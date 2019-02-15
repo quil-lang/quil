@@ -346,7 +346,200 @@ HALT
 WAIT
 ```
 
-## 6. Language Features
+## 6. Pulse Level Control
+
+**Frames**
+
+```
+Frame :: String
+```
+
+A frame encapsulates any rotating frame relative to which control/readout
+waveforms may be defined. Frames are defined by simple strings.
+
+Examples:
+```
+"rf"
+"ff"
+"ro"
+```
+
+**Waveforms**
+
+```
+Waveform :: Name
+Waveform :: flat ( Expression, Expression )
+Waveform :: gaussian ( Expression, Expression, Expression )
+```
+
+Waveforms are referenced either by name or by a built-in waveform generator.
+
+The built-in waveform generators are:
+- `flat(duration, iq)` creates a flat waveform where:
+    - `duration` is a floating point number representing the duration of the
+      waveform in seconds
+    - `iq` is a complex number representing the IQ value to play for the
+      duration of the waveform
+- `gaussian(time, fwhm, t0)` creates a Gaussian waveform where:
+    - `duration` is a floating point number representing the duration of the
+      waveform in seconds
+    - `fwhm` is a floating point number representing the full-width-half-max of
+      the waveform in seconds
+    - `t0` is a floating point number representing the center time coordinate of
+      the waveform in seconds
+
+**Defining new waveforms**
+
+```
+WaveformDefinition :: DEFWAVEFORM Name ( Parameter+ ) : MatrixRow
+MatrixRow :: Indent (Expression ,)+
+```
+
+New waveforms may be defined by listing out all the IQ values as complex
+numbers, separated by commas. Waveform definitions may also be parameterized,
+although note that Quil has no support for vector level operations.
+
+Example:
+```
+DEFWAVEFORM my_custom_waveform:
+    1+2i, 3+4i, 5+6i
+```
+
+**Pulses**
+
+```
+Pulse :: PULSE Qubit Frame Waveform (* Expression)?
+```
+
+Pulses can be played on the frame of a particular qubit by listing the qubit,
+frame name, waveform name (or generator), and an optional scale/phase.
+
+For certain control hardware it can be more efficient to apply the scale/phase
+at the time of the pulse generation rather than defining multiple waveforms.
+
+Examples:
+```
+# Simple pulse with previously defined waveform
+PULSE 0 "rf" my_custom_waveform
+
+# Pulse with built-in waveform generator
+PULSE 0 "rf" flat(1e-6, 2+3i)
+
+# Pulse with custom scaling
+PULSE 0 "rf" my_custom_waveform * 0.5
+
+# Pulse with custom phase
+PULSE 0 "rf" my_custom_waveform * e^(2*pi*i)
+```
+
+**Frequency**
+
+TODO, especially readout frames?
+
+**Phase**
+
+```
+ShiftPhase :: SHIFT-PHASE Qubit Frame Expression
+```
+
+TODO
+
+Example:
+```
+SHIFT-PHASE 0 "rf" -pi
+```
+
+**Capture**
+
+```
+Capture :: CAPTURE Qubit Frame (Waveform|Raw) MemoryReference
+Raw :: raw ( Expression )
+```
+
+The capture instruction opens up the readout on a qubit and measures its state.
+An integration waveform will be applied to the raw IQ points and the result is
+placed in classical memory.
+
+The waveform will define the length of the capture. The memory reference must be
+able to store a complex number.
+
+A special waveform generator called `raw` can be used to capture all the IQ
+points without an integration kernel. In this case the argument to `raw` will
+be the length of time in seconds to capture and the memory reference must be
+able to store complex numbers for every sample of the duration.
+
+Example:
+```
+# Simple capture of an IQ point
+DECLARE iq REAL[2]
+CAPTURE 0 "ro" flat(1e-6, 2+3i) iq
+
+# Raw capture of the full IQ trace
+DECLARE iqs REAL[400]
+CAPTURE 0 "ro" raw(1e-6) iqs
+```
+
+**Defining Calibrations**
+
+```
+CalibrationDefinition :: DEFCAL Name ( Parameter+ ) Qubit+ : Instruction+
+MeasureCalibrationDefinition :: DEFCAL Name Qubit Parameter : Instruction+
+```
+
+Calibrations for high-level gates can be defined by mapping a combination of
+(gate name, parameters, qubits) to a sequence of analog control instructions.
+
+Calibrations with the same gate name as a built-in gate definition or custom
+gate definition are assumed to be the same.
+
+Multiple calibration definitions can be defined for different parameter and
+qubit values. When a gate is translated into control instructions the
+calibration definitions are enumerated in order and the first match will be
+taken.
+
+For example, given the following list of calibration definitions in this order:
+1. `DEFCAL RX(pi/2) 0`
+2. `DEFCAL RX(%theta) 0`
+3. `DEFCAL RX(%theta) %qubit`
+The instruction `RX(pi/2) 0` would match (1), the instruction `RX(pi) 0` would
+match (2), and the instruction `RX(pi/2) 1` would match (3).
+
+The same system applies for `MEASURE` although `MEASURE` cannot be
+parameterized, it takes only a single qubit as input, and it has an additional
+parameter for the memory reference in which to read out the result.
+
+Examples:
+```
+# Simple non-parameterized gate on qubit 0
+DEFCAL X 0:
+    PULSE 0 "rf" gaussian(1, 2, 3)
+
+# Parameterized gate on qubit 0
+DEFCAL RX(%theta) 0:
+    PULSE 0 "rf" flat(1e-6, 2+3i)*%theta/(2*pi)
+
+# Measurement and classification
+DEFCAL MEASURE 0 %dest:
+    DECLARE iq REAL[2]
+    CAPTURE 0 "ro" flat(1e-6, 2+3i) iq
+    LT %dest iq[0] 0.5 # thresholding
+```
+
+**Timing Control**
+
+```
+Delay :: DELAY Qubit Expression
+Fence :: FENCE Qubit+
+```
+
+Delay allows for the insertion of a gap within a list of pulses or gates with
+a specified duration in seconds.
+
+Fence ensures that all operations on the specified qubits that proceed the
+fence statement happen after the end of the right-most operation of that set
+of qubits.
+
+## 7. Language Features
 
 **File Inclusion**
 
