@@ -380,7 +380,7 @@ The built-in waveform generators are:
       waveform in seconds
     - `iq` is a complex number representing the IQ value to play for the
       duration of the waveform
-- `gaussian(time, fwhm, t0)` creates a Gaussian waveform where:
+- `gaussian(duration, fwhm, t0)` creates a Gaussian waveform where:
     - `duration` is a floating point number representing the duration of the
       waveform in seconds
     - `fwhm` is a floating point number representing the full-width-half-max of
@@ -403,50 +403,93 @@ Example:
 ```
 DEFWAVEFORM my_custom_waveform:
     1+2i, 3+4i, 5+6i
+
+DEFWAVEFORM my_custom_paramterized_waveform(%a)
+    (1+2i)*%a, (3+4i)*%a, (5+6i)*%a
 ```
 
 **Pulses**
 
 ```
-Pulse :: PULSE Qubit Frame Waveform (* Expression)?
+Pulse :: PULSE Qubit Frame Waveform
 ```
 
 Pulses can be played on the frame of a particular qubit by listing the qubit,
-frame name, waveform name (or generator), and an optional scale/phase.
-
-For certain control hardware it can be more efficient to apply the scale/phase
-at the time of the pulse generation rather than defining multiple waveforms.
+frame name, waveform name (or generator).
 
 Examples:
 ```
 # Simple pulse with previously defined waveform
 PULSE 0 "rf" my_custom_waveform
 
+# Pulse with previously defined parameterized waveform
+PULSE 0 "rf" my_custom_parameterized_waveform(0.5)
+
 # Pulse with built-in waveform generator
 PULSE 0 "rf" flat(1e-6, 2+3i)
-
-# Pulse with custom scaling
-PULSE 0 "rf" my_custom_waveform * 0.5
-
-# Pulse with custom phase
-PULSE 0 "rf" my_custom_waveform * e^(2*pi*i)
 ```
 
 **Frequency**
 
-TODO, especially readout frames?
+```
+SetFrequency :: SET-FREQUENCY Qubit Frame Float
+ShiftFrequency :: SHIFT-FREQUENCY Qubit Frame Float
+```
+
+Each frame has a frequency which is tracked throughout the program. Initially
+the frequency starts out as not defined. It may be set or shifted up and down.
+
+Frequency must be a floating point real number.
+
+```
+SET-FREQUENCY 0 "rf" 5.4e9
+SET-FREQUENCY 0 "ro" 6.1e9
+
+SHIFT-FREQUENCY 0 "ro" 100e6
+SHIFT-FREQUENCY 0 "ro" -100e6
+```
 
 **Phase**
 
 ```
+SetPhase :: SET-PHASE Qubit Frame Float
 ShiftPhase :: SHIFT-PHASE Qubit Frame Expression
 ```
 
-TODO
+Each frame has a phase which is tracked throughout the program. Initially the
+phase starts out as 0. It may be set or shifted up and down.
+
+The phase must be a floating point real number. There is also support for
+shifted the phase based on some expression, as long as that expression returns
+a floating point real number.
 
 Example:
 ```
+SET-PHASE 0 "rf" pi/2
+
 SHIFT-PHASE 0 "rf" -pi
+SHIFT-PHASE 0 "rf" %theta*2/pi
+```
+
+**Scale**
+
+```
+SetScale :: SET-SCALE Qubit Frame Float
+ShiftScale :: SHIFT-SCALE Qubit Frame Float
+```
+
+Each frame has a scale which is tracked throughout the program. Initially the
+scale starts out as 1. It may be set or shifted up and down.
+
+The scale must remain a floating point positive real number.
+
+Example:
+```
+SET-SCALE 0 "rf" 0.75
+
+SHIFT-SCALE 0 "rf" 0.1
+SHIFT-SCALE 0 "rf" -0.1 # is valid
+SHIFT-SCALE 0 "rf" -0.8 # would put scale in invalid (-0.05) state
 ```
 
 **Capture**
