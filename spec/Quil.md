@@ -61,10 +61,11 @@ Names in Quil have the following requirements:
 any part of the name
 - The digits 0-9 may be used in any position except the first
 - The hyphen character may be used in any position except the first and last
+- They cannot be any of the built-in instruction names
 
 Valid examples: `CNOT`, `X_half`, `CPHASE-0`
 
-Invalid examples: `C*NOT`, `-GATE-`, `_GATE`, `01rotation`
+Invalid examples: `C*NOT`, `-GATE-`, `_GATE`, `01rotation`, `MEASURE`
 
 **Comments**
 
