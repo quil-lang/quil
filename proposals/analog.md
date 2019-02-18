@@ -243,6 +243,31 @@ then it can, otherwise it can be ignored. Sample rates are only needed when
 there are both custom waveforms and the system running/compiling cares about
 physical time.
 
+**Why not just open source Rigetti's existing IR for pulse control?**
+
+Our existing IR is difficult to use directly since it is intended to be a
+compiler target rather than a target for human beings. In order to accomplish
+the goals listed at the top of this proposal there is a good amount of manual
+bookkeeping needed. Also information about high-level intentions of the
+programmer is lost at that level of detail.
+
+In addition, after using our internal IR for the past year, we've learned about
+how to make it better, those ideas are included in this proposal. In particular:
+- defining a frequency per frame means that the readout detuning problem can be
+solved by the compiler instead of the programmer, a very common source of error
+- waveform shapes (flat, gaussian) will allow optimizations and ease of use
+that wasn't available at the level of IQ values
+- using relative (with delays) instead of absolute time
+
+Finally by extending Quil we can take advantage of all the great existing
+constructions already built in to the language, rather than re-defining all of
+these things again at the IR level. This includes:
+- a classical memory model
+- control flow
+- rich support for expressions and built-in mathematical functions
+- file inclusion, pragmas, and circuit definitions
+- existing tools such as pyquil, qvm, and quilc
+
 ## TODO
 
 - Add more examples:
