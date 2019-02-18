@@ -439,7 +439,7 @@ ShiftFrequency :: SHIFT-FREQUENCY Qubit Frame Float
 Each frame has a frequency which is tracked throughout the program. Initially
 the frequency starts out as not defined. It may be set or shifted up and down.
 
-Frequency must be a floating point real number.
+Frequency must be a positive real number.
 
 ```
 SET-FREQUENCY 0 "rf" 5.4e9
@@ -461,7 +461,7 @@ phase starts out as 0. It may be set or shifted up and down.
 
 The phase must be a floating point real number. There is also support for
 shifted the phase based on some expression, as long as that expression returns
-a floating point real number.
+a real number.
 
 Example:
 ```
@@ -481,7 +481,7 @@ ShiftScale :: SHIFT-SCALE Qubit Frame Float
 Each frame has a scale which is tracked throughout the program. Initially the
 scale starts out as 1. It may be set or shifted up and down.
 
-The scale must remain a floating point positive real number.
+The scale must remain a positive real number.
 
 Example:
 ```
@@ -560,6 +560,10 @@ DEFCAL X 0:
 # Parameterized gate on qubit 0
 DEFCAL RX(%theta) 0:
     PULSE 0 "rf" flat(1e-6, 2+3i)*%theta/(2*pi)
+
+# Applying RZ to any qubit
+DEFCAL RZ(%theta) %qubit:
+    SHIFT-PHASE %qubit "rf" %theta
 
 # Measurement and classification
 DEFCAL MEASURE 0 %dest:
