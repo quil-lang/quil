@@ -126,7 +126,7 @@ calibration definitions in this order:
 The instruction `RX(pi/2) 0` would match (1), the instruction `RX(pi) 0` would
 match (2), and the instruction `RX(pi/2) 1` would match (3).
 
-The body of a DEFCAL is a list of analog control instructions to that ideally
+The body of a DEFCAL is a list of analog control instructions that ideally
 enacts the corresponding gate.
 
 ## Practical Considerations
