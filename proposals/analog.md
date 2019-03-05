@@ -32,7 +32,7 @@ Quil instruction types:
 
 ### Frames and Waveforms
 
-Each qubit can have multiple frames, defined by string names such as "rf", "ff",
+Each qubit can have multiple frames, defined by string names such as "1q", "flux",
 or "ro". A frame is an abstraction that captures the instantaneous frequency
 phase of a local oscillator relevant to the control sequence relative to some
 assumed external reference.
@@ -71,10 +71,10 @@ specifying both the qubit frame as well as the waveform.
 
 Given a waveform `my_custom_waveform` and the following program:
 ```
-SET-FREQUENCY 5.4e9
+SET-FREQUENCY "1q" 5400e6
 SET-PHASE pi/2
-SET-SCALE 0.5
-PULSE 0 "rf" my_custom_waveform
+SET-SCALE 1/2
+PULSE 0 "1q" my_custom_waveform
 ```
 A compiler would have several options depending on the hardware backend. It
 could create a new waveform (eg. `my_custom_waveform_2`) and apply the
@@ -200,15 +200,15 @@ DEFWAVEFORM q0_x90:
     2.1844880984552813e-06, 3.1518177925082128e-06, 4.519565664356811e-06, ...
 
 DEFCAL RX(pi/2) 0:
-    PULSE 0 "rf" q0_x90
+    PULSE 0 "1q" q0_x90
 
 # Using a built-in waveform instead
 DEFCAL RX(pi/2) 0:
-    PULSE 0 "rf" gaussian(6e-8, 1.5e-8, 3e-8)
+    PULSE 0 "1q" gaussian(6e-8, 1.5e-8, 3e-8)
 
 # With crosstalk mitigation - no pulses on neighbors
 DEFCAL RX(pi/2) 0:
-    PULSE 0 "rf" q0x90
+    PULSE 0 "1q" q0_x90
     FENCE 0 1 7
 ```
 
@@ -255,9 +255,14 @@ In addition, after using our internal IR for the past year, we've learned about
 how to make it better, those ideas are included in this proposal. In particular:
 - defining a frequency per frame means that the readout detuning problem can be
 solved by the compiler instead of the programmer, a very common source of error
+(previously the user had to keep track of the difference between the LO and the
+readout frequency and then do some arithmetic to calculate detuning and apply
+the correct kernel)
 - waveform shapes (flat, gaussian) will allow optimizations and ease of use
 that wasn't available at the level of IQ values
 - using relative (with delays) instead of absolute time
+- exposing small, realtime updates to calibrations that can optionally be
+applied
 
 Finally by extending Quil we can take advantage of all the great existing
 constructions already built in to the language, rather than re-defining all of
@@ -268,10 +273,13 @@ these things again at the IR level. This includes:
 - file inclusion, pragmas, and circuit definitions
 - existing tools such as pyquil, qvm, and quilc
 
-## TODO
+## FOLLOWUP FROM REVIEWS
 
+- Consider adding complex numbers to Quil (Eric)
+- Concern about |2> state (Eric) https://github.com/rigetti/quil/pull/5#discussion_r258090947
+- Deal with multiple flux frames (Lauren)
+- Better definition of raw capture (Lauren)
 - Add more examples:
   1. 2Q gate
   2. Active reset calibration
   3. Example of an experiment that requires analog control
-- Still uncertain about how to do raw captures

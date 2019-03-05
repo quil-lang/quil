@@ -359,8 +359,8 @@ waveforms may be defined. Frames are defined by simple strings.
 
 Examples:
 ```
-"rf"
-"ff"
+"1q"
+"flux"
 "ro"
 ```
 
@@ -376,16 +376,16 @@ Waveforms are referenced either by name or by a built-in waveform generator.
 
 The built-in waveform generators are:
 - `flat(duration, iq)` creates a flat waveform where:
-    - `duration` is a floating point number representing the duration of the
+    - `duration` is a rational number representing the duration of the
       waveform in seconds
     - `iq` is a complex number representing the IQ value to play for the
       duration of the waveform
 - `gaussian(duration, fwhm, t0)` creates a Gaussian waveform where:
-    - `duration` is a floating point number representing the duration of the
+    - `duration` is a rational number representing the duration of the
       waveform in seconds
-    - `fwhm` is a floating point number representing the full-width-half-max of
+    - `fwhm` is a rational number representing the full-width-half-max of
       the waveform in seconds
-    - `t0` is a floating point number representing the center time coordinate of
+    - `t0` is a rational number representing the center time coordinate of
       the waveform in seconds
 
 **Defining new waveforms**
@@ -420,13 +420,13 @@ frame name, waveform name (or generator).
 Examples:
 ```
 # Simple pulse with previously defined waveform
-PULSE 0 "rf" my_custom_waveform
+PULSE 0 "1q" my_custom_waveform
 
 # Pulse with previously defined parameterized waveform
-PULSE 0 "rf" my_custom_parameterized_waveform(0.5)
+PULSE 0 "1q" my_custom_parameterized_waveform(0.5)
 
 # Pulse with built-in waveform generator
-PULSE 0 "rf" flat(1e-6, 2+3i)
+PULSE 0 "1q" flat(1e-6, 2+3i)
 ```
 
 **Frequency**
@@ -442,7 +442,7 @@ the frequency starts out as not defined. It may be set or shifted up and down.
 Frequency must be a positive real number.
 
 ```
-SET-FREQUENCY 0 "rf" 5.4e9
+SET-FREQUENCY 0 "1q" 5.4e9
 SET-FREQUENCY 0 "ro" 6.1e9
 
 SHIFT-FREQUENCY 0 "ro" 100e6
@@ -459,16 +459,16 @@ ShiftPhase :: SHIFT-PHASE Qubit Frame Expression
 Each frame has a phase which is tracked throughout the program. Initially the
 phase starts out as 0. It may be set or shifted up and down.
 
-The phase must be a floating point real number. There is also support for
+The phase must be a rational real number. There is also support for
 shifted the phase based on some expression, as long as that expression returns
 a real number.
 
 Example:
 ```
-SET-PHASE 0 "rf" pi/2
+SET-PHASE 0 "1q" pi/2
 
-SHIFT-PHASE 0 "rf" -pi
-SHIFT-PHASE 0 "rf" %theta*2/pi
+SHIFT-PHASE 0 "1q" -pi
+SHIFT-PHASE 0 "1q" %theta*2/pi
 ```
 
 **Scale**
@@ -485,18 +485,17 @@ The scale must remain a positive real number.
 
 Example:
 ```
-SET-SCALE 0 "rf" 0.75
+SET-SCALE 0 "1q" 0.75
 
-SHIFT-SCALE 0 "rf" 0.1
-SHIFT-SCALE 0 "rf" -0.1 # is valid
-SHIFT-SCALE 0 "rf" -0.8 # would put scale in invalid (-0.05) state
+SHIFT-SCALE 0 "1q" 0.1
+SHIFT-SCALE 0 "1q" -0.1 # is valid
+SHIFT-SCALE 0 "1q" -0.8 # would put scale in invalid (-0.05) state
 ```
 
 **Capture**
 
 ```
-Capture :: CAPTURE Qubit Frame (Waveform|Raw) MemoryReference
-Raw :: raw ( Expression )
+Capture :: CAPTURE Qubit Frame Waveform MemoryReference
 ```
 
 The capture instruction opens up the readout on a qubit and measures its state.
@@ -506,20 +505,11 @@ placed in classical memory.
 The waveform will define the length of the capture. The memory reference must be
 able to store a complex number.
 
-A special waveform generator called `raw` can be used to capture all the IQ
-points without an integration kernel. In this case the argument to `raw` will
-be the length of time in seconds to capture and the memory reference must be
-able to store complex numbers for every sample of the duration.
-
 Example:
 ```
 # Simple capture of an IQ point
 DECLARE iq REAL[2]
 CAPTURE 0 "ro" flat(1e-6, 2+3i) iq
-
-# Raw capture of the full IQ trace
-DECLARE iqs REAL[400]
-CAPTURE 0 "ro" raw(1e-6) iqs
 ```
 
 **Defining Calibrations**
@@ -555,15 +545,15 @@ Examples:
 ```
 # Simple non-parameterized gate on qubit 0
 DEFCAL X 0:
-    PULSE 0 "rf" gaussian(1, 2, 3)
+    PULSE 0 "1q" gaussian(1, 2, 3)
 
 # Parameterized gate on qubit 0
 DEFCAL RX(%theta) 0:
-    PULSE 0 "rf" flat(1e-6, 2+3i)*%theta/(2*pi)
+    PULSE 0 "1q" flat(1e-6, 2+3i)*%theta/(2*pi)
 
 # Applying RZ to any qubit
 DEFCAL RZ(%theta) %qubit:
-    SHIFT-PHASE %qubit "rf" %theta
+    SHIFT-PHASE %qubit "1q" %theta
 
 # Measurement and classification
 DEFCAL MEASURE 0 %dest:
@@ -585,6 +575,18 @@ a specified duration in seconds.
 Fence ensures that all operations on the specified qubits that proceed the
 fence statement happen after the end of the right-most operation of that set
 of qubits.
+
+Examples:
+```
+X 0
+FENCE 0 1
+X 1 # This X gate will be applied to qubit 1 AFTER the X gate on qubit 0
+
+# Simple T1 experiment
+X 0
+DELAY 0 100e-6
+MEASURE 0 ro[0]
+```
 
 ## 7. Language Features
 
