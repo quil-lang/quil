@@ -481,8 +481,6 @@ ShiftScale :: SHIFT-SCALE Qubit Frame Float
 Each frame has a scale which is tracked throughout the program. Initially the
 scale starts out as 1. It may be set or shifted up and down.
 
-The scale must remain a positive real number.
-
 Example:
 ```
 SET-SCALE 0 "1q" 0.75

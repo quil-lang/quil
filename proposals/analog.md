@@ -12,6 +12,7 @@ In particular there is a desire to:
 - be able to introduce more sophisticated translation for ideas eg. dynamic
 decoupling, crosstalk correction, gate decompositions, etc.
 - define new gates (e.g. Toffoli and Fredkin) by composing pulses on frames
+and/or that exploit levels beyond the two level qubit approximation
 - remove channels where discrepancies between internal and external performance
 can be introduced
 
@@ -33,9 +34,9 @@ Quil instruction types:
 ### Frames and Waveforms
 
 Each qubit can have multiple frames, defined by string names such as "1q", "flux",
-or "ro". A frame is an abstraction that captures the instantaneous frequency
-phase of a local oscillator relevant to the control sequence relative to some
-assumed external reference.
+or "ro". A frame is an abstraction that captures the instantaneous frequency and
+phase that will be mixed into the control signal. The frame frequencies are with
+respect to the absolute "lab frame".
 
 Waveforms are defined using DEFWAVEFORM as a list of complex numbers which
 represent the desired waveform envelope. Each complex number represents one
@@ -43,12 +44,12 @@ sample of the waveform. The exact time to play a waveform can be determined by
 dividing by the sample rate for a qubit frame, which is in units of samples per
 second. There are also some built-in waveform shapes which take as a parameter
 the duration of the waveform in seconds, alleviating the need to know the sample
- rate to calculate duration.
+rate to calculate duration.
 
 In order to materialize the precise waveforms to be played the waveform
 envelopes must by modulated by the frame's frequency, in addition to applying
-some scaling and phasing factors. Although in theory it would be possible to
-simply define new waveforms that did the modulation, scaling, and phasing
+some scaling and phasing factors. Although in theory it would be mostly possible
+to simply define new waveforms that did the modulation, scaling, and phasing
 manually, this is both tedious and doesn't take advantage of hardware which has
 specialized support for tracking these things.
 
@@ -61,7 +62,7 @@ tracked through the program:
 |-----------|---------------|-----------------------|-----------------------|
 | Frequency | (not set)     | Positive real numbers | No                    |
 | Phase     | 0.0           | Real numbers          | Yes                   |
-| Scale     | 1.0           | Positive real numbers | No                    |
+| Scale     | 1.0           | Real numbers          | No                    |
 
 ### Pulses
 
@@ -104,9 +105,11 @@ Analog control instructions extend the definition of a quantum abstract machine
 to introduce the concept of time. In this new interpretation each instruction in
 Quil has an associated time to execute (which may be zero). It is up to the
 discretion of the interpreter to provide semantics for how pulses are scheduled,
-as long two requirements are satisfied:
+as long as these requirements are satisfied:
 1. All pulses on a qubit frame must happen in the order listed in the program
 2. Pulses on a qubit frame cannot overlap in time
+3. "Events" on a qubit frame happen at a well defined time since eg. updating a
+frame frequency means that it starts to accumulate phase at a new rate.
 
 A good interpretation for Rigetti's hardware would be to assume that pulses will
 not happen on different frames at the same time, with the exception of measuring
@@ -197,7 +200,7 @@ Calibrations of RX:
 ```
 DEFWAVEFORM q0_x90:
     # Truncated for readability
-    2.1844880984552813e-06, 3.1518177925082128e-06, 4.519565664356811e-06, ...
+    2.18e-06+0i, 3.15e-06+0i, 4.51e-06+0i, ...
 
 DEFCAL RX(pi/2) 0:
     PULSE 0 "1q" q0_x90
@@ -208,6 +211,7 @@ DEFCAL RX(pi/2) 0:
 
 # With crosstalk mitigation - no pulses on neighbors
 DEFCAL RX(pi/2) 0:
+    FENCE 0 1 7
     PULSE 0 "1q" q0_x90
     FENCE 0 1 7
 ```
