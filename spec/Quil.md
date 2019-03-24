@@ -525,6 +525,7 @@ SHIFT-SCALE 0 "xy" -0.8 # would put scale in invalid (-0.05) state
 
 ```
 Capture :: CAPTURE Qubit Frame Waveform MemoryReference
+RawCapture :: RAW-CAPTURE Qubit Frame Expression MemoryReference
 ```
 
 The capture instruction opens up the readout on a qubit and measures its state.
@@ -534,11 +535,18 @@ placed in classical memory.
 The waveform will define the length of the capture. The memory reference must be
 able to store a complex number.
 
+In the case of a raw capture the waveform is replaced with a rational number
+representing the duration of the capture.
+
 Example:
 ```
 # Simple capture of an IQ point
 DECLARE iq REAL[2]
-CAPTURE 0 "ro" flat(1e-6, 2+3i) iq
+CAPTURE 0 "out" flat(1e-6, 2+3i) iq
+
+# Raw capture
+DECLARE iqs REAL[400] # length needs to be determined based on the sample rate
+CAPTURE 0 "out" 200e-6 iqs
 ```
 
 **Defining Calibrations**
