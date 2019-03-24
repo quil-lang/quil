@@ -357,19 +357,27 @@ Frame :: String
 A frame encapsulates any rotating frame relative to which control/readout
 waveforms may be defined. Frames are defined by simple strings.
 
+There are no built-in frames, they are dependent on the architecture.
+
 Examples:
 ```
-"1q"
-"flux"
-"ro"
+"xy"  # eg. for the drive line
+"cz"  # eg. for a flux pulse for enacting CZ gate
+"iswap"
+"ro"  # eg. for the readout pulse
+"out" # eg. for the capture line
 ```
 
 **Waveforms**
 
 ```
 Waveform :: Name
-Waveform :: flat ( Expression, Expression )
-Waveform :: gaussian ( Expression, Expression, Expression )
+Waveform :: flat ( duration: Expression, iq: Expression )
+Waveform :: gaussian ( duration: Expression, fwhm: Expression, t0: Expression )
+Waveform :: draggaussian ( duration: Expression, fwhm: Expression, t0: Expression,
+    anh: Expression, alpha: Expression )
+Waveform :: erfsquare ( duration: Expression, risetime: Expression,
+    padleft: Expression, padright: Expression )
 ```
 
 Waveforms are referenced either by name or by a built-in waveform generator.
@@ -387,6 +395,26 @@ The built-in waveform generators are:
       the waveform in seconds
     - `t0` is a rational number representing the center time coordinate of
       the waveform in seconds
+- `draggaussian(duration, fwhm, t0, anh, alpha)` creates a DRAG gaussian pulse where:
+    - `duration` is a rational number representing the duration of the
+      waveform in seconds
+    - `fwhm` is a rational number representing the full-width-half-max of
+      the waveform in seconds
+    - `t0` is a rational number representing the center time coordinate of
+      the waveform in seconds
+    - `anh` is a rational number representing the anharmonicity of the qubit in
+      Hertz
+    - `alpha` is a rational number for the dimensionless drag parameter
+- `erfsquare(duration, risetime, padleft, padright)` creates a pulse with a flat
+    top and edges that are error functions (erfs) where:
+    - `duration` is a rational number representing the duration of the
+      waveform in seconds
+    - `risetime` is a rational number representing the rise and fall sections of
+      the pulse in seconds
+    - `padleft` is a rational number representing the amount of zero-amplitude
+      padding to add to the left of the pulse
+    - `padright` is a rational number representing the amount of zero-amplitude
+      padding to add to the right of the pulse
 
 **Defining new waveforms**
 
@@ -411,7 +439,7 @@ DEFWAVEFORM my_custom_paramterized_waveform(%a)
 **Pulses**
 
 ```
-Pulse :: PULSE Qubit Frame Waveform
+Pulse :: PULSE Qubit+ Frame Waveform
 ```
 
 Pulses can be played on the frame of a particular qubit by listing the qubit,
@@ -420,13 +448,16 @@ frame name, waveform name (or generator).
 Examples:
 ```
 # Simple pulse with previously defined waveform
-PULSE 0 "1q" my_custom_waveform
+PULSE 0 "xy" my_custom_waveform
 
 # Pulse with previously defined parameterized waveform
-PULSE 0 "1q" my_custom_parameterized_waveform(0.5)
+PULSE 0 "xy" my_custom_parameterized_waveform(0.5)
 
 # Pulse with built-in waveform generator
-PULSE 0 "1q" flat(1e-6, 2+3i)
+PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)
+
+# Pulse on a flux line
+PULSE 0 1 "cz" flat(duration: 1e-6, iq: 2+3i)
 ```
 
 **Frequency**
@@ -442,7 +473,7 @@ the frequency starts out as not defined. It may be set or shifted up and down.
 Frequency must be a positive real number.
 
 ```
-SET-FREQUENCY 0 "1q" 5.4e9
+SET-FREQUENCY 0 "xy" 5.4e9
 SET-FREQUENCY 0 "ro" 6.1e9
 
 SHIFT-FREQUENCY 0 "ro" 100e6
@@ -465,10 +496,10 @@ a real number.
 
 Example:
 ```
-SET-PHASE 0 "1q" pi/2
+SET-PHASE 0 "xy" pi/2
 
-SHIFT-PHASE 0 "1q" -pi
-SHIFT-PHASE 0 "1q" %theta*2/pi
+SHIFT-PHASE 0 "xy" -pi
+SHIFT-PHASE 0 "xy" %theta*2/pi
 ```
 
 **Scale**
@@ -483,11 +514,11 @@ scale starts out as 1. It may be set or shifted up and down.
 
 Example:
 ```
-SET-SCALE 0 "1q" 0.75
+SET-SCALE 0 "xy" 0.75
 
-SHIFT-SCALE 0 "1q" 0.1
-SHIFT-SCALE 0 "1q" -0.1 # is valid
-SHIFT-SCALE 0 "1q" -0.8 # would put scale in invalid (-0.05) state
+SHIFT-SCALE 0 "xy" 0.1
+SHIFT-SCALE 0 "xy" -0.1 # is valid
+SHIFT-SCALE 0 "xy" -0.8 # would put scale in invalid (-0.05) state
 ```
 
 **Capture**
@@ -525,15 +556,15 @@ gate definition are assumed to be the same.
 
 Multiple calibration definitions can be defined for different parameter and
 qubit values. When a gate is translated into control instructions the
-calibration definitions are enumerated in order and the first match will be
-taken.
+calibration definitions are enumerated in reverse order of definition and the
+first match will be taken.
 
 For example, given the following list of calibration definitions in this order:
-1. `DEFCAL RX(pi/2) 0`
-2. `DEFCAL RX(%theta) 0`
-3. `DEFCAL RX(%theta) %qubit`
-The instruction `RX(pi/2) 0` would match (1), the instruction `RX(pi) 0` would
-match (2), and the instruction `RX(pi/2) 1` would match (3).
+1. `DEFCAL RX(%theta) %qubit:`
+2. `DEFCAL RX(%theta) 0:`
+3. `DEFCAL RX(pi/2) 0:`
+The instruction `RX(pi/2) 0` would match (3), the instruction `RX(pi) 0` would
+match (2), and the instruction `RX(pi/2) 1` would match (1).
 
 The same system applies for `MEASURE` although `MEASURE` cannot be
 parameterized, it takes only a single qubit as input, and it has an additional
@@ -543,20 +574,20 @@ Examples:
 ```
 # Simple non-parameterized gate on qubit 0
 DEFCAL X 0:
-    PULSE 0 "1q" gaussian(1, 2, 3)
+    PULSE 0 "xy" gaussian(duration: 1, fwhm: 2, t0: 3)
 
 # Parameterized gate on qubit 0
 DEFCAL RX(%theta) 0:
-    PULSE 0 "1q" flat(1e-6, 2+3i)*%theta/(2*pi)
+    PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)*%theta/(2*pi)
 
 # Applying RZ to any qubit
 DEFCAL RZ(%theta) %qubit:
-    SHIFT-PHASE %qubit "1q" %theta
+    SHIFT-PHASE %qubit "xy" %theta
 
 # Measurement and classification
 DEFCAL MEASURE 0 %dest:
     DECLARE iq REAL[2]
-    CAPTURE 0 "ro" flat(1e-6, 2+3i) iq
+    CAPTURE 0 "out" flat(1e-6, 2+3i) iq
     LT %dest iq[0] 0.5 # thresholding
 ```
 

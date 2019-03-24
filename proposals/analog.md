@@ -33,7 +33,7 @@ Quil instruction types:
 
 ### Frames and Waveforms
 
-Each qubit can have multiple frames, defined by string names such as "1q", "flux",
+Each qubit can have multiple frames, defined by string names such as "xy", "cz",
 or "ro". A frame is an abstraction that captures the instantaneous frequency and
 phase that will be mixed into the control signal. The frame frequencies are with
 respect to the absolute "lab frame".
@@ -72,10 +72,10 @@ specifying both the qubit frame as well as the waveform.
 
 Given a waveform `my_custom_waveform` and the following program:
 ```
-SET-FREQUENCY "1q" 5400e6
+SET-FREQUENCY "xy" 5400e6
 SET-PHASE pi/2
 SET-SCALE 1/2
-PULSE 0 "1q" my_custom_waveform
+PULSE 0 "xy" my_custom_waveform
 ```
 A compiler would have several options depending on the hardware backend. It
 could create a new waveform (eg. `my_custom_waveform_2`) and apply the
@@ -96,7 +96,7 @@ currently support complex numbers, so a real array of length 2 is used instead:
 ```
 # Simple capture of an IQ point
 DECLARE iq REAL[2]
-CAPTURE 0 "ro" flat(1e-6, 2+3i) iq
+CAPTURE 0 "ro" flat(duration: 1e-6, iq: 2+3i) iq
 ```
 
 ### Timing
@@ -121,13 +121,14 @@ Calibrations can be associated with gates in Quil to aid the compiler in
 converting a list of gates into the corresponding series of pulses.
 
 Calibrations can be parameterized and include concrete values, which are
-resolved in "Haskell-style". For example, given the following list of
-calibration definitions in this order:
-1. `DEFCAL RX(pi/2) 0`
-2. `DEFCAL RX(%theta) 0`
-3. `DEFCAL RX(%theta) %qubit`
-The instruction `RX(pi/2) 0` would match (1), the instruction `RX(pi) 0` would
-match (2), and the instruction `RX(pi/2) 1` would match (3).
+resolved in "Haskell-style", with later definitions being prioritized over
+earlier ones. For example, given the following list of calibration definitions
+in this order:
+1. `DEFCAL RX(%theta) %qubit:`
+2. `DEFCAL RX(%theta) 0:`
+3. `DEFCAL RX(pi/2) 0:`
+The instruction `RX(pi/2) 0` would match (3), the instruction `RX(pi) 0` would
+match (2), and the instruction `RX(pi/2) 1` would match (1).
 
 The body of a DEFCAL is a list of analog control instructions that ideally
 enacts the corresponding gate.
@@ -203,16 +204,16 @@ DEFWAVEFORM q0_x90:
     2.18e-06+0i, 3.15e-06+0i, 4.51e-06+0i, ...
 
 DEFCAL RX(pi/2) 0:
-    PULSE 0 "1q" q0_x90
+    PULSE 0 "xy" q0_x90
 
 # Using a built-in waveform instead
 DEFCAL RX(pi/2) 0:
-    PULSE 0 "1q" gaussian(6e-8, 1.5e-8, 3e-8)
+    PULSE 0 "xy" gaussian(duration: 6e-8, fwhm: 1.5e-8, t0: 3e-8)
 
 # With crosstalk mitigation - no pulses on neighbors
 DEFCAL RX(pi/2) 0:
     FENCE 0 1 7
-    PULSE 0 "1q" q0_x90
+    PULSE 0 "xy" q0_x90
     FENCE 0 1 7
 ```
 
@@ -276,14 +277,3 @@ these things again at the IR level. This includes:
 - rich support for expressions and built-in mathematical functions
 - file inclusion, pragmas, and circuit definitions
 - existing tools such as pyquil, qvm, and quilc
-
-## FOLLOWUP FROM REVIEWS
-
-- Consider adding complex numbers to Quil (Eric)
-- Concern about |2> state (Eric) https://github.com/rigetti/quil/pull/5#discussion_r258090947
-- Deal with multiple flux frames (Lauren)
-- Better definition of raw capture (Lauren)
-- Add more examples:
-  1. 2Q gate
-  2. Active reset calibration
-  3. Example of an experiment that requires analog control
