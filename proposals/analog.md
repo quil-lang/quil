@@ -260,6 +260,28 @@ DEFCAL MEASURE 0 %dest:
     LT %dest iq[0] ??? # thresholding
 ```
 
+Toffoli gate (from Colm):
+```
+SET-FREQUENCY 12 13 "cz" 283.5e6
+SET-FREQUENCY 13 14 "iswap" 181e6
+
+DEFCAL CCNOT 12 13 14:
+    # iSWAP_02 on 13-14
+    FENCE 12 13 14
+    PULSE 13 14 "iswap" erfsquare(tmax: 131e-9, risetime: 20e-9, padleft: 12e-9, pad_right: 13e-9)
+
+    # CZ_20 or 12-13
+    FENCE 12 13 14
+    PULSE 12 13 "cz" erfsquare(tmax: 332e-9, risetime: 20e-9, padleft: 12e-9, pad_right: 12e-9)
+
+    # iSWAP_02 on 13-14
+    FENCE 12 13 14
+    SHIFT-PHASE 13 14 "iswap" 0.5 # iSWAP_phase from the original code snippet
+    PULSE 13 14 "iswap" erfsquare(tmax: 131e-9, risetime: 20e-9, padleft: 12e-9, pad_right: 13e-9)
+
+    FENCE 12 13 14
+```
+
 ## FAQs
 
 **How would this interact with quilc and qvm?**
