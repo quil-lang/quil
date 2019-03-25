@@ -197,24 +197,66 @@ to pulses by the compiler, or they can resolve the pulses themselves
 
 Here are some example calibrations for various types of gates and measurements.
 
+Setting up frequencies:
+```
+SET-FREQUENCY 0 "xy" 4678266018.71412
+SET-FREQUENCY 1 "xy" 3821271416.79618
+
+SET-FREQUENCY 0 1 "cz" 137293415.829024
+
+SET-FREQUENCY 0 "ro" 5901586914.0625
+SET-FREQUENCY 1 "ro" 5721752929.6875
+
+SET-FREQUENCY 0 "out" 5901586914.0625
+SET-FREQUENCY 1 "out" 5721752929.6875
+```
+
 Calibrations of RX:
 ```
-DEFWAVEFORM q0_x90:
-    # Truncated for readability
-    2.18e-06+0i, 3.15e-06+0i, 4.51e-06+0i, ...
+DEFCAL RX(%theta) 0:
+    SET-SCALE %theta/pi
+    PULSE 0 "xy" draggaussian(duration: 80e-9, fwhm: 40e-9, t0: 40e-9, anh: -210e6, alpha: 0)
 
 DEFCAL RX(pi/2) 0:
-    PULSE 0 "xy" q0_x90
-
-# Using a built-in waveform instead
-DEFCAL RX(pi/2) 0:
-    PULSE 0 "xy" gaussian(duration: 6e-8, fwhm: 1.5e-8, t0: 3e-8)
+    PULSE 0 "xy" draggaussian(duration: 80e-9, fwhm: 40e-9, t0: 40e-9, anh: -210e6, alpha: 0)
 
 # With crosstalk mitigation - no pulses on neighbors
 DEFCAL RX(pi/2) 0:
     FENCE 0 1 7
-    PULSE 0 "xy" q0_x90
+    PULSE 0 "xy" draggaussian(duration: 80e-9, fwhm: 40e-9, t0: 40e-9, anh: -210e6, alpha: 0)
     FENCE 0 1 7
+```
+
+RZ:
+```
+DEFCAL RZ(%theta) %qubit:
+    # RZ of +theta corresponds to a frame change of -theta
+    SHIFT-PHASE %qubit "xy" -%theta
+```
+
+Calibrations of CZ:
+```
+DEFCAL CZ 0 1:
+    PULSE 0 1 "cz" erfsquare(duration: 340e-9, risetime: 20e-9, padleft: 8e-9, padright: 8e-9)
+    SHIFT-PHASE 0 "xy" 0.00181362669
+    SHIFT-PHASE 1 "xy" 3.44695296672
+
+# With no parallel 2Q gates
+DEFCAL CZ 0 1:
+    FENCE 0 1 2 3 4 5 6 7 10 11 12 13 14 15 16 17
+    PULSE 0 1 "cz" erfsquare(duration: 340e-9, risetime: 20e-9, padleft: 8e-9, padright: 8e-9)
+    SHIFT-PHASE 0 "xy" 0.00181362669
+    SHIFT-PHASE 1 "xy" 3.44695296672
+    FENCE 0 1 2 3 4 5 6 7 10 11 12 13 14 15 16 17
+```
+
+Readout:
+```
+DEFCAL MEASURE 0 %dest:
+    DECLARE iq REAL[2]
+    PULSE 0 "ro" flat(duration: 1.2e-6, iq: ???)
+    CAPTURE 0 "out" flat(duration: 1.2e-6, iq: ???) iq
+    LT %dest iq[0] ??? # thresholding
 ```
 
 ## FAQs

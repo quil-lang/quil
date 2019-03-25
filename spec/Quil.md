@@ -463,8 +463,8 @@ PULSE 0 1 "cz" flat(duration: 1e-6, iq: 2+3i)
 **Frequency**
 
 ```
-SetFrequency :: SET-FREQUENCY Qubit Frame Float
-ShiftFrequency :: SHIFT-FREQUENCY Qubit Frame Float
+SetFrequency :: SET-FREQUENCY Qubit+ Frame Float
+ShiftFrequency :: SHIFT-FREQUENCY Qubit+ Frame Float
 ```
 
 Each frame has a frequency which is tracked throughout the program. Initially
@@ -483,8 +483,8 @@ SHIFT-FREQUENCY 0 "ro" -100e6
 **Phase**
 
 ```
-SetPhase :: SET-PHASE Qubit Frame Float
-ShiftPhase :: SHIFT-PHASE Qubit Frame Expression
+SetPhase :: SET-PHASE Qubit+ Frame Float
+ShiftPhase :: SHIFT-PHASE Qubit+ Frame Expression
 ```
 
 Each frame has a phase which is tracked throughout the program. Initially the
@@ -505,8 +505,8 @@ SHIFT-PHASE 0 "xy" %theta*2/pi
 **Scale**
 
 ```
-SetScale :: SET-SCALE Qubit Frame Float
-ShiftScale :: SHIFT-SCALE Qubit Frame Float
+SetScale :: SET-SCALE Qubit+ Frame Float
+ShiftScale :: SHIFT-SCALE Qubit+ Frame Float
 ```
 
 Each frame has a scale which is tracked throughout the program. Initially the
