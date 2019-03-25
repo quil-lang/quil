@@ -47,7 +47,7 @@ the duration of the waveform in seconds, alleviating the need to know the sample
 rate to calculate duration.
 
 In order to materialize the precise waveforms to be played the waveform
-envelopes must by modulated by the frame's frequency, in addition to applying
+envelopes must be modulated by the frame's frequency, in addition to applying
 some scaling and phasing factors. Although in theory it would be mostly possible
 to simply define new waveforms that did the modulation, scaling, and phasing
 manually, this is both tedious and doesn't take advantage of hardware which has
@@ -58,6 +58,7 @@ that can be modified throughout the program using SET- and SHIFT- instructions.
 
 Here's a table explaining the differences between these three values that are
 tracked through the program:
+
 | Name      | Initial Value | Valid Values          | Can be parameterized? |
 |-----------|---------------|-----------------------|-----------------------|
 | Frequency | (not set)     | Positive real numbers | No                    |
@@ -72,9 +73,9 @@ specifying both the qubit frame as well as the waveform.
 
 Given a waveform `my_custom_waveform` and the following program:
 ```
-SET-FREQUENCY "xy" 5400e6
-SET-PHASE pi/2
-SET-SCALE 1/2
+SET-FREQUENCY 0 "xy" 5400e6
+SET-PHASE 0 "xy" pi/2
+SET-SCALE 0 "xy" 1/2
 PULSE 0 "xy" my_custom_waveform
 ```
 A compiler would have several options depending on the hardware backend. It
@@ -156,7 +157,7 @@ qvm_result = qvm.simulate(my_program)
 calibrations = get_calibrations([0, 1, 2], version='most_recent')
 full_program = calibrations + my_program
 
-binary = compiler.comple(full_program)
+binary = compiler.compile(full_program)
 qpu_result = qpu.run(binary)
 ```
 
