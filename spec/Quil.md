@@ -359,9 +359,14 @@ waveforms may be defined. Frames are defined by simple strings.
 
 There are no built-in frames, they are dependent on the architecture.
 
+Frames (and associated sample rates) need to be provided to the user prior to
+construction of a program. Rigetti has a set of canonical frames (some examples
+are below) but this is subject to change.
+
 Examples:
 ```
 "xy"  # eg. for the drive line
+"ff"  # eg. for a generic flux line
 "cz"  # eg. for a flux pulse for enacting CZ gate
 "iswap"
 "ro"  # eg. for the readout pulse
@@ -464,20 +469,16 @@ PULSE 0 1 "cz" flat(duration: 1e-6, iq: 2+3i)
 
 ```
 SetFrequency :: SET-FREQUENCY Qubit+ Frame Float
-ShiftFrequency :: SHIFT-FREQUENCY Qubit+ Frame Float
 ```
 
 Each frame has a frequency which is tracked throughout the program. Initially
-the frequency starts out as not defined. It may be set or shifted up and down.
+the frequency starts out as not defined.
 
-Frequency must be a positive real number.
+Set instructions are local to the surrounding scope.
 
 ```
 SET-FREQUENCY 0 "xy" 5.4e9
 SET-FREQUENCY 0 "ro" 6.1e9
-
-SHIFT-FREQUENCY 0 "ro" 100e6
-SHIFT-FREQUENCY 0 "ro" -100e6
 ```
 
 **Phase**
@@ -485,14 +486,19 @@ SHIFT-FREQUENCY 0 "ro" -100e6
 ```
 SetPhase :: SET-PHASE Qubit+ Frame Float
 ShiftPhase :: SHIFT-PHASE Qubit+ Frame Expression
+SwapPhases :: SWAP-PHASES Qubit+ Frame Qubit+ Frame
 ```
 
 Each frame has a phase which is tracked throughout the program. Initially the
-phase starts out as 0. It may be set or shifted up and down.
+phase starts out as 0. It may be set or shifted up and down, as well as swapped
+with other frames.
 
 The phase must be a rational real number. There is also support for
 shifted the phase based on some expression, as long as that expression returns
 a real number.
+
+Set instructions are local to the surrounding scope, however shifting and
+swapping have global effect to the frame across the entire program.
 
 Example:
 ```
@@ -500,25 +506,24 @@ SET-PHASE 0 "xy" pi/2
 
 SHIFT-PHASE 0 "xy" -pi
 SHIFT-PHASE 0 "xy" %theta*2/pi
+
+SWAP-PHASE 0 "xy" 1 "xy"
 ```
 
 **Scale**
 
 ```
 SetScale :: SET-SCALE Qubit+ Frame Float
-ShiftScale :: SHIFT-SCALE Qubit+ Frame Float
 ```
 
 Each frame has a scale which is tracked throughout the program. Initially the
-scale starts out as 1. It may be set or shifted up and down.
+scale starts out as 1.
+
+Set instructions are local to the surrounding scope.
 
 Example:
 ```
 SET-SCALE 0 "xy" 0.75
-
-SHIFT-SCALE 0 "xy" 0.1
-SHIFT-SCALE 0 "xy" -0.1 # is valid
-SHIFT-SCALE 0 "xy" -0.8 # would put scale in invalid (-0.05) state
 ```
 
 **Capture**

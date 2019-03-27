@@ -28,8 +28,8 @@ Quil instruction types:
 - DELAY
 - FENCE
 - PULSE
-- SET-FREQUENCY, SET-PHASE, SET-SCALE
-- SHIFT-FREQUENCY, SHIFT-PHASE, SHIFT-SCALE
+- SET-FREQUENCY, SET-SCALE
+- SET-PHASE, SHIFT-PHASE, SWAP-PHASES
 
 ### Frames and Waveforms
 
@@ -54,14 +54,15 @@ manually, this is both tedious and doesn't take advantage of hardware which has
 specialized support for tracking these things.
 
 Therefore, each frame has associated with it a triple (frequency, phase, scale)
-that can be modified throughout the program using SET- and SHIFT- instructions.
+that can be modified throughout the program using SET- instructions (and
+additional instructions for phase).
 
 Here's a table explaining the differences between these three values that are
 tracked through the program:
 
 | Name      | Initial Value | Valid Values          | Can be parameterized? |
 |-----------|---------------|-----------------------|-----------------------|
-| Frequency | (not set)     | Positive real numbers | No                    |
+| Frequency | (not set)     | Real numbers          | No                    |
 | Phase     | 0.0           | Real numbers          | Yes                   |
 | Scale     | 1.0           | Real numbers          | No                    |
 
@@ -215,10 +216,11 @@ SET-FREQUENCY 1 "out" 5721752929.6875
 Calibrations of RX:
 ```
 DEFCAL RX(%theta) 0:
-    SET-SCALE %theta/pi
+    SET-SCALE %theta/pi*0.936
     PULSE 0 "xy" draggaussian(duration: 80e-9, fwhm: 40e-9, t0: 40e-9, anh: -210e6, alpha: 0)
 
 DEFCAL RX(pi/2) 0:
+    SET-SCALE 0.468
     PULSE 0 "xy" draggaussian(duration: 80e-9, fwhm: 40e-9, t0: 40e-9, anh: -210e6, alpha: 0)
 
 # With crosstalk mitigation - no pulses on neighbors
@@ -280,6 +282,29 @@ DEFCAL CCNOT 12 13 14:
     PULSE 13 14 "iswap" erfsquare(tmax: 131e-9, risetime: 20e-9, padleft: 12e-9, pad_right: 13e-9)
 
     FENCE 12 13 14
+```
+
+Active Reset Calibration:
+```
+DEFCAL RESET %qubit:
+    DECLARE ro BIT
+    MEASURE %qubit ro[0]
+    JUMP-UNLESS ro @delay
+    RX(pi) %qubit
+    JUMP @end
+    LABEL delay
+    DELAY(60e-9) %qubit
+    LABEL end
+```
+
+Single point of a parametric gate chevron:
+(parameterized in amplitude, frequency, and time)
+```
+RX(pi) 0
+RX(pi) 1
+SET-FREQUENCY 0 "cz" 160e6
+SET-SCALE 0 "cz" 0.45
+PULSE 0 1 "cz" erfsquare(duration: 100e-9, risetime: 20e-9, padleft: 0, padright: 0)
 ```
 
 ## FAQs
