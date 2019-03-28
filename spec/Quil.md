@@ -120,6 +120,17 @@ RX(pi/2) 0
 CPHASE(pi) 0 1
 ```
 
+**Gate Modifiers**
+
+TODO
+
+```
+<modified gate> ::= <simple gate>
+                  | <parametric gate>
+                  | CONTROLLED <modified gate>
+                  | DAGGER <modified gate>
+```
+
 **Gate Definitions**
 
 ```
@@ -283,15 +294,27 @@ DEFGATE PSWAP(%theta):
     0, 0,           0,           1
 ```
 
-**Qubit Reset**
+**Qubit and State Reset**
 
 TODO
+
+State reset
+```
+RESET
+```
+
+Qubit reset
+```
+RESET q
+```
 
 ## 4. Measurement and Classical Memory
 
 **Classical Memory Declarations**
 
 TODO
+
+_See [`typed-memory.md`](typed-memory.md)._
 
 **Measurement**
 
@@ -313,12 +336,30 @@ MEASURE 1 ro[1]
 
 TODO
 
+_See [`typed-memory.md`](typed-memory.md) for classical operations._
+
+```
+JUMP <label>
+JUMP-WHEN <label> <bit-mem>
+JUMP-UNLESS <label> <bit-mem>
+HALT
+WAIT
+```
+
 ## 6. Language Features
 
 **File Inclusion**
 
 TODO
 
+```
+INCLUDE <filename>
+```
+
 **Pragmas**
 
 TODO
+
+```
+PRAGMA <word> <word>* "string"?
+```

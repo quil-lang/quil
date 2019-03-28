@@ -300,7 +300,7 @@ CONVERT  a b            # a := (T)b, where T = type-of(a)
          <real> <int>   # - Best real approximation of an integer.
          <real> <bit>   # - Convert 0 or 1 to a real.
          <bit> <int>    # - 0 if 0, 1 if non-zero.
-         <bit> <real>   # - 0 of 0.0, 1 if non-zero
+         <bit> <real>   # - 0 if 0.0, 1 if non-zero
 
 # Logical Operations
 NOT      a              # a := ~a
