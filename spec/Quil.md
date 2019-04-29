@@ -362,6 +362,7 @@ RX(pi) 0              RX(pi/2) 0        RX(pi/4) 0              RX(pi/8) 0
 
 ```
 GateDefinition :: DEFGATE Name ( Parameter+ | ( AS GateType )? ) : MatrixRow+
+GateType :: 'MATRIX' | 'PERMUTATION'
 MatrixRow :: Indent (Expression ,)+
 ```
 
@@ -445,6 +446,9 @@ DEFGATE CCNOT:  # Also known as the Toffoli gate.
     0, 0, 0, 0, 0, 0, 0, 1
     0, 0, 0, 0, 0, 0, 1, 0
 
+# CCNOT equivalent using permutation notation
+DEFGATE CCNOT AS PERMUTATION:
+    0, 1, 2, 3, 4, 5, 7, 6
 
 # Phase Gates
 
