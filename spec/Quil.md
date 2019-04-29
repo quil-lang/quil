@@ -361,7 +361,7 @@ RX(pi) 0              RX(pi/2) 0        RX(pi/4) 0              RX(pi/8) 0
 ### Gate Definitions
 
 ```
-GateDefinition :: DEFGATE Name ( Parameter+ )? : MatrixRow+
+GateDefinition :: DEFGATE Name ( Parameter+ | ( AS GateType )? ) : MatrixRow+
 MatrixRow :: Indent (Expression ,)+
 ```
 
