@@ -4,10 +4,7 @@ This repository contains the reference specification for the Quil language in
 addition to some useful extras outlined below.
 
 Repository layout:
-- `/examples`: examples of Quil
 - `/grammars`: example grammars used by parser generators
-- `/paper`: the source and rendered files for the Quil reference paper, by
-Smith et al
 - `/rfcs`: proposals for adding features or changing Quil
 - `/spec`: the Quil language specification
 
