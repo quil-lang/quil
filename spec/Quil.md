@@ -122,13 +122,137 @@ CPHASE(pi) 0 1
 
 **Gate Modifiers**
 
-TODO
-
 ```
 <modified gate> ::= <simple gate>
                   | <parametric gate>
                   | CONTROLLED <modified gate>
                   | DAGGER <modified gate>
+                  | FORKED <modified gate>
+```
+
+Gates can be modified by one of the modifier keywords `CONTROLLED`, `DAGGER`, or
+`FORKED`. The meaning of these modifiers is as follows:
+
+**`CONTROLLED`**
+
+The `CONTROLLED` modifier takes some gate G acting on some number of qubits
+q1...qn and makes it conditioned on the state of some new qubit q. Therefore, if
+G is an n-qubit gate, then `CONTROLLED G` is an (n+1)-qubit gate. For example,
+the gate `CONTROLLED X 1 0` is the familiar controlled not gate, which can also
+be written using the standard built-in Quil gate `CNOT 1 0`.
+
+Specifically, when acting on a gate G that can be represented as an N x N matrix
+U, `CONTROLLED G` produces a gate G' described by the 2N x 2N matrix C(U) such
+that C(U) = I (+) U, where I is the N x N identity matrix and (+) is a direct
+sum. For example, if U is the 2 x 2, 1-qubit operator
+
+```
+[ a b ]
+[ c d ]
+```
+
+Then C(U) is
+
+```
+[ 1 0 0 0 ]
+[ 0 1 0 0 ]
+[ 0 0 a b ]
+[ 0 0 c d ]
+```
+
+**`DAGGER`**
+
+The `DAGGER` modifier represents the adjoint operation or complex-conjugate
+transpose. For example, if G is a gate described by the 1-qubit operator
+
+```
+[ a b ]
+[ c d ]
+```
+
+Then `DAGGER G` is
+
+```
+[ a* c* ]
+[ b* d* ]
+```
+
+where `a*` is the complex-conjugate of `a`.
+
+**`FORKED`**
+
+The `FORKED` modifier takes a gate G on some number of qubits q0...qn and
+"forks" it, conditioned on some new qubit q. Therefore, if G is an n-qubit gate,
+then `FORKED G` is an (n+1)-qubit gate.
+
+Additionally, If G is a parameterized gate with N parameters, then the `FORKED`
+version of G must be given 2N parameters, with half the parameters going to the
+"left" fork of G, and the other half going to the "right" fork. For example, the
+built-in gate `RX` takes a single `%theta` parameter and acts on a single qubit,
+like so `RX(pi/2) 0`. Therefore, `FORKED RX(pi/2, pi/4) 1 0` produces a "forked"
+version of `RX`, conditioned on qubit 1. The "left" fork corresponds to
+`RX(pi/2) 0` and the "right" fork to `RX(pi/4) 0`.
+
+In general, when acting on a gate G that can be represented as an N x N matrix U
+= G(p1,...,pN), `FORKED G` produces a 2N x 2N matrix F(G)(p1,...,p2N) =
+G(p1,...,pN) (+) G(pN+1,...,2N), where (+) is the direct sum. For example, when N=0 and U is the 2 x 2, 1-qubit operator
+
+```
+[ a b ]
+[ c d ]
+```
+
+Then F(U) is
+
+```
+[ a b 0 0 ]
+[ c d 0 0 ]
+[ 0 0 a b ]
+[ 0 0 c d ]
+```
+
+Likewise if `MY-RZ` is defined as
+
+```
+DEFGATE MY-RZ(%theta):
+    cis(-%theta/2), 0
+    0,              cis(%theta/2)
+```
+
+Then `FORKED MY-RZ(x1, x2) 1 0` (for some real numbers x1 and x2) results in a 2-qubit operator that can be described by the matrix.
+
+```
+[ cis(-x1/2), 0,         0,          0         ]
+[ 0,          cis(x1/2), 0,          0         ]
+[ 0,          0,         cis(-x2/2), 0         ]
+[ 0,          0,         0,          cis(x2/2) ]
+```
+
+**Chaining gate modifiers**
+
+When gate modifiers are chained, they consume qubits left-to-right, so that in
+the following example, the `CONTROLLED` modifier is conditioned on qubit 0,
+`FORKED` on qubit 1, and the gate G acts on qubit 2.
+
+```
+CONTROLLED FORKED DAGGER G 0 1 2
+    |         |          | ^ ^ ^
+    |         |          +-|-|-+
+    |         +------------|-+
+    +----------------------+
+```
+
+Examples:
+
+```
+CONTROLLED Z 0 1 # same as CZ 0 1
+CONTROLLED X 0 1 # same as CNOT 0 1
+CONTROLLED CONTROLLED X 0 1 2 # same as CCNOT 0 1 2
+
+DAGGER RX(pi/2) 0
+FORKED RX(pi/2, pi/4) 0 1
+
+DAGGER FORKED CONTROLLED RZ(0, pi) 0 1 2
 ```
 
 **Gate Definitions**
