@@ -312,7 +312,7 @@ CONTROLLED FORKED DAGGER G 0 1 2
 **Gate Definitions**
 
 ```
-GateDefinition :: DEFGATE Name ( Parameter+ ) : MatrixRow+
+GateDefinition :: DEFGATE Name ( Parameter+ )? : MatrixRow+
 MatrixRow :: Indent (Expression ,)+
 ```
 
@@ -517,11 +517,30 @@ TODO
 _See [`typed-memory.md`](typed-memory.md) for classical operations._
 
 ```
-JUMP <label>
-JUMP-WHEN <label> <bit-mem>
-JUMP-UNLESS <label> <bit-mem>
-HALT
-WAIT
+ClassicalInstruction := LABEL <label>
+                      | JUMP <label>
+                      | JUMP-WHEN <label> <bit-mem>
+                      | JUMP-UNLESS <label> <bit-mem>
+                      | HALT
+                      | WAIT
+```
+
+**Labels**
+
+```
+Label :: @Name
+```
+
+Locations within the instruction sequence are denoted by labels, which are names
+that are prepended with an `@` symbol, like `@START`. The declaration of a new
+label within the instruction sequence is called a jump target, and is written
+with the `LABEL` directive.
+
+Examples:
+
+```
+LABEL @start
+LABEL @MY-LABEL
 ```
 
 ## 6. Language Features
@@ -541,3 +560,105 @@ TODO
 ```
 PRAGMA <word> <word>* "string"?
 ```
+
+## 7. Circuits
+
+**Circuit Definitions**
+
+```
+CircuitDefinition :: DEFCIRCUIT Name ( Parameter+ )? Qubit* : CircuitRow+
+CircuitRow :: Indent CircuitInstruction
+CircuitInstruction :: Comment
+                    | ClassicalInstruction
+                    | <modified gate>
+                    | <modified circuit>
+                    | Measurement
+                    | RESET
+                    | PRAGMA
+```
+
+Sometimes it is convenient to name and parameterize a particular sequence of
+Quil instructions for use as a subroutine to other quantum programs. This can be
+done with the `DEFCIRCUIT` directive. Similar to the `DEFGATE` directive,
+`DEFCIRCUIT` can optionally specify a list of parameters. Additionally,
+`DEFCIRCUIT` directives may specify a list of formal arguments which can be
+substituted with either classical addresses or qubits.
+
+Examples:
+```
+DEFCIRCUIT SIMPLE:
+    X 0
+    X 1
+
+DEFCIRCUIT BELL_STATE q0 q1:
+    H q0
+    CNOT q0 q1
+
+DEFCIRCUIT LOOP:
+    LABEL @START
+    RESET 0
+    RESET 1
+    BELL_STATE 0 1
+    # The following two instructions assume that the ro memory region has been
+    # declared elsewhere. See the section "Classical Memory Declarations",
+    # above, for details on how to declare memory.
+    MEASURE 1 ro[0]
+    JUMP-WHEN @START ro[0]
+    HALT
+
+DEFCIRCUIT ROT(%theta) q:
+    RX(%theta) q
+```
+
+**Simple Circuits**
+
+```
+SimpleCircuit :: Name Qubit*
+```
+
+Circuit applications in Quil are written one per line with the name of the circuit preceding a list of zero or more qubits that the circuit acts upon.
+
+Examples:
+```
+DEFCIRCUIT MY-RESET:
+    RESET 0
+    RESET 1
+
+DEFCIRCUIT BELL_STATE q0 q1:
+    H q0
+    CNOT q0 q1
+
+MY-RESET
+BELL_STATE 0 1
+```
+
+**Parametric Circuits**
+
+```
+ParametricCircuit :: Name ( Expression+ ) Qubit*
+```
+
+A parametric circuit can take a certain number of parameters in addition to any
+formal qubit arguments. The application of this circuit is written as the
+circuit name followed by a list of parameters in parenthesis followed by a list
+of zero-or-more qubits.
+
+Examples:
+```
+DEFCIRCUIT MY-PARAMETRIC-CIRCUIT(%theta, %phi) q1 q2:
+    H q1
+    RX(%theta) q1
+    RY(%phi) q2
+
+MY-PARAMETRIC-CIRCUIT(pi/2, pi/4) 1 0
+```
+
+**Circuit Modifiers**
+
+```
+<modified circuit> := <simple circuit>
+                    | <parametric circuit>
+                    | DAGGER <modified circuit>
+```
+
+TODO
