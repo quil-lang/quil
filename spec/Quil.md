@@ -131,7 +131,22 @@ CPHASE(pi) 0 1
 ```
 
 Gates can be modified by one of the modifier keywords `CONTROLLED`, `DAGGER`, or
-`FORKED`. The meaning of these modifiers is as follows:
+`FORKED`.
+
+Examples:
+
+```
+CONTROLLED Z 0 1 # same as CZ 0 1
+CONTROLLED X 0 1 # same as CNOT 0 1
+CONTROLLED CONTROLLED X 0 1 2 # same as CCNOT 0 1 2
+
+DAGGER RX(pi/2) 0
+FORKED RX(pi/2, pi/4) 0 1
+
+DAGGER FORKED CONTROLLED RZ(0, pi) 0 1 2
+```
+
+The meaning of the modifiers is as follows:
 
 **`CONTROLLED`**
 
@@ -292,19 +307,6 @@ CONTROLLED FORKED DAGGER G 0 1 2
     |         |          +-|-|-+
     |         +------------|-+
     +----------------------+
-```
-
-Examples:
-
-```
-CONTROLLED Z 0 1 # same as CZ 0 1
-CONTROLLED X 0 1 # same as CNOT 0 1
-CONTROLLED CONTROLLED X 0 1 2 # same as CCNOT 0 1 2
-
-DAGGER RX(pi/2) 0
-FORKED RX(pi/2, pi/4) 0 1
-
-DAGGER FORKED CONTROLLED RZ(0, pi) 0 1 2
 ```
 
 **Gate Definitions**
