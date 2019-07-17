@@ -1,5 +1,4 @@
 # cavity_scan.quil
-# Readout cavity scan
 
 # Static constants that must be set before program execution
 # TODO: Define how $qubit is set. May be used in e.g. DEFCIRCUIT
