@@ -1,0 +1,16 @@
+# capture_delay.quil
+
+# TODO: Determine how $qubit is set.
+DECLARE scale REAL
+DECLARE pulse_duration REAL
+DECLARE capture_duration REAL
+DECLARE sample_rate INTEGER # Determine how this is set
+DECLARE num_iqs INTEGER
+
+MUL num_iqs capture_duration sample_rate # Must be INTEGER
+DECLARE iqs REAL[num_iqs]
+
+SET-SCALE $qubit "ro" scale
+PULSE $qubit "ro" flat(duration: pulse_duration, iq: ?)
+
+RAW-CAPTURE $qubit "out" capture_duration iqs
