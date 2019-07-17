@@ -1,10 +1,6 @@
-# Example measurements
+# cavity_scan.quil
+# Readout cavity scan
 
-The following is an incomplete list of measurements an experimenter may use analog quil to perform.
-
-## Readout cavity scan
-
-```
 # Static constants that must be set before program execution
 # TODO: Define how $qubit is set. May be used in e.g. DEFCIRCUIT
 
@@ -45,4 +41,3 @@ LE continue freq freq_max
 JUMP-WHEN @scan_step continue
 
 # TODO: Finalize
-```
