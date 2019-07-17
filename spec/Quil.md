@@ -206,24 +206,24 @@ Then `DAGGER G` is
 
 where `a*` is the complex-conjugate of `a`.
 
-More concretely, the sequence of Quil instructions
+Because `DAGGER` is an inverse, the sequence of Quil instructions
 
 ```
 G q1 ... qn
 DAGGER G q1 ... qn
 ```
 
-is always an identity since UU† = U†U = I for any unitary U. As another example,
-consider the gate `RZ`, which is defined as
+acts as an identity gate. As another example, consider the gate `PHASE`, which
+is defined as
 
 ```
-DEFGATE RZ(%theta):
-    cis(-%theta/2), 0
-    0,              cis(%theta/2)
+DEFGATE PHASE(%alpha):
+    1, 0
+    0, cis(%alpha)
 ```
 
-where `cis(x) = cos(x) + i sin(x) = e^{ix}`. Therefore, `RZ(theta) q` == `DAGGER
-RZ(-theta) q` for all `theta`.
+where `cis(x) = cos(x) + i sin(x) = e^{ix}`. Therefore, `PHASE(theta) q` ==
+`DAGGER PHASE(-theta) q` for all `theta`.
 
 **`FORKED`**
 
@@ -260,8 +260,7 @@ is in the one state.
 In general, when acting on a gate G that can be represented as an N x N matrix U
 = G(p1,...,pk), `FORKED G` produces a 2N x 2N matrix F(G)(p1,...,p2k) =
 G(p1,...,pk) (+) G(pk+1,...,p2k), where (+) is the direct sum. For example, when
-N=0 and U is the 2 x 2, 1-qubit operator (why won't github let me comment on a
-line with no diff?)
+N=0 and U is the 2 x 2, 1-qubit operator
 
 ```
 [ a b ]
@@ -277,16 +276,16 @@ Then F(U) is
 [ 0 0 c d ]
 ```
 
-Likewise if `MY-RZ` is defined as
+Likewise the gate `RZ` is defined as
 
 ```
-DEFGATE MY-RZ(%theta):
+DEFGATE RZ(%theta):
     cis(-%theta/2), 0
     0,              cis(%theta/2)
 ```
 
-Then `FORKED MY-RZ(x1, x2) 1 0` (for some real numbers x1 and x2) results in a
-2-qubit operator that can be described by the matrix.
+Therefore, `FORKED MY-RZ(x1, x2) 1 0` (for some real numbers x1 and x2) results
+in a 2-qubit operator that can be described by the matrix.
 
 ```
 [ cis(-x1/2), 0,         0,          0         ]
@@ -532,9 +531,8 @@ Label :: @Name
 ```
 
 Locations within the instruction sequence are denoted by labels, which are names
-that are prepended with an `@` symbol, like `@START`. The declaration of a new
-label within the instruction sequence is called a jump target, and is written
-with the `LABEL` directive.
+that are prepended with an `@` symbol, like `@START`. Labels are used as targets
+in JUMP-like instructions, and are written with the `LABEL` directive.
 
 Examples:
 
@@ -566,7 +564,8 @@ PRAGMA <word> <word>* "string"?
 **Circuit Definitions**
 
 ```
-CircuitDefinition :: DEFCIRCUIT Name ( Parameter+ )? Qubit* : CircuitRow+
+CircuitDefinition :: DEFCIRCUIT Name ( Parameter+ )? CircuitQubit+ : CircuitRow+
+CircuitQubit :: Qubit | Name
 CircuitRow :: Indent CircuitInstruction
 CircuitInstruction :: Comment
                     | ClassicalInstruction
@@ -594,16 +593,13 @@ DEFCIRCUIT BELL_STATE q0 q1:
     H q0
     CNOT q0 q1
 
-DEFCIRCUIT LOOP:
+DEFCIRCUIT LOOP temp:
     LABEL @START
     RESET 0
     RESET 1
     BELL_STATE 0 1
-    # The following two instructions assume that the ro memory region has been
-    # declared elsewhere. See the section "Classical Memory Declarations",
-    # above, for details on how to declare memory.
-    MEASURE 1 ro[0]
-    JUMP-WHEN @START ro[0]
+    MEASURE 1 temp
+    JUMP-WHEN @START temp
     HALT
 
 DEFCIRCUIT ROT(%theta) q:
@@ -639,9 +635,9 @@ ParametricCircuit :: Name ( Expression+ ) Qubit*
 ```
 
 A parametric circuit can take a certain number of parameters in addition to any
-formal qubit arguments. The application of this circuit is written as the
-circuit name followed by a list of parameters in parenthesis followed by a list
-of zero-or-more qubits.
+formal arguments. The application of this circuit is written as the circuit name
+followed by a list of parameters in parenthesis followed by a list of
+zero-or-more qubits.
 
 Examples:
 ```
