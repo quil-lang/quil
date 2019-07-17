@@ -136,10 +136,21 @@ Gates can be modified by one of the modifier keywords `CONTROLLED`, `DAGGER`, or
 **`CONTROLLED`**
 
 The `CONTROLLED` modifier takes some gate G acting on some number of qubits
-q1...qn and makes it conditioned on the state of some new qubit q. Therefore, if
-G is an n-qubit gate, then `CONTROLLED G` is an (n+1)-qubit gate. For example,
-the gate `CONTROLLED X 1 0` is the familiar controlled not gate, which can also
-be written using the standard built-in Quil gate `CNOT 1 0`.
+q1...qn and makes it conditioned on the state of some new qubit c1. Therefore,
+if G is an n-qubit gate
+
+```
+G q1 ... qn
+```
+
+then `CONTROLLED G` is an (n+1)-qubit gate
+
+```
+CONTROLLED G c1 q1 ... qn
+```
+
+For example, the gate `CONTROLLED X 1 0` is the familiar controlled not gate,
+which can also be written using the standard built-in Quil gate `CNOT 1 0`.
 
 Specifically, when acting on a gate G that can be represented as an N x N matrix
 U, `CONTROLLED G` produces a gate G' described by the 2N x 2N matrix C(U) such
@@ -163,7 +174,8 @@ Then C(U) is
 **`DAGGER`**
 
 The `DAGGER` modifier represents the adjoint operation or complex-conjugate
-transpose. For example, if G is a gate described by the 1-qubit operator
+transpose. Since every gate is a unitary operator, this is just the inverse. For
+example, if G is a gate described by the 1-qubit operator
 
 ```
 [ a b ]
@@ -179,23 +191,62 @@ Then `DAGGER G` is
 
 where `a*` is the complex-conjugate of `a`.
 
+More concretely, the sequence of Quil instructions
+
+```
+G q1 ... qn
+DAGGER G q1 ... qn
+```
+
+is always an identity since UU† = U†U = I for any unitary U. As another example,
+consider the gate `RZ`, which is defined as
+
+```
+DEFGATE RZ(%theta):
+    cis(-%theta/2), 0
+    0,              cis(%theta/2)
+```
+
+where `cis(x) = cos(x) + i sin(x) = e^{ix}`. Therefore, `RZ(theta) q` == `DAGGER
+RZ(-theta) q` for all `theta`.
+
 **`FORKED`**
 
-The `FORKED` modifier takes a gate G on some number of qubits q0...qn and
-"forks" it, conditioned on some new qubit q. Therefore, if G is an n-qubit gate,
-then `FORKED G` is an (n+1)-qubit gate.
+Let G be a parametric gate of k parameters p1 ... pk and n qubits
+q1 ... qn. This is written:
 
-Additionally, If G is a parameterized gate with N parameters, then the `FORKED`
-version of G must be given 2N parameters, with half the parameters going to the
-"left" fork of G, and the other half going to the "right" fork. For example, the
-built-in gate `RX` takes a single `%theta` parameter and acts on a single qubit,
-like so `RX(pi/2) 0`. Therefore, `FORKED RX(pi/2, pi/4) 1 0` produces a "forked"
-version of `RX`, conditioned on qubit 1. The "left" fork corresponds to
-`RX(pi/2) 0` and the "right" fork to `RX(pi/4) 0`.
+```
+G(p1, ..., pk) q1 ... qn
+```
+
+Consider a second set of k parameters p1' ... pk'. The `FORKED` modifier takes
+such a gate G and allows either set of parameters to be used conditioned on an
+additional qubit c.
+
+```
+FORKED G(p1, ..., pk, p1', ..., pk') c q1 ... qn
+```
+
+Roughly speaking, this is equivalent to the pseudocode:
+
+```
+if c = 0:
+    G(p1, ..., pk) q1 ... qn
+else c = 1:
+    G(p1', ..., pk') q1 ... qn
+```
+
+For example, the built-in gate `RX` takes a single `%theta` parameter and acts
+on a single qubit, like so `RX(pi/2) 0`. Therefore, `FORKED RX(pi/2, pi/4) 1 0`
+produces a "forked" version of `RX`, conditioned on qubit 1. If qubit 1 is in
+the zero state, this corresponds to `RX(pi/2) 0` and to `RX(pi/4) 0` if qubit 1
+is in the one state.
 
 In general, when acting on a gate G that can be represented as an N x N matrix U
-= G(p1,...,pN), `FORKED G` produces a 2N x 2N matrix F(G)(p1,...,p2N) =
-G(p1,...,pN) (+) G(pN+1,...,2N), where (+) is the direct sum. For example, when N=0 and U is the 2 x 2, 1-qubit operator
+= G(p1,...,pk), `FORKED G` produces a 2N x 2N matrix F(G)(p1,...,p2k) =
+G(p1,...,pk) (+) G(pk+1,...,p2k), where (+) is the direct sum. For example, when
+N=0 and U is the 2 x 2, 1-qubit operator (why won't github let me comment on a
+line with no diff?)
 
 ```
 [ a b ]
@@ -219,7 +270,8 @@ DEFGATE MY-RZ(%theta):
     0,              cis(%theta/2)
 ```
 
-Then `FORKED MY-RZ(x1, x2) 1 0` (for some real numbers x1 and x2) results in a 2-qubit operator that can be described by the matrix.
+Then `FORKED MY-RZ(x1, x2) 1 0` (for some real numbers x1 and x2) results in a
+2-qubit operator that can be described by the matrix.
 
 ```
 [ cis(-x1/2), 0,         0,          0         ]
