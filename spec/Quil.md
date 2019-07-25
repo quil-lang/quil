@@ -309,6 +309,29 @@ CONTROLLED FORKED DAGGER G 0 1 2
     +----------------------+
 ```
 
+Note that chaining multiple `FORKED` modifiers causes the numbers of parameters consumed by the gate to double for each additional `FORKED`. For example:
+
+```
+RX(pi) 0
+FORKED RX(pi, pi/2) 1 0
+FORKED FORKED RX(pi, pi/2, pi/4, pi/8) 2 1 0
+```
+
+You can think of that last example as representing the following decision tree, where an edge label like `q2=0` means that qubit 2 is in the zero state.
+
+```
+           FORKED FORKED RX(pi, pi/2, pi/4, pi/8) 2 1 0
+                   /                               \
+                q2=0                              q2=1
+                 /                                   \
+    FORKED RX(pi, pi/2) 1 0                  FORKED RX(pi/4, pi/8) 1 0
+       /              \                         /               \
+    q1=0             q1=1                    q1=0              q1=1
+     /                  \                     /                   \
+RX(pi) 0              RX(pi/2) 0        RX(pi/4) 0              RX(pi/8) 0
+```
+
+
 **Gate Definitions**
 
 ```
