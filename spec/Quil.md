@@ -151,8 +151,9 @@ The meaning of the modifiers is as follows:
 **`CONTROLLED`**
 
 The `CONTROLLED` modifier takes some gate G acting on some number of qubits
-q1...qn and makes it conditioned on the state of some new qubit c1. Therefore,
-if G is an n-qubit gate
+q1...qn and makes it conditioned on the state of some new qubit c1: if c1 is
+high, G is applied to q1, ..., qn; and if c1 is low, no operation is
+applied. Therefore, if G is an n-qubit gate
 
 ```
 G q1 ... qn
@@ -247,7 +248,7 @@ Roughly speaking, this is equivalent to the pseudocode:
 ```
 if c = 0:
     G(p1, ..., pk) q1 ... qn
-else c = 1:
+else if c = 1:
     G(p1', ..., pk') q1 ... qn
 ```
 
@@ -260,7 +261,7 @@ is in the one state.
 In general, when acting on a gate G that can be represented as an N x N matrix U
 = G(p1,...,pk), `FORKED G` produces a 2N x 2N matrix F(G)(p1,...,p2k) =
 G(p1,...,pk) (+) G(pk+1,...,p2k), where (+) is the direct sum. For example, when
-N=0 and U is the 2 x 2, 1-qubit operator
+k=0 and U is the 2 x 2, 1-qubit operator
 
 ```
 [ a b ]
