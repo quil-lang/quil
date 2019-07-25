@@ -674,4 +674,52 @@ MY-PARAMETRIC-CIRCUIT(pi/2, pi/4) 1 0
                     | DAGGER <modified circuit>
 ```
 
-TODO
+The `DAGGER` modifier can also be applied to simple or parametric circuits, so
+long as the circuit in question is comprised entirely of gate applications or
+other daggerable circuit applications, recursively. No classical or control-flow
+instructions are allowed to appear in the body of the daggered circuit.
+
+The operation of `DAGGER` on a circuit effectively reverses the order of
+instructions that appear in the circuit body and applies `DAGGER` to each of
+them individually.
+
+For example,
+
+```
+DEFCIRCUIT H1:
+    H 1
+
+DEFCIRCUIT GATES-ONLY:
+    H 0
+    H1
+    CCNOT 0 1 2
+
+DAGGER GATES-ONLY
+```
+
+is permissible and is equivalent to the following program:
+
+```
+DAGGER CCNOT 0 1 2
+DAGGER H 1
+DAGGER H 0
+```
+
+Examples:
+```
+DEFCIRCUIT BELL_STATE q0 q1:
+    H q0
+    CNOT q0 q1
+
+DEFCIRCUIT DOUBLE_BELL q0 q1 q2 q3:
+    BELL_STATE q0 q1
+    BELL_STATE q2 q3
+
+DEFCIRCUIT CANNOT-DAGGER:
+    RESET 0
+    MEASURE 0
+
+DAGGER BELL_STATE 0 1      # ok, only gate applications
+DAGGER DOUBLE_BELL 0 1 2 3 # also ok
+DAGGER CANNOT-DAGGER       # error
+```
