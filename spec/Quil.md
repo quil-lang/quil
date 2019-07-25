@@ -540,12 +540,12 @@ TODO
 _See [`typed-memory.md`](typed-memory.md) for classical operations._
 
 ```
-ClassicalInstruction := LABEL <label>
-                      | JUMP <label>
-                      | JUMP-WHEN <label> <bit-mem>
-                      | JUMP-UNLESS <label> <bit-mem>
-                      | HALT
-                      | WAIT
+LABEL <label>
+JUMP <label>
+JUMP-WHEN <label> <bit-mem>
+JUMP-UNLESS <label> <bit-mem>
+HALT
+WAIT
 ```
 
 **Labels**
@@ -590,14 +590,7 @@ PRAGMA <word> <word>* "string"?
 ```
 CircuitDefinition :: DEFCIRCUIT Name ( Parameter+ )? CircuitQubit+ : CircuitRow+
 CircuitQubit :: Qubit | Name
-CircuitRow :: Indent CircuitInstruction
-CircuitInstruction :: Comment
-                    | ClassicalInstruction
-                    | <modified gate>
-                    | <modified circuit>
-                    | Measurement
-                    | RESET
-                    | PRAGMA
+CircuitRow :: Indent Instruction
 ```
 
 Sometimes it is convenient to name and parameterize a particular sequence of
