@@ -285,8 +285,8 @@ DEFGATE RZ(%theta):
     0,              cis(%theta/2)
 ```
 
-Therefore, `FORKED MY-RZ(x1, x2) 1 0` (for some real numbers x1 and x2) results
-in a 2-qubit operator that can be described by the matrix.
+Therefore, `FORKED RZ(x1, x2) 1 0`, for real numbers x1 and x2, results in a
+2-qubit operator that can be described by the matrix.
 
 ```
 [ cis(-x1/2), 0,         0,          0         ]
