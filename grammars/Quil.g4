@@ -33,12 +33,15 @@ instr               : gate
 
 // C. Static and Parametric Gates
 
-gate                : name ( LPAREN param ( COMMA param )* RPAREN )? qubit+ ;
+gate                : modifier* name ( LPAREN param ( COMMA param )* RPAREN )? qubit+ ;
 
 name                : IDENTIFIER ;
 qubit               : INT ;
 
 param               : expression ;
+
+modifier            : CONTROLLED
+                    | DAGGER ;
 
 // D. Gate Definitions
 
@@ -132,7 +135,7 @@ sign                : PLUS | MINUS ;
 // Numbers
 // We suffix -N onto these names so they don't conflict with already defined Python types
 
-number              : realN | imaginaryN | I | PI ;
+number              : MINUS? ( realN | imaginaryN | I | PI ) ;
 imaginaryN          : realN I ;
 realN               : FLOAT | INT ;
 
@@ -207,6 +210,11 @@ TIMES               : '*' ;
 DIVIDE              : '/' ;
 POWER               : '^' ;
 
+// Modifiers
+
+CONTROLLED          : 'CONTROLLED' ;
+DAGGER              : 'DAGGER' ;
+
 // Identifiers
 
 IDENTIFIER          : ( ( [A-Za-z_] ) | ( [A-Za-z_] [A-Za-z0-9\-_]* [A-Za-z0-9_] ) ) ;
@@ -237,11 +245,11 @@ UNDERSCORE          : '_' ;
 // Whitespace
 
 TAB                 : '    ' ;
-NEWLINE             : ( '\r'? '\n' | '\r' )+ ;
+NEWLINE             : (' ' | '\t' )* ( '\r'? '\n' | '\r' )+ ;
 
 // Skips
 
-COMMENT             : '#' ~( '\n' | '\r' )* -> skip ;
+COMMENT             : (' ' | '\t' )* '#' ~( '\n' | '\r' )* -> skip ;
 SPACE               : ' ' -> skip ;
 
 // Error
