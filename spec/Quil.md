@@ -44,11 +44,38 @@ constructs and their associated semantics.
 
 ## 2. Language
 
-**Instructions**
+**Whitespace and Instructions**
 
-Instructions in Quil are written one per line, separated by a newline character.
+A single line of Quil source may contain several Quil instructions, delimited by
+isolated semicolons.
+
+For example:
+```
+X 0 ; H 1
+X 1
+```
+is equivalent to
+``` 
+X 0
+H 0
+X 1
+```
+
 Whitespace such as spaces and tabs are considered insignificant, except at the
-beginning of a line.
+beginning of a line. For a line containing several semicolon delimited
+instructions, the initial indentation applies to each instruction in the line.
+
+For example:
+```
+DEFCIRCUIT FOO:
+    X 0 ; H 1
+```
+is equivalent to
+```
+DEFCIRCUIT FOO:
+    X 0
+    H 1
+```
 
 **Names**
 
@@ -74,7 +101,7 @@ Comment :: # /[^\n]*/
 ```
 
 Lines starting with the # character are comments and are ignored. Comments may
-also be placed after an instruction line and will similarly be ignored.
+also be placed after an instruction and will similarly be ignored.
 
 ## 3. Quantum Gates
 
@@ -95,8 +122,8 @@ processors) may use a numbering scheme based on particular physical qubits.
 SimpleGate :: Name Qubit+
 ```
 
-Gate applications in Quil are written one per line with the name of the gate
-preceding a list of one or more qubits that the gate acts upon.
+Gate applications in Quil are written with the name of the gate preceding a list
+of one or more qubits that the gate acts upon.
 
 Examples:
 ```
@@ -629,7 +656,8 @@ DEFCIRCUIT ROT(%theta) q:
 SimpleCircuit :: Name Qubit*
 ```
 
-Circuit applications in Quil are written one per line with the name of the circuit preceding a list of zero or more qubits that the circuit acts upon.
+Circuit applications may be written with the name of the circuit preceding a
+list of zero or more qubits that the circuit acts upon.
 
 Examples:
 ```
