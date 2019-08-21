@@ -46,8 +46,7 @@ constructs and their associated semantics.
 
 **Whitespace and Instructions**
 
-A single line of Quil source may contain several Quil instructions, delimited by
-isolated semicolons.
+A single line of Quil source may contain several Quil instructions, delimited by semicolons.
 
 For example:
 ```
