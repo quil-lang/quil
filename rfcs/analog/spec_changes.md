@@ -5,19 +5,23 @@ Add section 6 to spec:
 **Frames**
 
 ```
-Frame :: String
+FrameName :: String
+Frame :: Qubit+ FrameName
 ```
 
 A frame encapsulates any rotating frame relative to which control/readout
-waveforms may be defined. Frames are defined by simple strings.
+waveforms may be defined. Frames are referred to by specifying a list of qubits
+as well as the name of the frame. For example, `0 1 "cz"` is the "cz" frame on
+qubits 0 and 1. The order of the qubits matters. In particular, the above frame
+may differ from `1 0 "cz"`.
 
 There are no built-in frames, they are dependent on the architecture.
 
 Frames (and associated sample rates) need to be provided to the user prior to
-construction of a program. Rigetti has a set of canonical frames (some examples
-are below) but this is subject to change.
+construction of a program. Rigetti has a set of canonical frames (some
+examples are below) but this is subject to change.
 
-Examples:
+Examples (names only):
 ```
 "xy"  # eg. for the drive line
 "ff"  # eg. for a generic flux line
@@ -98,11 +102,10 @@ DEFWAVEFORM my_custom_paramterized_waveform(%a)
 **Pulses**
 
 ```
-Pulse :: PULSE Qubit+ Frame Waveform
+Pulse :: PULSE Frame Waveform
 ```
 
-Pulses can be played on the frame of a particular qubit by listing the qubit,
-frame name, waveform name (or generator).
+Pulses represent the propagation of a specific waveform (either built-in or custom) on a specific frame.
 
 Examples:
 ```
@@ -122,7 +125,7 @@ PULSE 0 1 "cz" flat(duration: 1e-6, iq: 2+3i)
 **Frequency**
 
 ```
-SetFrequency :: SET-FREQUENCY Qubit+ Frame Float
+SetFrequency :: SET-FREQUENCY Frame Float
 ```
 
 Each frame has a frequency which is tracked throughout the program. Initially
@@ -138,9 +141,9 @@ SET-FREQUENCY 0 "ro" 6.1e9
 **Phase**
 
 ```
-SetPhase :: SET-PHASE Qubit+ Frame Float
-ShiftPhase :: SHIFT-PHASE Qubit+ Frame Expression
-SwapPhases :: SWAP-PHASES Qubit+ Frame Qubit+ Frame
+SetPhase :: SET-PHASE Frame Float
+ShiftPhase :: SHIFT-PHASE Frame Expression
+SwapPhases :: SWAP-PHASES Frame Frame
 ```
 
 Each frame has a phase which is tracked throughout the program. Initially the
@@ -167,7 +170,7 @@ SWAP-PHASE 0 "xy" 1 "xy"
 **Scale**
 
 ```
-SetScale :: SET-SCALE Qubit+ Frame Float
+SetScale :: SET-SCALE Frame Float
 ```
 
 Each frame has a scale which is tracked throughout the program. Initially the
@@ -183,8 +186,8 @@ SET-SCALE 0 "xy" 0.75
 **Capture**
 
 ```
-Capture :: CAPTURE Qubit Frame Waveform MemoryReference
-RawCapture :: RAW-CAPTURE Qubit Frame Expression MemoryReference
+Capture :: CAPTURE Qubit FrameName Waveform MemoryReference
+RawCapture :: RAW-CAPTURE Qubit FrameName Expression MemoryReference
 ```
 
 The capture instruction opens up the readout on a qubit and measures its state.
