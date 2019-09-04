@@ -186,16 +186,16 @@ SET-SCALE 0 "xy" 0.75
 **Capture**
 
 ```
-Capture :: CAPTURE Qubit FrameName Waveform MemoryReference
-RawCapture :: RAW-CAPTURE Qubit FrameName Expression MemoryReference
+Capture :: CAPTURE Frame Waveform MemoryReference
+RawCapture :: RAW-CAPTURE Frame Expression MemoryReference
 ```
 
-The capture instruction opens up the readout on a qubit and measures its state.
+The capture instruction opens up the readout on a frame and measures its state.
 An integration waveform will be applied to the raw IQ points and the result is
 placed in classical memory.
 
-The waveform will define the length of the capture. The memory reference must be
-able to store a complex number.
+The waveform will define the duration of the capture. The memory reference must
+be able to store a complex number for each qubit in the frame.
 
 In the case of a raw capture the waveform is replaced with a rational number
 representing the duration of the capture.
