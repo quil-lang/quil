@@ -78,22 +78,28 @@ The built-in waveform generators are:
 **Defining new waveforms**
 
 ```
-WaveformDefinition :: DEFWAVEFORM Name ( Parameter+ ) : MatrixRow
+SampleRate :: Float
+WaveformDefinition :: DEFWAVEFORM Name ( Parameter+ ) SampleRate : MatrixRow
 MatrixRow :: Indent (Expression ,)+
 ```
 
-New waveforms may be defined by listing out all the IQ values as complex
-numbers, separated by commas. Waveform definitions may also be parameterized,
-although note that Quil has no support for vector level operations.
+New waveforms may be defined by specifying the sample rate (in Hertz) and listing out all
+the IQ values as complex numbers, separated by commas. Waveform definitions may
+also be parameterized, although note that Quil has no support for vector level
+operations. 
 
 Example:
 ```
-DEFWAVEFORM my_custom_waveform:
+DEFWAVEFORM my_custom_waveform 6.0:
     1+2i, 3+4i, 5+6i
 
-DEFWAVEFORM my_custom_paramterized_waveform(%a)
+DEFWAVEFORM my_custom_parameterized_waveform(%a) 6.0:
     (1+2i)*%a, (3+4i)*%a, (5+6i)*%a
 ```
+
+The duration (in seconds) of a custom waveform may be computed by dividing the
+number of samples by the sample rate. In the above example, both waveforms have
+a duration of 0.5 seconds.
 
 **Pulses**
 
@@ -118,6 +124,10 @@ PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)
 # Pulse on a flux line
 PULSE 0 1 "cz" flat(duration: 1e-6, iq: 2+3i)
 ```
+
+Each frame has a fixed, hardware-specific sample rate. The behavior of a `PULSE`
+instruction with a custom waveform whose sample rate does not match the
+corresponding frame's sample rate is undefined.
 
 **Frequency**
 
@@ -207,6 +217,9 @@ CAPTURE 0 "out" flat(1e-6, 2+3i) iq
 DECLARE iqs REAL[400] # length needs to be determined based on the sample rate
 CAPTURE 0 "out" 200e-6 iqs
 ```
+
+The behavior of a `CAPTURE` instruction with a custom waveform whose sample rate
+does not match the corresponding frame's sample rate is undefined.
 
 **Defining Calibrations**
 
