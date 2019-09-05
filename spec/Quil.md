@@ -56,7 +56,7 @@ X 1
 is equivalent to
 ``` 
 X 0
-H 0
+H 1
 X 1
 ```
 
