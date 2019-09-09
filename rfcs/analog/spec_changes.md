@@ -211,8 +211,9 @@ CAPTURE 0 "out" 200e-6 iqs
 **Defining Calibrations**
 
 ```
-CalibrationDefinition :: DEFCAL Name ( Parameter+ ) Qubit+ : Instruction+
-MeasureCalibrationDefinition :: DEFCAL Name Qubit Parameter : Instruction+
+GateModifier :: CONTROLLED | DAGGER | FORKED
+CalibrationDefinition :: DEFCAL OpModifier* Name ( Parameter+ ) Qubit+ : Instruction+
+MeasureCalibrationDefinition :: DEFCAL Name Qubit? Parameter : Instruction+
 ```
 
 Calibrations for high-level gates can be defined by mapping a combination of
@@ -233,9 +234,9 @@ For example, given the following list of calibration definitions in this order:
 The instruction `RX(pi/2) 0` would match (3), the instruction `RX(pi) 0` would
 match (2), and the instruction `RX(pi/2) 1` would match (1).
 
-The same system applies for `MEASURE` although `MEASURE` cannot be
+The same system applies for `MEASURE`. Although `MEASURE` cannot be
 parameterized, it takes only a single qubit as input, and it has an additional
-parameter for the memory reference in which to read out the result.
+(optional) parameter for the memory reference into which to store the result.
 
 Examples:
 ```
@@ -257,6 +258,23 @@ DEFCAL MEASURE 0 %dest:
     CAPTURE 0 "out" flat(1e-6, 2+3i) iq
     LT %dest iq[0] 0.5 # thresholding
 ```
+
+Quil supports arbitrarily chained gate modifiers. As such, calibration
+definitions may also incorporate gate modifiers, with the convention that a
+calibration definition matches a gate application only if the modifiers match
+exactly. Thus in
+
+```
+DEFCAL T 0:
+    ... 
+    
+DEFCAL DAGGER T 0:
+    ...
+```
+
+the first calibration definition matches `T 0`, the second matches `DAGGER T 0`,
+and neither match `DAGGER DAGGER T 0`.
+
 
 **Timing Control**
 
