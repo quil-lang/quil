@@ -616,8 +616,8 @@ the effect of resetting qubit 0 is to put the system into either state `|00⟩` 
 ```
 RESET
 ```
-is semantically equivalent to sequentially resetting all qubits `RESET 0 ; RESET 1 ; ...`
-and brings the full quantum state to the zero state.
+brings the full quantum state to the zero state. This is semantically equivalent to 
+sequentially resetting all qubits (e.g. `RESET 0 ; RESET 1 ; ...`).
 
 ## 6. Classical Operations and Control Flow
 
