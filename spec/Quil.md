@@ -562,41 +562,6 @@ DEFGATE PSWAP(%theta):
     0, 0,           0,           1
 ```
 
-### Qubit and State Reset
-
-The following operations allow for some or all of the quantum state to be
-brought to a known reference value.
-
-Qubit reset
-```
-RESET q
-```
-is semantically equivalent to
-```
-DECLARE ro BIT
-MEASURE q ro
-JUMP-WHEN @end-reset ro
-X q
-LABEL @end-reset
-```
-which brings qubit q to the zero state. 
-
-Note: The resulting quantum system is generally described by a mixed state. For
-example, supposing that we have prepared the Bell state `(|00⟩ + |11⟩)/sqrt(2)`,
-the effect of resetting qubit 0 is to put the system into either state `|00⟩` or
-`|10⟩`, each with probability 1/2.
-
-
-State reset
-```
-RESET
-```
-is semantically equivalent to sequentially resetting all qubits
-```
-RESET 0 ; RESET 1 ; ...
-```
-which brings the full quantum state to the zero state.
-
 ## 4. Measurement and Classical Memory
 
 ### Classical Memory Declarations
@@ -621,7 +586,40 @@ MEASURE 0 ro[0]
 MEASURE 1 ro[1]
 ```
 
-## 5. Classical Operations and Control Flow
+## 5. Other Quantum Operations
+
+The following operations allow for some or all of the quantum state to be
+brought to a known reference value.
+
+### Qubit reset
+
+```
+RESET q
+```
+is semantically equivalent to
+```
+DECLARE ro BIT
+MEASURE q ro
+JUMP-WHEN @end-reset ro
+X q
+LABEL @end-reset
+```
+which brings qubit q to the zero state. 
+
+Note: The resulting quantum system is generally described by a mixed state. For
+example, supposing that we have prepared the Bell state `(|00⟩ + |11⟩)/sqrt(2)`,
+the effect of resetting qubit 0 is to put the system into either state `|00⟩` or
+`|10⟩`, each with probability 1/2.
+
+### State reset
+
+```
+RESET
+```
+is semantically equivalent to sequentially resetting all qubits `RESET 0 ; RESET 1 ; ...`
+and brings the full quantum state to the zero state.
+
+## 6. Classical Operations and Control Flow
 
 TODO
 
@@ -653,7 +651,7 @@ LABEL @start
 LABEL @MY-LABEL
 ```
 
-## 6. Language Features
+## 7. Language Features
 
 ### File Inclusion
 
@@ -671,7 +669,7 @@ TODO
 PRAGMA <word> <word>* "string"?
 ```
 
-## 7. Circuits
+## 8. Circuits
 
 ### Circuit Definitions
 
