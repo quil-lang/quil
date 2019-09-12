@@ -42,6 +42,47 @@ Line 1
 The remainder of this document serves as a reference for all Quil language
 constructs and their associated semantics.
 
+### Semantic Conventions
+
+In describing the meaning or interpretation of certain instructions, we will
+have occasion to speak of notions such as "quantum state", "collapse of the
+wavefunction", and so forth. Here we briefly collect some relevant remarks.
+
+A Quil program manipulates a collection of classical and quantum resources. The
+quantum resources consist of a set of _qubits_, which are usually referred to by
+numerical indices. There is no bound on the number of qubits in a Quil program,
+and in general any finite collection of qubits may interact. Physical devices,
+however, may impose constraints on the number of qubits and their allowed
+interactions.
+
+**For the purposes of this document**, a full description of the state of a set
+of n qubits will usually be expressed via an associated 2ⁿ-dimensional
+_wavefunction_. Quil expresses quantum computations with respect to a fixed
+computational basis. Thus a wavefunction may be expressed as a linear
+combination of _basis elements_, which are written as `|b⟩` for a bitstring b of
+length n. For example, the _Bell state_, which we write as `(1/sqrt(2))(|00⟩ + |11⟩)`, 
+is a combination of two basis elements. Given some collection of qubits, the 
+_zero state_ is that state in which each qubit is deterministically zero. The
+corresponding wavefunction is `|00...0⟩`.
+
+**Note:** we also adopt the convention that the "i-th" entry of a bitstring is
+to be considered from right-to-left, starting from zero. Thus in `|001⟩`, the
+zeroth bit is 1, while bits one and two are 0.
+
+TODO: Include whatever discussion is needed about gates and measurement.
+
+It will sometimes be convenient to speak of _mixed states_. Here we
+intentionally keep the discussion light: for the most part, it will suffice to
+consider simple probabilistic statements (e.g. "the system is in state A or B,
+each with probability 1/2"). This is particularly relevant when considering the
+meaning of Quil programs involving measurement or classical control flow.
+
+A fuller discussion of the semantics of Quil may be found in the original Quil whitepaper
+```
+R. Smith, M. J. Curtis and W. J. Zeng, "A Practical Quantum Instruction Set Architecture," (2016), 
+  arXiv:1608.03355 [quant-ph], https://arxiv.org/abs/1608.03355
+```
+
 ## 2. Language
 
 ### Whitespace and Instructions
@@ -523,17 +564,38 @@ DEFGATE PSWAP(%theta):
 
 ### Qubit and State Reset
 
-TODO
-
-State reset
-```
-RESET
-```
+The following operations allow for some or all of the quantum state to be
+brought to a known reference value.
 
 Qubit reset
 ```
 RESET q
 ```
+is semantically equivalent to
+```
+DECLARE ro BIT
+MEASURE q ro
+JUMP-WHEN @end-reset ro
+X q
+LABEL @end-reset
+```
+which brings qubit q to the zero state. 
+
+Note: The resulting quantum system is generally described by a mixed state. For
+example, supposing that we have prepared the Bell state `(|00⟩ + |11⟩)/sqrt(2)`,
+the effect of resetting qubit 0 is to put the system into either state `|00⟩` or
+`|10⟩`, each with probability 1/2.
+
+
+State reset
+```
+RESET
+```
+is semantically equivalent to sequentially resetting all qubits
+```
+RESET 0 ; RESET 1 ; ...
+```
+which brings the full quantum state to the zero state.
 
 ## 4. Measurement and Classical Memory
 
