@@ -60,7 +60,7 @@ of n qubits will usually be expressed via an associated 2ⁿ-dimensional
 _wavefunction_. Quil expresses quantum computations with respect to a fixed
 computational basis. Thus a wavefunction may be expressed as a linear
 combination of _basis elements_, which are written as `|b⟩` for a bitstring b of
-length n. For example, the _Bell state_, which we write as `(1/sqrt(2))(|00⟩ + |11⟩)`, 
+length n. For example, the _Bell state_, which we write as `(|00⟩ + |11⟩)/sqrt(2)`, 
 is a combination of two basis elements. Given some collection of qubits, the 
 _zero state_ is that state in which each qubit is deterministically zero. The
 corresponding wavefunction is `|00...0⟩`.
