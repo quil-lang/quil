@@ -69,8 +69,6 @@ corresponding wavefunction is `|00...0⟩`.
 to be considered from right-to-left, starting from zero. Thus in `|001⟩`, the
 zeroth bit is 1, while bits one and two are 0.
 
-TODO: Include whatever discussion is needed about gates and measurement.
-
 It will sometimes be convenient to speak of _mixed states_. Here we
 intentionally keep the discussion light: for the most part, it will suffice to
 consider simple probabilistic statements (e.g. "the system is in state A or B,
@@ -616,7 +614,7 @@ the effect of resetting qubit 0 is to put the system into either state `|00⟩` 
 ```
 RESET
 ```
-brings the full quantum state to the zero state. This is semantically equivalent to 
+brings the full quantum system to the zero state. This is semantically equivalent to 
 sequentially resetting all qubits (e.g. `RESET 0 ; RESET 1 ; ...`).
 
 ## 6. Classical Operations and Control Flow
