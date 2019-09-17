@@ -2,7 +2,7 @@
 
 *Quil 2.0 released in September, 2018*
 
-**Introduction**
+### Introduction
 
 This is the specification for Quil, a practical quantum instruction set
 architecture released by Rigetti Computing.
@@ -12,7 +12,7 @@ with classical feedback and control. It can be written directly for the purpose
 of quantum programming, used as an intermediate format within classical
 programs, or used as a compilation target for quantum programming languages.
 
-**Copyright notice**
+### Copyright notice
 
 Copyright © 2016‐present, Rigetti & Co, Inc.
 
@@ -44,7 +44,7 @@ constructs and their associated semantics.
 
 ## 2. Language
 
-**Whitespace and Instructions**
+### Whitespace and Instructions
 
 A single line of Quil source may contain several Quil instructions, delimited by semicolons.
 
@@ -76,7 +76,7 @@ DEFCIRCUIT FOO:
     H 1
 ```
 
-**Names**
+### Names
 
 ```
 Name :: /[A-Za-z_]|[A-Za-z_][A-Za-z0-9\-_]*[A-Za-z0-9_]/
@@ -93,7 +93,7 @@ Valid examples: `CNOT`, `X_half`, `CPHASE-0`
 
 Invalid examples: `C*NOT`, `-GATE-`, `_GATE`, `01rotation`, `MEASURE`
 
-**Comments**
+### Comments
 
 ```
 Comment :: # /[^\n]*/
@@ -104,7 +104,7 @@ also be placed after an instruction and will similarly be ignored.
 
 ## 3. Quantum Gates
 
-**Qubits**
+### Qubits
 
 ```
 Qubit :: /0|[1-9][0-9]*/
@@ -115,7 +115,7 @@ integer is at the discretion of the interpreter of the Quil input. Some
 interpreters may require qubits be contiguous, others (such as quantum
 processors) may use a numbering scheme based on particular physical qubits.
 
-**Simple Gates**
+### Simple Gates
 
 ```
 SimpleGate :: Name Qubit+
@@ -130,7 +130,7 @@ H 0
 CNOT 0 1
 ```
 
-**Parametric Gates**
+### Parametric Gates
 
 ```
 ParametricGate :: Name ( Expression+ ) Qubit+
@@ -146,7 +146,7 @@ RX(pi/2) 0
 CPHASE(pi) 0 1
 ```
 
-**Gate Modifiers**
+### Gate Modifiers
 
 ```
 <modified gate> ::= <simple gate>
@@ -174,7 +174,7 @@ DAGGER FORKED CONTROLLED RZ(0, pi) 0 1 2
 
 The meaning of the modifiers is as follows:
 
-**`CONTROLLED`**
+#### `CONTROLLED`
 
 The `CONTROLLED` modifier takes some gate G acting on some number of qubits
 q1...qn and makes it conditioned on the state of some new qubit c1: if c1 is
@@ -213,7 +213,7 @@ Then C(U) is
 [ 0 0 c d ]
 ```
 
-**`DAGGER`**
+#### `DAGGER`
 
 The `DAGGER` modifier represents the adjoint operation or complex-conjugate
 transpose. Since every gate is a unitary operator, this is just the inverse. For
@@ -252,7 +252,7 @@ DEFGATE PHASE(%alpha):
 where `cis(x) = cos(x) + i sin(x) = e^{ix}`. Therefore, `PHASE(theta) q` ==
 `DAGGER PHASE(-theta) q` for all `theta`.
 
-**`FORKED`**
+#### `FORKED`
 
 Let G be a parametric gate of k parameters p1 ... pk and n qubits
 q1 ... qn. This is written:
@@ -321,7 +321,7 @@ Therefore, `FORKED RZ(x1, x2) 1 0`, for real numbers x1 and x2, results in a
 [ 0,          0,         0,          cis(x2/2) ]
 ```
 
-**Chaining gate modifiers**
+#### Chaining gate modifiers
 
 When gate modifiers are chained, they consume qubits left-to-right, so that in
 the following example, the `CONTROLLED` modifier is conditioned on qubit 0,
@@ -358,7 +358,7 @@ RX(pi) 0              RX(pi/2) 0        RX(pi/4) 0              RX(pi/8) 0
 ```
 
 
-**Gate Definitions**
+### Gate Definitions
 
 ```
 GateDefinition :: DEFGATE Name ( Parameter+ )? : MatrixRow+
@@ -380,7 +380,7 @@ DEFGATE RX(%theta):
     -i*sin(%theta/2), cos(%theta/2)
 ```
 
-**Standard Gates**
+### Standard Gates
 
 The following gates are very commonly used and are therefore understood by Quil
 without requiring associated DEFGATE definitions.
@@ -521,7 +521,7 @@ DEFGATE PSWAP(%theta):
     0, 0,           0,           1
 ```
 
-**Qubit and State Reset**
+### Qubit and State Reset
 
 TODO
 
@@ -537,13 +537,13 @@ RESET q
 
 ## 4. Measurement and Classical Memory
 
-**Classical Memory Declarations**
+### Classical Memory Declarations
 
 TODO
 
 _See [`typed-memory.md`](typed-memory.md)._
 
-**Measurement**
+### Measurement
 
 ```
 Measurement :: MEASURE Qubit ClassicalMem
@@ -574,7 +574,7 @@ HALT
 WAIT
 ```
 
-**Labels**
+### Labels
 
 ```
 Label :: @Name
@@ -593,7 +593,7 @@ LABEL @MY-LABEL
 
 ## 6. Language Features
 
-**File Inclusion**
+### File Inclusion
 
 TODO
 
@@ -601,7 +601,7 @@ TODO
 INCLUDE <filename>
 ```
 
-**Pragmas**
+### Pragmas
 
 TODO
 
@@ -611,7 +611,7 @@ PRAGMA <word> <word>* "string"?
 
 ## 7. Circuits
 
-**Circuit Definitions**
+### Circuit Definitions
 
 ```
 CircuitDefinition :: DEFCIRCUIT Name ( Parameter+ )? CircuitQubit+ : CircuitRow+
@@ -649,7 +649,7 @@ DEFCIRCUIT ROT(%theta) q:
     RX(%theta) q
 ```
 
-**Simple Circuits**
+### Simple Circuits
 
 ```
 SimpleCircuit :: Name Qubit*
@@ -672,7 +672,7 @@ MY-RESET
 BELL_STATE 0 1
 ```
 
-**Parametric Circuits**
+### Parametric Circuits
 
 ```
 ParametricCircuit :: Name ( Expression+ ) Qubit*
@@ -693,7 +693,7 @@ DEFCIRCUIT MY-PARAMETRIC-CIRCUIT(%theta, %phi) q1 q2:
 MY-PARAMETRIC-CIRCUIT(pi/2, pi/4) 1 0
 ```
 
-**Circuit Modifiers**
+### Circuit Modifiers
 
 ```
 <modified circuit> := <simple circuit>
