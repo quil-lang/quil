@@ -2,12 +2,13 @@
 
 # TODO: Determine how $qubit is set.
 DECLARE scale REAL
+DECLARE freq REAL
 DECLARE pulse_duration REAL
 DECLARE capture_duration REAL
-DECLARE sample_rate INTEGER # Determine how this is set
 DECLARE iqs REAL[65536]
 
 SET-SCALE $qubit "ro" scale
+SET-FREQUENCY $qubit "ro" freq
 PULSE $qubit "ro" flat(duration: pulse_duration, iq: ?)
 
 RAW-CAPTURE $qubit "out" capture_duration iqs

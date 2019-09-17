@@ -10,7 +10,7 @@ DECLARE freq_step REAL
 DECLARE scale REAL
 
 # Values set by program
-DECLARE buffer REAL[65536] # 16-bit memory
+DECLARE buffer REAL[65536]
 DECLARE iq REAL[2]
 DECLARE freq REAL
 DECLARE idx INTEGER
