@@ -10,16 +10,18 @@ Frame :: Qubit+ FrameName
 ```
 
 A frame encapsulates any rotating frame relative to which control/readout
-waveforms may be defined. Frames are referred to by specifying a list of qubits
-as well as the name of the frame. For example, `0 1 "cz"` is the "cz" frame on
-qubits 0 and 1. The order of the qubits matters. In particular, the above frame
-may differ from `1 0 "cz"`.
+waveforms may be defined. For the purposes of scheduling and execution on
+possibly heterogenous hardware, frames are specified with respect to a specific
+list of qubits. Thus, `0 1 "cz"` is the "cz" frame on qubits 0 and 1. The order
+of the qubits matters. In particular, the above frame may differ from `1 0
+"cz"`.
 
-There are no built-in frames, they are dependent on the architecture.
+There are no built-in frames. The specific set of available frames is
+hardware-dependent.
 
 Frames (and associated sample rates) need to be provided to the user prior to
-construction of a program. Rigetti has a set of canonical frames (some
-examples are below) but this is subject to change.
+construction of a program. Rigetti has a set of canonical frames (some examples
+are below) but this is subject to change.
 
 Examples (names only):
 ```
