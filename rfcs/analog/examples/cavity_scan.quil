@@ -1,7 +1,6 @@
 # cavity_scan.quil
 
 # Static constants that must be set before program execution
-# TODO: Define how $qubit is set. May be used in e.g. DEFCIRCUIT
 
 # Other values that will be set by user input
 DECLARE freq_min REAL
@@ -36,5 +35,3 @@ ADD idx 1
 ADD freq freq_step
 LE continue freq freq_max
 JUMP-WHEN @scan_step continue
-
-# TODO: Finalize

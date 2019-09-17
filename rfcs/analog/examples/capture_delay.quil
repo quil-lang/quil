@@ -1,6 +1,5 @@
 # capture_delay.quil
 
-# TODO: Determine how $qubit is set.
 DECLARE scale REAL
 DECLARE freq REAL
 DECLARE pulse_duration REAL
@@ -9,6 +8,6 @@ DECLARE iqs REAL[65536]
 
 SET-SCALE $qubit "ro" scale
 SET-FREQUENCY $qubit "ro" freq
-PULSE $qubit "ro" flat(duration: pulse_duration, iq: ?)
+PULSE $qubit "ro" flat(duration: pulse_duration, iq: [1 0])
 
 RAW-CAPTURE $qubit "out" capture_duration iqs
