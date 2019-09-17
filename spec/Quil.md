@@ -55,12 +55,14 @@ and in general any finite collection of qubits may interact. Physical devices,
 however, may impose constraints on the number of qubits and their allowed
 interactions.
 
+(Currently, Quil has no provisions for allocating an unbounded number of qubits at runtime. The number of qubits used by a program can be statically determined.)
+
 **For the purposes of this document**, a full description of the state of a set
 of n qubits will usually be expressed via an associated 2ⁿ-dimensional
 _wavefunction_. Quil expresses quantum computations with respect to a fixed
 computational basis. Thus a wavefunction may be expressed as a linear
 combination of _basis elements_, which are written as `|b⟩` for a bitstring b of
-length n. For example, the _Bell state_, which we write as `(|00⟩ + |11⟩)/sqrt(2)`, 
+length `n`. For example, the _Bell state_, which we write as `(|00⟩ + |11⟩)/sqrt(2)`, 
 is a combination of two basis elements. Given some collection of qubits, the 
 _zero state_ is that state in which each qubit is deterministically zero. The
 corresponding wavefunction is `|00...0⟩`.
@@ -75,7 +77,7 @@ consider simple probabilistic statements (e.g. "the system is in state A or B,
 each with probability 1/2"). This is particularly relevant when considering the
 meaning of Quil programs involving measurement or classical control flow.
 
-A fuller discussion of the semantics of Quil may be found in the original Quil whitepaper
+A fuller discussion of the semantics of this aspect of Quil may be found in the original Quil whitepaper
 ```
 R. Smith, M. J. Curtis and W. J. Zeng, "A Practical Quantum Instruction Set Architecture," (2016), 
   arXiv:1608.03355 [quant-ph], https://arxiv.org/abs/1608.03355
@@ -602,7 +604,7 @@ JUMP-WHEN @end-reset ro
 X q
 LABEL @end-reset
 ```
-which brings qubit q to the zero state. 
+which brings qubit `q` to the zero state.  This is sometimes called **active reset**.
 
 Note: The resulting quantum system is generally described by a mixed state. For
 example, supposing that we have prepared the Bell state `(|00⟩ + |11⟩)/sqrt(2)`,
