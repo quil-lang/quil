@@ -609,7 +609,7 @@ JUMP-WHEN @end-reset ro
 X q
 LABEL @end-reset
 ```
-which brings qubit `q` to the zero state.  This is sometimes called **active reset**.
+which brings qubit `q` to the zero state.  This is sometimes called _active reset_.
 
 Note: The resulting quantum system is generally described by a mixed state. For
 example, supposing that we have prepared the Bell state `(|00⟩ + |11⟩)/sqrt(2)`,
