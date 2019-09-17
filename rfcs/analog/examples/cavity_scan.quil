@@ -25,9 +25,7 @@ LABEL @scan_step
 SET-FREQUENCY $qubit "ro" freq
 SET-SCALE $qubit "ro" scale
 PULSE $qubit "ro" flat(duration: duration, iq: ?)
-# TODO: Determine if capture_delay is needed, and how it is set
-DELAY(capture_delay) $qubit # Round trip acquisition delay
-CAPTURE $qubit "out" flat(duration: duration, iq: ?) iq
+CAPTURE $qubit "out" flat(duration: duration, iq: ?) iq  # Capture delay is built-in
 
 # Store results in the buffer, increment
 STORE buffer idx iq[0]
