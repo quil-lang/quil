@@ -381,6 +381,18 @@ DEFGATE RX(%theta):
     -i*sin(%theta/2), cos(%theta/2)
 ```
 
+If the matrix can be represented as a permutation, then the gate can
+be defined with the compact notation
+
+```
+DEFGATE NAME AS PERMUTATION:
+    P_1, P_2, ..., P_N
+```
+
+with each `P_i` being a strictly positive integer, and `N×N` being the
+dimension of the intended matrix representation. See the `CCNOT` example
+below.
+
 ### Standard Gates
 
 The following gates are very commonly used and are therefore understood by Quil
