@@ -77,10 +77,15 @@ consider simple probabilistic statements (e.g. "the system is in state A or B,
 each with probability 1/2"). This is particularly relevant when considering the
 meaning of Quil programs involving measurement or classical control flow.
 
-A fuller discussion of the semantics of this aspect of Quil may be found in the original Quil whitepaper
+A fuller discussion of related aspects of Quil semantics may be found in the original whitepaper
 ```
 R. Smith, M. J. Curtis and W. J. Zeng, "A Practical Quantum Instruction Set Architecture," (2016), 
   arXiv:1608.03355 [quant-ph], https://arxiv.org/abs/1608.03355
+```
+For a detailed treatment of index notation and the interpretation of gate applications, see
+```
+R. Smith, "Someone Shouts ``|01000⟩!'' Who is excited?," (2017), 
+  arXiv:1711.02086 [quant-ph], https://arxiv.org/abs/1711.02086
 ```
 
 ## 2. Language
