@@ -1,4 +1,6 @@
-# Quil: A Practical Quantum Instruction Set Architecture
+# Quil: A Portable Quantum Instruction Language
+
+<img src="quil-rectangle.png" style="zoom:48%;" />
 
 This repository contains the reference specification for the Quil language in
 addition to some useful extras outlined below.
