@@ -680,20 +680,53 @@ LABEL @MY-LABEL
 
 ## 7. Language Features
 
+The Quil language provides for several additional directives which do not
+directly express classical or quantum operations.
+
 ### File Inclusion
 
-TODO
+```
+INCLUDE String
+```
 
-```
-INCLUDE <filename>
-```
+Quil programs may span several source files. A Quil program with an `INCLUDE
+"foo.quil"` directive has the same meaning as if the body of the file `foo.quil`
+was substituted in at the position of this line.
+
+Included files may themselves feature `INCLUDE` directives. The meaning then is
+as if these were themselves recursively included, assuming that this process
+terminates in a finite number of steps. If this recursive process would not
+terminate in a finite number of steps (for example, if `foo.quil` includes
+`bar.quil` and `bar.quil` includes `foo.quil`), the meaning of the program is
+undefined.
 
 ### Pragmas
 
+```
+PRAGMA Name (Name|Integer)* String?
+```
+
+Programs which process Quil may benefit from additional information or metadata
+provided by the programmer. The `PRAGMA` directive represents one mechanism for
+associating such information with a program.
+
+In common usage, the first `Name` token denotes the kind or type of the `PRAGMA`
+directive and the remaining tokens serve as a data payload. 
+
+For example, the `quilc` compiler allows programmers to signal that a sequence
+of instructions should not be modified during optimization passes by surrounding
+them with a pair of `PRESERVE_BLOCK` and `END_PRESERVE_BLOCK` pragmas:
 
 ```
-PRAGMA Name (Name|Integer)* String
+PRAGMA PRESERVE_BLOCK
+RX(-pi/2) 0
+CZ 1 0
+RX(pi) 3
+PRAGMA END_PRESERVE_BLOCK
 ```
+
+The set of valid `PRAGMA` directives, and their associated semantics, is
+application specific, and otherwise unspecified by the Quil language.
 
 ## 8. Circuits
 
