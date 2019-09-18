@@ -1,0 +1,4 @@
+v1 arxiv to v2
+- Fixed revbin impl
+- Fixed some typos
+- 
