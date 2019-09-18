@@ -142,7 +142,7 @@ Invalid examples: `C*NOT`, `-GATE-`, `_GATE`, `01rotation`, `MEASURE`
 ### Integers
 
 ```
-NatNum :: /\d+/
+Natural :: /\d+/
 ```
 
 A non-negative integer literal.
@@ -175,7 +175,7 @@ also be placed after an instruction and will similarly be ignored.
 ### Qubits
 
 ```
-Qubit :: NatNum
+Qubit :: Natural
 ```
 
 A qubit in Quil is referred to by a positive integer. Interpretation of this
