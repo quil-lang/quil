@@ -392,8 +392,8 @@ DEFGATE Name AS PERMUTATION:
 with each `P_i` being a non-negative integer, and `N×N` being the
 dimension of the intended matrix representation. See the `CCNOT` example
 below. The values P_0 to P_(N-1) indicate how the basis states are 
-permuted: The zeroth basis state goes to P_0, the first basis state
-goes to P_1, and so on.
+permuted: The zeroth basis state goes to `P_0`, the first basis state
+goes to `P_1`, and so on.
 
 ### Standard Gates
 
