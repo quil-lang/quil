@@ -139,6 +139,28 @@ Valid examples: `CNOT`, `X_half`, `CPHASE-0`
 
 Invalid examples: `C*NOT`, `-GATE-`, `_GATE`, `01rotation`, `MEASURE`
 
+### Integers
+
+```
+Natural :: /\d+/
+```
+
+A non-negative integer literal.
+
+### Strings
+
+```
+String :: /\"([^\"]|\\\")*\"/
+```
+
+Some instructions (`PRAGMA` and `INCLUDE`) take string literals as arguments.
+These are bounded by quotation marks, with support for backslash-escaped
+quotation marks within the string literal.
+
+Valid examples: `"foo bar"`, `"baz.quil"`, `"valid \"quote\""`
+
+Invalid examples: `foo`, `"invalid "quote""`
+
 ### Comments
 
 ```
@@ -153,7 +175,7 @@ also be placed after an instruction and will similarly be ignored.
 ### Qubits
 
 ```
-Qubit :: /0|[1-9][0-9]*/
+Qubit :: Natural
 ```
 
 A qubit in Quil is referred to by a positive integer. Interpretation of this
@@ -658,21 +680,55 @@ LABEL @MY-LABEL
 
 ## 7. Language Features
 
+The Quil language provides for several additional directives which do not
+directly express classical or quantum operations.
+
 ### File Inclusion
 
-TODO
+```
+INCLUDE String
+```
 
-```
-INCLUDE <filename>
-```
+Include a Quil file, whose filename is written as a string literal. 
+
+Quil programs may span several source files. A Quil program with an `INCLUDE
+"foo.quil"` directive has the same meaning as if the body of the file `foo.quil`
+was substituted in at the position of this line.
+
+Included files may themselves feature `INCLUDE` directives. The meaning then is
+as if these were themselves recursively included, assuming that this process
+terminates in a finite number of steps. If this recursive process would not
+terminate in a finite number of steps (for example, if `foo.quil` includes
+`bar.quil` and `bar.quil` includes `foo.quil`), the meaning of the program is
+undefined.
 
 ### Pragmas
 
-TODO
+```
+PRAGMA Name (Name|Natural)* String?
+```
+
+Programs which process Quil may benefit from additional information or metadata
+provided by the programmer. The `PRAGMA` directive represents one mechanism for
+associating such information with a program.
+
+In common usage, the first `Name` token denotes the kind or type of the `PRAGMA`
+directive and the remaining tokens serve as a data payload. 
+
+For example, the `quilc` compiler allows programmers to signal that a sequence
+of instructions should not be modified during optimization passes by surrounding
+them with a pair of `PRESERVE_BLOCK` and `END_PRESERVE_BLOCK` pragmas:
 
 ```
-PRAGMA <word> <word>* "string"?
+PRAGMA PRESERVE_BLOCK
+RX(-pi/2) 0
+CZ 1 0
+RX(pi) 3
+PRAGMA END_PRESERVE_BLOCK
 ```
+
+The set of valid `PRAGMA` directives, and their associated semantics, is
+application specific, and otherwise unspecified by the Quil language.
 
 ## 8. Circuits
 
