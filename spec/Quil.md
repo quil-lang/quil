@@ -382,7 +382,7 @@ DEFGATE RX(%theta):
 ```
 
 If the matrix can be represented as a permutation, then the gate can
-be defined with the compact notation
+be defined with the compact notation:
 
 ```
 DEFGATE NAME AS PERMUTATION:
