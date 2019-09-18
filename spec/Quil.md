@@ -391,7 +391,9 @@ DEFGATE Name AS PERMUTATION:
 
 with each `P_i` being a non-negative integer, and `N×N` being the
 dimension of the intended matrix representation. See the `CCNOT` example
-below.
+below. The values of `P_0` to `P_(N-1)` indicate how the bits of the 
+bitstring are permuted: The zeroth column goes to `P_0`, the first column
+goes to `P_1`, and so on.
 
 ### Standard Gates
 
