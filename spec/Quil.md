@@ -389,7 +389,7 @@ DEFGATE Name AS PERMUTATION:
     P_0, P_1, ..., P_(N-1)
 ```
 
-with each `P_i` being a strictly positive integer, and `N×N` being the
+with each `P_i` being a non-negative integer, and `N×N` being the
 dimension of the intended matrix representation. See the `CCNOT` example
 below.
 
