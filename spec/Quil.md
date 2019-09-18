@@ -154,7 +154,7 @@ String :: /\"([^\"]|\\\")*\"/
 ```
 
 Some instructions (`PRAGMA` and `INCLUDE`) take string literals as arguments.
-These are bounded by quotation marks, with support for backlash-escaped
+These are bounded by quotation marks, with support for backslash-escaped
 quotation marks within the string literal.
 
 Valid examples: `"foo bar"`, `"baz.quil"`, `"valid \"quote\""`
