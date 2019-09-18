@@ -139,6 +139,28 @@ Valid examples: `CNOT`, `X_half`, `CPHASE-0`
 
 Invalid examples: `C*NOT`, `-GATE-`, `_GATE`, `01rotation`, `MEASURE`
 
+### Integers
+
+```
+NatNum :: /\d+/
+```
+
+Non-negative integer literal.
+
+### Strings
+
+```
+String :: /\"([^\"]|\\\")*\"/
+```
+
+Some instructions (`PRAGMA` and `INCLUDE`) take string literals as arguments.
+These are bounded by quotation marks, with support for backlash-escaped
+quotation marks within the string literal.
+
+Valid examples: `"foo bar"`, `"baz.quil"`, `"valid \"quote\""`
+
+Invalid examples: `foo`, `"invalid "quote""`
+
 ### Comments
 
 ```
@@ -153,7 +175,7 @@ also be placed after an instruction and will similarly be ignored.
 ### Qubits
 
 ```
-Qubit :: /0|[1-9][0-9]*/
+Qubit :: NatNum
 ```
 
 A qubit in Quil is referred to by a positive integer. Interpretation of this
@@ -668,10 +690,9 @@ INCLUDE <filename>
 
 ### Pragmas
 
-TODO
 
 ```
-PRAGMA <word> <word>* "string"?
+PRAGMA Name (Name|Integer)* String
 ```
 
 ## 8. Circuits
