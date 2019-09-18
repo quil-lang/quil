@@ -705,7 +705,7 @@ undefined.
 ### Pragmas
 
 ```
-PRAGMA Name (Name|Integer)* String?
+PRAGMA Name (Name|Natural)* String?
 ```
 
 Programs which process Quil may benefit from additional information or metadata
