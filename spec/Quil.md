@@ -145,7 +145,7 @@ Invalid examples: `C*NOT`, `-GATE-`, `_GATE`, `01rotation`, `MEASURE`
 NatNum :: /\d+/
 ```
 
-Non-negative integer literal.
+A non-negative integer literal.
 
 ### Strings
 
