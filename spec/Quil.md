@@ -689,6 +689,8 @@ directly express classical or quantum operations.
 INCLUDE String
 ```
 
+Include a Quil file, whose filename is written as a string literal. 
+
 Quil programs may span several source files. A Quil program with an `INCLUDE
 "foo.quil"` directive has the same meaning as if the body of the file `foo.quil`
 was substituted in at the position of this line.
