@@ -429,7 +429,8 @@ RX(pi) 0              RX(pi/2) 0        RX(pi/4) 0              RX(pi/8) 0
 ### Gate Definitions
 
 ```
-GateDefinition :: DEFGATE Name ( Parameter+ )? : MatrixRow+
+GateDefinition :: DEFGATE Name ( Parameter+ | ( AS GateType ) )? : MatrixRow+
+GateType :: 'MATRIX' | 'PERMUTATION'
 MatrixRow :: Indent (Expression ,)+
 ```
 
@@ -447,6 +448,20 @@ DEFGATE RX(%theta):
     cos(%theta/2), -i*sin(%theta/2)
     -i*sin(%theta/2), cos(%theta/2)
 ```
+
+If the matrix can be represented as a permutation, then the gate can
+be defined with the compact notation:
+
+```
+DEFGATE Name AS PERMUTATION:
+    P_0, P_1, ..., P_(N-1)
+```
+
+with each `P_i` being a non-negative integer, and `N×N` being the
+dimension of the intended matrix representation. See the `CCNOT` example
+below. The values P_0 to P_(N-1) indicate how the basis states are 
+permuted: The zeroth basis state goes to `P_0`, the first basis state
+goes to `P_1`, and so on.
 
 ### Standard Gates
 
@@ -513,6 +528,9 @@ DEFGATE CCNOT:  # Also known as the Toffoli gate.
     0, 0, 0, 0, 0, 0, 0, 1
     0, 0, 0, 0, 0, 0, 1, 0
 
+# CCNOT equivalent using permutation notation
+DEFGATE CCNOT AS PERMUTATION:
+    0, 1, 2, 3, 4, 5, 7, 6
 
 # Phase Gates
 
