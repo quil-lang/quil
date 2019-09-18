@@ -386,7 +386,7 @@ be defined with the compact notation:
 
 ```
 DEFGATE Name AS PERMUTATION:
-    P_1, P_2, ..., P_N
+    P_0, P_1, ..., P_(N-1)
 ```
 
 with each `P_i` being a strictly positive integer, and `N×N` being the
