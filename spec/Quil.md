@@ -615,7 +615,7 @@ Quil doesn't have a notion of _allocating_ memory, but rather the notion of
 _declaring the existence_ of memory. In the following, we introduce the
 `DECLARE` directive, which describes available memory for a program to use. _For
 a discussion of various design considerations, as well as additional examples,
-see see [`typed-memory.md`](typed-memory.md)._
+see see [`typed-memory.md`](../rfcs/typed-memory.md)._
 
 The `DECLARE` directive is used to declare a fixed-length one dimensional array,
 henceforth known as a _vector_, of _typed memory_. The vector contains elements
@@ -841,7 +841,7 @@ sequentially resetting all qubits (e.g. `RESET 0 ; RESET 1 ; ...`).
 
 TODO
 
-_See [`typed-memory.md`](typed-memory.md) for classical operations._
+_See [`typed-memory.md`](../rfcs/typed-memory.md) for classical operations._
 
 ```
 LABEL <label>
