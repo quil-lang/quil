@@ -611,9 +611,182 @@ DEFGATE PSWAP(%theta):
 
 ### Classical Memory Declarations
 
-TODO
+Quil doesn't have a notion of _allocating_ memory, but rather the notion of
+_declaring the existence_ of memory. In the following, we introduce the
+`DECLARE` directive, which describes available memory for a program to use. _For
+a discussion of various design considerations, as well as additional examples,
+see see [`typed-memory.md`](typed-memory.md)._
 
-_See [`typed-memory.md`](typed-memory.md)._
+The `DECLARE` directive is used to declare a fixed-length one dimensional array,
+henceforth known as a _vector_, of _typed memory_. The vector contains elements
+of a fixed _scalar type_. Supported scalar types are: `BIT` which represents one
+bit, `OCTET ` which represents 8 bits, `INTEGER` which represents a
+machine-sized signed integer, and `REAL` which represents a machine-sized real
+number.
+
+```
+ScalarType :: BIT | OCTET | INTEGER | REAL
+```
+
+**NOTE**: The formats/layouts of these are specific to the machine being run on.
+The type `INTEGER` is guaranteed to be large enough to hold a valid length of
+octets, and is guaranteed to hold at least the values `-127` to `128`.
+
+A fixed-length vector type, relative to a scalar type, is denoted by the scalar
+type name followed by an integer in brackets. For instance, `REAL[5]` is a type
+that represents five real numbers in sequence.
+
+```
+VectorType :: ScalarType ( \[ Natural \])?
+```
+
+There are three variants of `DECLARE`: plain declaration, aliased declaration,
+and aliased declaration with offset.
+
+```
+MemoryDeclaration :: PlainDeclaration | AliasedDeclaration | AliasedDeclarationWithOffset
+```
+
+#### Plain Declaration
+
+```
+PlainDeclaration :: DECLARE Name VectorType
+```
+
+`DECLARE <name> <type>` declares that `<name>` designates memory of the
+associated type `<type>`. If this is a scalar type, then it is assumed to
+designate a vector of length 1. That is, the following two lines are equivalent:
+
+```
+DECLARE x INTEGER
+DECLARE x INTEGER[1]
+```
+
+In the program that follows, `x` or equivalently `x[0]` would refer to an
+integer quantity.
+
+#### Aliased Declaration
+
+```
+AlisedDeclaration :: DECLARE Name VectorType SHARING Name
+```
+
+Aliased declarations allow for the designation of memory regions which
+correspond to initial segments of other memory regions.
+
+For example, in
+
+```
+DECLARE bar OCTET
+DECLARE foo BIT[2] SHARING bar
+```
+
+`bar` designates a memory region of a single octet, and `foo` designates the
+first two bits of `bar`.
+
+In general, the total memory size designated by the first region shall not
+exceed the total memory size designated by the second region.
+
+An implementation is free to reject programs where particular instances of
+sharing is invalid (e.g., alignment is violated; disparate memories are
+unshareable; etc.).
+
+#### Aliased Declaration with Offset
+
+```
+AliasedDeclarationWithOffset :: DECLARE Name VectorType SHARING Name OFFSET ( Integer VectorType )+
+```
+
+With offsets, an aliased declaration may declare a memory region that coincides
+with an intermediate segment of some other memory region.
+
+
+In the declaration
+
+```
+DECLARE <name> <type> SHARING <other-name> OFFSET <integer_1> <offset-type_1> <integer_2> <offset-type_2>
+```
+
+`<name>` will point to memory a total of `SUM_i <integer_i> *
+sizeof(<offset-type_i>)` octets after the start of `<other-name>`. As with an
+aliased declaration, the memory at `<name>` must not overflow the end of
+`<other-name>`.
+
+##### Extended Example: Memory Aliasing
+
+A system with a fixed and known memory layout optimized for running QAOA-like
+circuits might include the following declarations:
+
+```
+DECLARE memory OCTET[131072]                              # 128k global memory
+DECLARE qaoa-params REAL[32] SHARING memory               # all QAOA params
+DECLARE beta REAL[16] SHARING qaoa-params                 # beta params
+DECLARE gamma REAL[16] SHARING qaoa-params OFFSET 16 REAL # gamma params
+DECLARE ro BIT[16]                                        # readout registers
+```
+
+Here, we have two disjoint memories: the global data memory `memory`, and the
+readout memory `ro`. We see that the global data memory `memory` is partitioned
+into a section `qaoa-params`, which is further partitioned into regions `beta`
+and `gamma`. This allows for convenient memory usage. For example, one may wish
+to peform a bulk update of `qaoa-params`, while still allowing subsequent Quil
+code to reference `beta` and `gamma` individually.
+
+#### Portability of Aliased Declarations
+
+Aliased declarations with mixed types require an intimate view of the target
+architecture. The widths of each data type, which are hitherto unspecified, must
+be known. For example, the following declarations may not be valid if the size
+of `REAL` exceeds the size of `INTEGER`.
+
+```
+DECLARE x INTEGER
+DECLARE y REAL SHARING x
+```
+
+Even if such a declaration is valid, operations on `y` are not portably
+specified. For example, continuing the above,
+
+```
+DECLARE b BIT
+MOVE x 0
+EQ b y 0.0
+```
+
+could result in any value for `b`, depending on the implementation.
+
+An implementation shall describe the bit-level description of the types, the
+available declarable memories, the limits on the declared memory, alignment
+requirements, and limits on sharing and offsets. Implementations may enforce
+alignment by way of erroring if the stated declaration is invalid.
+Implementations must _not_ round up or down to alignment boundaries.
+
+### Dereferencing Memory
+
+```
+ClassicalMem :: Name ( \[ Natural \])?
+```
+
+Memory is dereferenced in a Quil program using common array dereferencing
+syntax. In particular, given a name `x` pointing to memory of type `T`, and a
+non-negative integer offset `n`, the syntax `x[n]` refers to the `n`th element
+of type `T`, relative to `x[0]`.
+
+If and only if `x` was declared with just a single element, then `x` may be
+referred to simply by its name with no bracket. In this case, `x` and `x[0]`
+would be equivalent.
+
+Dereferencing with indirection, e.g., `x[y[3]]`, is supported through the `LOAD`
+and `STORE` instructions. For example,
+
+```
+DECLARE x INTEGER[16]
+DECLARE y INTEGER[16]
+DECLARE z INTEGER[16]
+DECLARE t INTEGER
+LOAD t y z[3]          # t := y[z[3]]
+LOAD t x t             # t := x[t]
+```
 
 ### Measurement
 
