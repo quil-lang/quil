@@ -2,7 +2,7 @@ Add section 6 to spec:
 
 ## 6. Pulse Level Control
 
-**Frames**
+### Frames
 
 ```
 FrameName :: String
@@ -33,7 +33,7 @@ Examples (names only):
 "out" # eg. for the capture line
 ```
 
-**Waveforms**
+### Waveforms
 
 ```
 Waveform :: Name
@@ -81,7 +81,7 @@ The built-in waveform generators are:
     - `padright` is a rational number representing the amount of zero-amplitude
       padding to add to the right of the pulse
 
-**Defining new waveforms**
+#### Defining new waveforms
 
 ```
 SampleRate :: Float
@@ -107,7 +107,7 @@ The duration (in seconds) of a custom waveform may be computed by dividing the
 number of samples by the sample rate. In the above example, both waveforms have
 a duration of 0.5 seconds.
 
-**Pulses**
+### Pulses
 
 ```
 Pulse :: PULSE Frame Waveform
@@ -134,7 +134,9 @@ Each frame has a fixed, hardware-specific sample rate. The behavior of a `PULSE`
 instruction with a custom waveform whose sample rate does not match the
 corresponding frame's sample rate is undefined.
 
-**Frequency**
+### Frame Mutations
+
+#### Frequency
 
 ```
 SetFrequency :: SET-FREQUENCY Frame Float
@@ -150,7 +152,7 @@ SET-FREQUENCY 0 "xy" 5.4e9
 SET-FREQUENCY 0 "ro" 6.1e9
 ```
 
-**Phase**
+#### Phase
 
 ```
 SetPhase :: SET-PHASE Frame Float
@@ -179,7 +181,7 @@ SHIFT-PHASE 0 "xy" %theta*2/pi
 SWAP-PHASE 0 "xy" 1 "xy"
 ```
 
-**Scale**
+#### Scale
 
 ```
 SetScale :: SET-SCALE Frame Float
@@ -195,7 +197,7 @@ Example:
 SET-SCALE 0 "xy" 0.75
 ```
 
-**Capture**
+### Capture
 
 ```
 Capture :: CAPTURE Frame Waveform MemoryReference
@@ -227,6 +229,8 @@ The behavior of a `CAPTURE` instruction with a custom waveform whose sample rate
 does not match the corresponding frame's sample rate is undefined.
 
 **Defining Calibrations**
+
+### Defining Calibrations
 
 ```
 GateModifier :: CONTROLLED | DAGGER | FORKED
@@ -294,7 +298,7 @@ the first calibration definition matches `T 0`, the second matches `DAGGER T 0`,
 and neither match `DAGGER DAGGER T 0`.
 
 
-**Timing Control**
+### Timing Control
 
 ```
 Delay :: DELAY Qubit Expression
