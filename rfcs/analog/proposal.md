@@ -28,23 +28,32 @@ Quil instruction types:
 - DELAY
 - FENCE
 - PULSE
+- CAPTURE
 - SET-FREQUENCY, SET-SCALE
 - SET-PHASE, SHIFT-PHASE, SWAP-PHASES
 
 ### Frames and Waveforms
 
-Each qubit can have multiple frames, defined by string names such as "xy", "cz",
+Each qubit can have multiple frames, denoted by string names such as "xy", "cz",
 or "ro". A frame is an abstraction that captures the instantaneous frequency and
 phase that will be mixed into the control signal. The frame frequencies are with
 respect to the absolute "lab frame".
 
-Waveforms are defined using DEFWAVEFORM as a list of complex numbers which
-represent the desired waveform envelope. Each complex number represents one
-sample of the waveform. The exact time to play a waveform can be determined by
-dividing by the sample rate for a qubit frame, which is in units of samples per
-second. There are also some built-in waveform shapes which take as a parameter
-the duration of the waveform in seconds, alleviating the need to know the sample
-rate to calculate duration.
+Quilt has two notions of _waveforms_. Custom waveforms are defined using
+DEFWAVEFORM as a list of complex numbers which represent the desired waveform
+envelope, along with a sample rate. Each complex number represents one sample of
+the waveform. The exact time to play a waveform can be determined by dividing by
+the _sample rate_, which is in units of samples per second.
+
+**NOTE**: Quilt frames also have an associated sample rate, which are determined
+at link time by the underlying control hardware which the frame is associated
+to. It is an error to apply a custom waveform (via `PULSE` or `CAPTURE`) to a
+frame for which it has an incompatible sample rate.
+
+There are also some built-in waveform generator which take as a parameter the
+duration of the waveform in seconds, alleviating the need to know the sample
+rate to calculate duration. These are valid for use regardless of the frame's
+underlying sample rate.
 
 In order to materialize the precise waveforms to be played the waveform
 envelopes must be modulated by the frame's frequency, in addition to applying
@@ -65,6 +74,7 @@ tracked through the program:
 | Frequency | (not set)     | Real numbers          | No                    |
 | Phase     | 0.0           | Real numbers          | Yes                   |
 | Scale     | 1.0           | Real numbers          | No                    |
+
 
 ### Pulses
 
