@@ -123,17 +123,19 @@ a qubit which happens at the same time as a readout pulse.
 
 The finest granularity of timing information considered here is at the frame
 level. One model of semantics, which we outline here, is to consider that each
-frame (on a particular set of qubits) has a "local clock", which may be
-represented as a single real number. This clock may be "advanced" by a
-non-negative value. Thus, the frame clock are monotonically increasing during
+frame (on a particular set of qubits) has a _local clock_, which may be
+represented as a single real number. This clock may be _advanced_ by a
+non-negative value. Thus, frame clocks are monotonically increasing during
 program execution.
 
 Under this model:
-- pulse operations and frame mutations have a well defined local time at which
-  they _occur_.
-- pulse operations on a given qubit do not overlap in time, unless the
+- Instructions have the additional effect of advancing frame clocks.
+- Pulse operations and frame mutations have a well defined local time at which
+  they _occur_. Instructions involving multiple frames promise a form of
+  consistency: the local clocks are advanced to a consistent state so that the
+  time of occurrence is common across frames.
+- Pulse operations on a given qubit do not overlap in time, unless the
   `NONBLOCKING` modifier is used.
-- instructions have the additional effect of advancing frame clocks.
 
 #### Pulse Operations
 
