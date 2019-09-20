@@ -115,17 +115,69 @@ CAPTURE 0 "ro" flat(duration: 1e-6, iq: 2+3i) iq
 
 Analog control instructions extend the definition of a quantum abstract machine
 to introduce the concept of time. In this new interpretation each instruction in
-Quil has an associated time to execute (which may be zero). It is up to the
-discretion of the interpreter to provide semantics for how pulses are scheduled,
-as long as these requirements are satisfied:
-1. All pulses on a qubit frame must happen in the order listed in the program
-2. Pulses on a qubit frame cannot overlap in time
-3. "Events" on a qubit frame happen at a well defined time since eg. updating a
-frame frequency means that it starts to accumulate phase at a new rate.
+Quil has an associated time to execute (which may be zero). 
 
 A good interpretation for Rigetti's hardware would be to assume that pulses will
 not happen on different frames at the same time, with the exception of measuring
 a qubit which happens at the same time as a readout pulse.
+
+The finest granularity of timing information considered here is at the frame
+level. One model of semantics, which we outline here, is to consider that each
+frame (on a particular set of qubits) has a "local clock", which may be
+represented as a single real number. This clock may be "advanced" by a
+non-negative value. Thus, the frame clock are monotonically increasing during
+program execution.
+
+Under this model:
+- pulse operations and frame mutations have a well defined local time at which
+  they _occur_.
+- pulse operations on a given qubit do not overlap in time, unless the
+  `NONBLOCKING` modifier is used.
+- instructions have the additional effect of advancing frame clocks.
+
+#### Pulse Operations
+
+The duration of a pulse operation, i.e. `PULSE`, `CAPTURE`, or `RAW-CAPTURE`, is
+the duration of the associated waveform.
+
+The pulse occurs at the pulse frame's local time. The pulse has the effect of
+advancing the pulse frame's local clock by the waveform duration.
+
+Each frame is defined relative to a set of qubits. Two frames with a common
+qubit are said to _intersect_. All intersecting frames shall have their local
+clocks advanced to the maximum of their current value and the updated clock
+value of the pulse frame.
+
+##### NONBLOCKING
+
+In certain instances it may be desirable to support multiple concurrent pulses
+on the same frame. Pulse operations (`PULSE`, `CAPTURE`, and `RAW-CAPTURE`)
+support the optional `NONBLOCKING` modifier. The resulting pulse still has the
+effect of advancing the clock of the pulse frame, _but does not otherwise modify
+the clocks of intersecting frames_.
+
+#### Delay
+
+A `DELAY` instruction advances the local clocks of all specified frames by the
+specified delay amount. If the `DELAY` instruction specifies a qubit but no
+frames, _all frames intersecting this qubit have their clocks advanced_.
+
+#### Fence
+
+The `FENCE` instruction guarantees that all frames intersecting the specified
+qubits have their clocks advanced to the same value. The specific value is
+unspecified; the only requirement is that it be not less than the local clock
+values for any involved frames.
+
+#### Frame Mutations
+
+Single frame mutations (`SET-FREQUENCY`, `SET-PHASE`, `SHIFT-PHASE`,
+`SET-SCALE`) occur at the time of the local frame clock. It is unspecified, and
+implementation dependent, as to whether they advance the frame clock.
+
+The `SWAP-PHASE` instruction introduces an implicit synchronization on the two
+involved frames. Thus: i) frame clocks are advanced to a common value, ii) this
+value is when the `SWAP-PHASE` operation "occurs".
 
 ### Calibrations
 
