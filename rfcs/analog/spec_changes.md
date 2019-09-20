@@ -301,12 +301,16 @@ and neither match `DAGGER DAGGER T 0`.
 ### Timing Control
 
 ```
-Delay :: DELAY Qubit Expression
+Delay :: DELAY Qubit Expression ( FrameName )*
 Fence :: FENCE Qubit+
 ```
 
 Delay allows for the insertion of a gap within a list of pulses or gates with
 a specified duration in seconds.
+
+If frame names are specified, then the delay instruction only affects frames
+with those names which intersect the qubit. If no frame names are specified, all
+frames which intersect the qubit are affected.
 
 Fence ensures that all operations on the specified qubits that proceed the
 fence statement happen after the end of the right-most operation of that set
