@@ -45,10 +45,11 @@ envelope, along with a sample rate. Each complex number represents one sample of
 the waveform. The exact time to play a waveform can be determined by dividing by
 the _sample rate_, which is in units of samples per second.
 
-**NOTE**: Quilt frames also have an associated sample rate, which are determined
-at link time by the underlying control hardware which the frame is associated
-to. It is an error to apply a custom waveform (via `PULSE` or `CAPTURE`) to a
-frame for which it has an incompatible sample rate.
+**NOTE**: Quilt frames also have an associated sample rate, which may be
+specified in the corresponding `DEFFRAME` block, and are ultimately
+determined/enforced at link time by the underlying control hardware which the
+frame is associated to. It is an error to apply a custom waveform (via `PULSE`
+or `CAPTURE`) to a frame for which it has an incompatible sample rate.
 
 There are also some built-in waveform generator which take as a parameter the
 duration of the waveform in seconds, alleviating the need to know the sample
@@ -162,15 +163,18 @@ the clocks of intersecting frames_.
 
 A `DELAY` instruction advances the local clocks of all specified frames by the
 specified delay amount. If the `DELAY` instruction specifies a list of qubits
-with no frame names, _all frames on these qubits have their clocks
+with no frame names, _all frames on exactly these qubits have their clocks
 advanced_.
+
+For example, `DELAY 0 1.0` delays all one qubit frames on qubit 0. It would not
+affect `0 1 "cz"`.
 
 #### Fence
 
 The `FENCE` instruction guarantees that all frames intersecting the specified
-qubits have their clocks advanced to the same value. The specific value is
-unspecified; the only requirement is that it be not less than the local clock
-values for any involved frames.
+qubits have their clocks advanced to the same value. This value is unspecified;
+the only requirement is that it be not less than the local clock values for any
+involved frames.
 
 #### Frame Mutations
 
