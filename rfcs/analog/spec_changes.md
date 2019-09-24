@@ -298,23 +298,26 @@ the first calibration definition matches `T 0`, the second matches `DAGGER T 0`,
 and neither match `DAGGER DAGGER T 0`.
 
 
-### Timing Control
+### Timing and Synchronization
 
 ```
-Delay :: DELAY Qubit Expression ( FrameName )*
+Delay :: DELAY Qubit+ FrameName* Expression
 Fence :: FENCE Qubit+
 ```
 
 Delay allows for the insertion of a gap within a list of pulses or gates with
 a specified duration in seconds.
 
-If frame names are specified, then the delay instruction only affects frames
-with those names which intersect the qubit. If no frame names are specified, all
-frames which intersect the qubit are affected.
+If frame names are specified, then the delay instruction affects those frames on
+those qubits. If no frame names are specified, all frames on precisely those
+qubits are affected. **Note:** this excludes frames which _intersect_ the
+specified qubits but involve others. For example, `DELAY 0 1.0` delays one qubit
+frames on `0`, such as `0 "xy"`, but leaves other frames, such as `0 1 "cz"`,
+unaffected.
 
-Fence ensures that all operations on the specified qubits that proceed the
-fence statement happen after the end of the right-most operation of that set
-of qubits.
+Fence ensures that all operations involving the specified qubits that follow the
+fence statement happen after all operations involving the specified qubits that
+preceed the fence statement.
 
 Examples:
 ```

@@ -161,8 +161,9 @@ the clocks of intersecting frames_.
 #### Delay
 
 A `DELAY` instruction advances the local clocks of all specified frames by the
-specified delay amount. If the `DELAY` instruction specifies a qubit but no
-frames, _all frames intersecting this qubit have their clocks advanced_.
+specified delay amount. If the `DELAY` instruction specifies a list of qubits
+with no frame names, _all frames on these qubits have their clocks
+advanced_.
 
 #### Fence
 
@@ -357,7 +358,7 @@ DEFCAL RESET %qubit:
     RX(pi) %qubit
     JUMP @end
     LABEL delay
-    DELAY(60e-9) %qubit
+    DELAY %qubit 60e-9
     LABEL end
 ```
 
