@@ -16,12 +16,24 @@ list of qubits. Thus, `0 1 "cz"` is the "cz" frame on qubits 0 and 1. The order
 of the qubits matters. In particular, the above frame may differ from `1 0
 "cz"`.
 
-There are no built-in frames. The specific set of available frames is
-hardware-dependent.
+#### DEFFRAME
 
-Frames (and associated sample rates) need to be provided to the user prior to
-construction of a program. Rigetti has a set of canonical frames (some examples
-are below) but this is subject to change.
+There are no built-in frames. Frames must be defined using the `DEFFRAME`
+directive.
+
+```
+DefFrame :: DEFFRAME Frame (: FrameSpec+ )?
+FrameSpec :: Indent FrameAttr : Expression
+FrameAttr :: SAMPLE-RATE | INITIAL-FREQUENCY
+```
+
+All frames used in a program must have a corresponding top-level definition.
+
+
+Before execution, a Quilt program is linked with a specific system of control
+hardware, and frames are mapped to suitable hardware objects. Native or
+canonical frame definitions may be provided by a hardware vendor. Some examples
+of Rigetti's canonical frames are listed below, but this is subject to change.
 
 Examples (names only):
 ```
