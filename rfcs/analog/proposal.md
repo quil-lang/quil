@@ -28,7 +28,7 @@ Quil instruction types:
 - DELAY
 - FENCE
 - PULSE
-- CAPTURE
+- CAPTURE, RAW-CAPTURE
 - SET-FREQUENCY, SET-SCALE
 - SET-PHASE, SHIFT-PHASE, SWAP-PHASES
 
@@ -48,10 +48,11 @@ the _sample rate_, which is in units of samples per second.
 **NOTE**: Quilt frames also have an associated sample rate, which may be
 specified in the corresponding `DEFFRAME` block, and are ultimately
 determined/enforced at link time by the underlying control hardware which the
-frame is associated to. It is an error to apply a custom waveform (via `PULSE`
-or `CAPTURE`) to a frame for which it has an incompatible sample rate.
+frame is associated to. If a custom waveform is applied (via `PULSE` or
+`CAPTURE`) to a frame for which it has an incompatible sample rate, the behavior
+is undefined.
 
-There are also some built-in waveform generator which take as a parameter the
+There are also some built-in waveform generators which take as a parameter the
 duration of the waveform in seconds, alleviating the need to know the sample
 rate to calculate duration. These are valid for use regardless of the frame's
 underlying sample rate.
@@ -134,7 +135,8 @@ Under this model:
 - Pulse operations and frame mutations have a well defined local time at which
   they _occur_. Instructions involving multiple frames promise a form of
   consistency: the local clocks are advanced to a consistent state so that the
-  time of occurrence is common across frames.
+  time of occurrence is common across frames. Note that this does not apply to
+  `DELAY` instructions.
 - Pulse operations on a given qubit do not overlap in time, unless the
   `NONBLOCKING` modifier is used.
 
@@ -147,9 +149,9 @@ The pulse occurs at the pulse frame's local time. The pulse has the effect of
 advancing the pulse frame's local clock by the waveform duration.
 
 Each frame is defined relative to a set of qubits. Two frames with a common
-qubit are said to _intersect_. All intersecting frames shall have their local
-clocks advanced to the maximum of their current value and the updated clock
-value of the pulse frame.
+qubit are said to _intersect_. All frames intersecting the pulse frame shall
+have their local clocks advanced to the maximum of their current value and the
+updated clock value of the pulse frame.
 
 ##### NONBLOCKING
 
