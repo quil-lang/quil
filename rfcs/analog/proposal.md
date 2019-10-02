@@ -65,7 +65,7 @@ manually, this is both tedious and doesn't take advantage of hardware which has
 specialized support for tracking these things.
 
 Therefore, each frame has associated with it a triple (frequency, phase, scale)
-that can be modified throughout the program using SET- instructions (and
+that can be modified throughout the program using SET-* instructions (and
 additional instructions for phase).
 
 Here's a table explaining the differences between these three values that are
@@ -117,76 +117,75 @@ CAPTURE 0 "ro" flat(duration: 1e-6, iq: 2+3i) iq
 
 Analog control instructions extend the definition of a quantum abstract machine
 to introduce the concept of time. In this new interpretation each instruction in
-Quil has an associated time to execute (which may be zero). 
-
-A good interpretation for Rigetti's hardware would be to assume that pulses will
-not happen on different frames at the same time, with the exception of measuring
-a qubit which happens at the same time as a readout pulse.
-
-The finest granularity of timing information considered here is at the frame
-level. One model of semantics, which we outline here, is to consider that each
-frame (on a particular set of qubits) has a _local clock_, which may be
-represented as a single real number. This clock may be _advanced_ by a
-non-negative value. Thus, frame clocks are monotonically increasing during
-program execution.
-
-Under this model:
-- Instructions have the additional effect of advancing frame clocks.
-- Pulse operations and frame mutations have a well defined local time at which
-  they _occur_. Instructions involving multiple frames promise a form of
-  consistency: the local clocks are advanced to a consistent state so that the
-  time of occurrence is common across frames. Note that this does not apply to
-  `DELAY` instructions.
-- Pulse operations on a given qubit do not overlap in time, unless the
-  `NONBLOCKING` modifier is used.
+Quil has an associated time to execute (which may be effectively zero for
+certain operations). It is up to the interpreter to provide semantics for how
+pulses are scheduled, as long as certain consistency requirements are met.
+Roughly speaking:
+1. "Events" on a frame happen at a well defined time since eg. updating a
+   frame frequency means that it starts to accumulate phase at a new rate.
+2. Events happen in the order listed in the program.
+3. Pulses on a common frame may not overlap in time.
+4. Pulses on distinct frames which involve a common resource may not overlap in
+   time unless one is marked as `NONBLOCKING`.
+   
+A more precise specification of the timing semantics is provided in
+[scheduling.md](./scheduling.md).
 
 #### Pulse Operations
 
 The duration of a pulse operation, i.e. `PULSE`, `CAPTURE`, or `RAW-CAPTURE`, is
 the duration of the associated waveform.
 
-The pulse occurs at the pulse frame's local time. The pulse has the effect of
-advancing the pulse frame's local clock by the waveform duration.
-
-Each frame is defined relative to a set of qubits. Two frames with a common
-qubit are said to _intersect_. All frames intersecting the pulse frame shall
-have their local clocks advanced to the maximum of their current value and the
-updated clock value of the pulse frame.
+Each frame is defined relative to a set of qubits. The execution of a pulse
+operation on a frame blocks pulse operations on intersecting frames, i.e. frames
+with a qubit in common with the pulse frame.
 
 ##### NONBLOCKING
 
 In certain instances it may be desirable to support multiple concurrent pulses
-on the same frame. Pulse operations (`PULSE`, `CAPTURE`, and `RAW-CAPTURE`)
-support the optional `NONBLOCKING` modifier. The resulting pulse still has the
-effect of advancing the clock of the pulse frame, _but does not otherwise modify
-the clocks of intersecting frames_.
+on the same frame, for example in measurements where `CAPTURE` performs a
+readout which may overlap with a transmission `PULSE`. 
+
+A pulse operation (`PULSE`, `CAPTURE`, and `RAW-CAPTURE`) with the `NONBLOCKING`
+modifier does not exclude pulse operations on other frames. For example,
+in
+
+```
+NONBLOCKING PULSE 0 "xy" flat(duration: 1.0, iq: 1.0)
+PULSE 0 1 "ff" flat(duration: 1.0, iq: 1.0)
+```
+
+the two pulses could be emitted simultaneously. Nonetheless, a `NONBLOCKING`
+pulse does still exclude the usage of the pulse frame, so e.g. `NONBLOCKING
+PULSE 0 "xy" ... ; PULSE 0 "xy" ...` would require serial execution.
 
 #### Delay
 
-A `DELAY` instruction advances the local clocks of all specified frames by the
-specified delay amount. If the `DELAY` instruction specifies a list of qubits
-with no frame names, _all frames on exactly these qubits have their clocks
-advanced_.
+A `DELAY` instruction is equivalent to a `NONBLOCKING` no-operation on all
+specified frames. For example, `DELAY 0 "xy" 1.0` delays frame `0 "xy"` by one
+second.
 
-For example, `DELAY 0 1.0` delays all one qubit frames on qubit 0. It would not
-affect `0 1 "cz"`.
+If the `DELAY` instruction presents a list of qubits with no frame names, _all
+frames on exactly these qubits are delayed_. Thus `DELAY 0 1.0` delays all one
+qubit frames on qubit 0, but does not affect `0 1 "cz"`.
 
 #### Fence
 
-The `FENCE` instruction guarantees that all frames intersecting the specified
-qubits have their clocks advanced to the same value. This value is unspecified;
-the only requirement is that it be not less than the local clock values for any
-involved frames.
+The `FENCE` instruction provides a means of synchronization of all frames
+involving a set of qubits. In particular, it guarantees that all instructions
+involving any of the fenced qubits preceding the `FENCE` are completed before
+any instructions involving the fenced qubits which follow the `FENCE`
 
 #### Frame Mutations
 
 Single frame mutations (`SET-FREQUENCY`, `SET-PHASE`, `SHIFT-PHASE`,
-`SET-SCALE`) occur at the time of the local frame clock. It is unspecified, and
-implementation dependent, as to whether they advance the frame clock.
+`SET-SCALE`) have a hardware dependent duration (which may be effectively zero).
+These operations block pulses on the targeted frame.
 
 The `SWAP-PHASE` instruction introduces an implicit synchronization on the two
-involved frames. Thus: i) frame clocks are advanced to a common value, ii) this
-value is when the `SWAP-PHASE` operation "occurs".
+involved frames. In other words, any operations involving either of the swapped
+frames and preceding the `SWAP-PHASE` must complete prior to the `SWAP-PHASE`
+event.
 
 ### Calibrations
 
