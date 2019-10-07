@@ -120,8 +120,8 @@ A _path_ is a sequence e(1), ..., e(n) of events, ordered by start time, such
 that, for 1 <= i < n,
 
 -   (obstructed successor) the frame of e(i+1) is obstructed by the instruction of e(i)
--   (earliest successor) amongst scheduled events satisfying (blocked), e(i+1)
-    is the earliest which start after e(i).
+-   (earliest successor) amongst scheduled events obstructed by and starting after e(i), the event e(i+1)
+    is the earliest.
 
 For example,
 ```
