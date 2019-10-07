@@ -28,23 +28,34 @@ Quil instruction types:
 - DELAY
 - FENCE
 - PULSE
+- CAPTURE, RAW-CAPTURE
 - SET-FREQUENCY, SET-SCALE
 - SET-PHASE, SHIFT-PHASE, SWAP-PHASES
 
 ### Frames and Waveforms
 
-Each qubit can have multiple frames, defined by string names such as "xy", "cz",
+Each qubit can have multiple frames, denoted by string names such as "xy", "cz",
 or "ro". A frame is an abstraction that captures the instantaneous frequency and
 phase that will be mixed into the control signal. The frame frequencies are with
 respect to the absolute "lab frame".
 
-Waveforms are defined using DEFWAVEFORM as a list of complex numbers which
-represent the desired waveform envelope. Each complex number represents one
-sample of the waveform. The exact time to play a waveform can be determined by
-dividing by the sample rate for a qubit frame, which is in units of samples per
-second. There are also some built-in waveform shapes which take as a parameter
-the duration of the waveform in seconds, alleviating the need to know the sample
-rate to calculate duration.
+Quilt has two notions of _waveforms_. Custom waveforms are defined using
+DEFWAVEFORM as a list of complex numbers which represent the desired waveform
+envelope, along with a sample rate. Each complex number represents one sample of
+the waveform. The exact time to play a waveform can be determined by dividing by
+the _sample rate_, which is in units of samples per second.
+
+**NOTE**: Quilt frames also have an associated sample rate, which may be
+specified in the corresponding `DEFFRAME` block, and are ultimately
+determined/enforced at link time by the underlying control hardware which the
+frame is associated to. If a custom waveform is applied (via `PULSE` or
+`CAPTURE`) to a frame for which it has an incompatible sample rate, the behavior
+is undefined.
+
+There are also some built-in waveform generators which take as a parameter the
+duration of the waveform in seconds, alleviating the need to know the sample
+rate to calculate duration. These are valid for use regardless of the frame's
+underlying sample rate.
 
 In order to materialize the precise waveforms to be played the waveform
 envelopes must be modulated by the frame's frequency, in addition to applying
@@ -54,7 +65,7 @@ manually, this is both tedious and doesn't take advantage of hardware which has
 specialized support for tracking these things.
 
 Therefore, each frame has associated with it a triple (frequency, phase, scale)
-that can be modified throughout the program using SET- instructions (and
+that can be modified throughout the program using SET-* instructions (and
 additional instructions for phase).
 
 Here's a table explaining the differences between these three values that are
@@ -65,6 +76,7 @@ tracked through the program:
 | Frequency | (not set)     | Real numbers          | No                    |
 | Phase     | 0.0           | Real numbers          | Yes                   |
 | Scale     | 1.0           | Real numbers          | No                    |
+
 
 ### Pulses
 
@@ -105,17 +117,75 @@ CAPTURE 0 "ro" flat(duration: 1e-6, iq: 2+3i) iq
 
 Analog control instructions extend the definition of a quantum abstract machine
 to introduce the concept of time. In this new interpretation each instruction in
-Quil has an associated time to execute (which may be zero). It is up to the
-discretion of the interpreter to provide semantics for how pulses are scheduled,
-as long as these requirements are satisfied:
-1. All pulses on a qubit frame must happen in the order listed in the program
-2. Pulses on a qubit frame cannot overlap in time
-3. "Events" on a qubit frame happen at a well defined time since eg. updating a
-frame frequency means that it starts to accumulate phase at a new rate.
+Quil has an associated time to execute (which may be effectively zero for
+certain operations). It is up to the interpreter to provide semantics for how
+pulses are scheduled, as long as certain consistency requirements are met.
+Roughly speaking:
+1. "Events" on a frame happen at a well defined time since eg. updating a
+   frame frequency means that it starts to accumulate phase at a new rate.
+2. Events happen in the order listed in the program.
+3. Pulses on a common frame may not overlap in time.
+4. Pulses on distinct frames which involve a common resource may not overlap in
+   time unless one is marked as `NONBLOCKING`.
+   
+A more precise specification of the timing semantics is provided in
+[scheduling.md](./scheduling.md).
 
-A good interpretation for Rigetti's hardware would be to assume that pulses will
-not happen on different frames at the same time, with the exception of measuring
-a qubit which happens at the same time as a readout pulse.
+#### Pulse Operations
+
+The duration of a pulse operation, i.e. `PULSE`, `CAPTURE`, or `RAW-CAPTURE`, is
+the duration of the associated waveform.
+
+Each frame is defined relative to a set of qubits. The execution of a pulse
+operation on a frame blocks pulse operations on intersecting frames, i.e. frames
+with a qubit in common with the pulse frame.
+
+##### NONBLOCKING
+
+In certain instances it may be desirable to support multiple concurrent pulses
+on the same frame, for example in measurements where `CAPTURE` performs a
+readout which may overlap with a transmission `PULSE`. 
+
+A pulse operation (`PULSE`, `CAPTURE`, and `RAW-CAPTURE`) with the `NONBLOCKING`
+modifier does not exclude pulse operations on other frames. For example,
+in
+
+```
+NONBLOCKING PULSE 0 "xy" flat(duration: 1.0, iq: 1.0)
+PULSE 0 1 "ff" flat(duration: 1.0, iq: 1.0)
+```
+
+the two pulses could be emitted simultaneously. Nonetheless, a `NONBLOCKING`
+pulse does still exclude the usage of the pulse frame, so e.g. `NONBLOCKING
+PULSE 0 "xy" ... ; PULSE 0 "xy" ...` would require serial execution.
+
+#### Delay
+
+A `DELAY` instruction is equivalent to a `NONBLOCKING` no-operation on all
+specified frames. For example, `DELAY 0 "xy" 1.0` delays frame `0 "xy"` by one
+second.
+
+If the `DELAY` instruction presents a list of qubits with no frame names, _all
+frames on exactly these qubits are delayed_. Thus `DELAY 0 1.0` delays all one
+qubit frames on qubit 0, but does not affect `0 1 "cz"`.
+
+#### Fence
+
+The `FENCE` instruction provides a means of synchronization of all frames
+involving a set of qubits. In particular, it guarantees that all instructions
+involving any of the fenced qubits preceding the `FENCE` are completed before
+any instructions involving the fenced qubits which follow the `FENCE`
+
+#### Frame Mutations
+
+Single frame mutations (`SET-FREQUENCY`, `SET-PHASE`, `SHIFT-PHASE`,
+`SET-SCALE`) have a hardware dependent duration (which may be effectively zero).
+These operations block pulses on the targeted frame.
+
+The `SWAP-PHASE` instruction introduces an implicit synchronization on the two
+involved frames. In other words, any operations involving either of the swapped
+frames and preceding the `SWAP-PHASE` must complete prior to the `SWAP-PHASE`
+event.
 
 ### Calibrations
 
@@ -293,7 +363,7 @@ DEFCAL RESET %qubit:
     RX(pi) %qubit
     JUMP @end
     LABEL delay
-    DELAY(60e-9) %qubit
+    DELAY %qubit 60e-9
     LABEL end
 ```
 

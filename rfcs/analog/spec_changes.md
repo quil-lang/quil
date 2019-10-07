@@ -2,7 +2,7 @@ Add section 6 to spec:
 
 ## 6. Pulse Level Control
 
-**Frames**
+### Frames
 
 ```
 FrameName :: String
@@ -16,12 +16,24 @@ list of qubits. Thus, `0 1 "cz"` is the "cz" frame on qubits 0 and 1. The order
 of the qubits matters. In particular, the above frame may differ from `1 0
 "cz"`.
 
-There are no built-in frames. The specific set of available frames is
-hardware-dependent.
+#### DEFFRAME
 
-Frames (and associated sample rates) need to be provided to the user prior to
-construction of a program. Rigetti has a set of canonical frames (some examples
-are below) but this is subject to change.
+There are no built-in frames. Frames must be defined using the `DEFFRAME`
+directive.
+
+```
+DefFrame :: DEFFRAME Frame (: FrameSpec+ )?
+FrameSpec :: Indent FrameAttr : Expression
+FrameAttr :: SAMPLE-RATE | INITIAL-FREQUENCY
+```
+
+All frames used in a program must have a corresponding top-level definition.
+
+
+Before execution, a Quilt program is linked with a specific system of control
+hardware, and frames are mapped to suitable hardware objects. Native or
+canonical frame definitions may be provided by a hardware vendor. Some examples
+of Rigetti's canonical frames are listed below, but this is subject to change.
 
 Examples (names only):
 ```
@@ -33,7 +45,7 @@ Examples (names only):
 "out" # eg. for the capture line
 ```
 
-**Waveforms**
+### Waveforms
 
 ```
 Waveform :: Name
@@ -81,7 +93,7 @@ The built-in waveform generators are:
     - `padright` is a rational number representing the amount of zero-amplitude
       padding to add to the right of the pulse
 
-**Defining new waveforms**
+#### Defining new waveforms
 
 ```
 SampleRate :: Float
@@ -107,7 +119,7 @@ The duration (in seconds) of a custom waveform may be computed by dividing the
 number of samples by the sample rate. In the above example, both waveforms have
 a duration of 0.5 seconds.
 
-**Pulses**
+### Pulses
 
 ```
 Pulse :: PULSE Frame Waveform
@@ -134,7 +146,9 @@ Each frame has a fixed, hardware-specific sample rate. The behavior of a `PULSE`
 instruction with a custom waveform whose sample rate does not match the
 corresponding frame's sample rate is undefined.
 
-**Frequency**
+### Frame Mutations
+
+#### Frequency
 
 ```
 SetFrequency :: SET-FREQUENCY Frame Float
@@ -150,7 +164,7 @@ SET-FREQUENCY 0 "xy" 5.4e9
 SET-FREQUENCY 0 "ro" 6.1e9
 ```
 
-**Phase**
+#### Phase
 
 ```
 SetPhase :: SET-PHASE Frame Float
@@ -179,7 +193,7 @@ SHIFT-PHASE 0 "xy" %theta*2/pi
 SWAP-PHASE 0 "xy" 1 "xy"
 ```
 
-**Scale**
+#### Scale
 
 ```
 SetScale :: SET-SCALE Frame Float
@@ -195,7 +209,7 @@ Example:
 SET-SCALE 0 "xy" 0.75
 ```
 
-**Capture**
+### Capture
 
 ```
 Capture :: CAPTURE Frame Waveform MemoryReference
@@ -227,6 +241,8 @@ The behavior of a `CAPTURE` instruction with a custom waveform whose sample rate
 does not match the corresponding frame's sample rate is undefined.
 
 **Defining Calibrations**
+
+### Defining Calibrations
 
 ```
 GateModifier :: CONTROLLED | DAGGER | FORKED
@@ -294,19 +310,26 @@ the first calibration definition matches `T 0`, the second matches `DAGGER T 0`,
 and neither match `DAGGER DAGGER T 0`.
 
 
-**Timing Control**
+### Timing and Synchronization
 
 ```
-Delay :: DELAY Qubit Expression
+Delay :: DELAY Qubit+ FrameName* Expression
 Fence :: FENCE Qubit+
 ```
 
 Delay allows for the insertion of a gap within a list of pulses or gates with
 a specified duration in seconds.
 
-Fence ensures that all operations on the specified qubits that proceed the
-fence statement happen after the end of the right-most operation of that set
-of qubits.
+If frame names are specified, then the delay instruction affects those frames on
+those qubits. If no frame names are specified, all frames on precisely those
+qubits are affected. **Note:** this excludes frames which _intersect_ the
+specified qubits but involve others. For example, `DELAY 0 1.0` delays one qubit
+frames on `0`, such as `0 "xy"`, but leaves other frames, such as `0 1 "cz"`,
+unaffected.
+
+Fence ensures that all operations involving the specified qubits that follow the
+fence statement happen after all operations involving the specified qubits that
+preceed the fence statement.
 
 Examples:
 ```
