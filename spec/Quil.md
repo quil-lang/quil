@@ -668,7 +668,7 @@ integer quantity.
 #### Aliased Declaration
 
 ```
-AlisedDeclaration :: DECLARE Name VectorType SHARING Name
+AliasedDeclaration :: DECLARE Name VectorType SHARING Name
 ```
 
 Aliased declarations allow for the designation of memory regions which
@@ -729,7 +729,7 @@ Here, we have two disjoint memories: the global data memory `memory`, and the
 readout memory `ro`. We see that the global data memory `memory` is partitioned
 into a section `qaoa-params`, which is further partitioned into regions `beta`
 and `gamma`. This allows for convenient memory usage. For example, one may wish
-to peform a bulk update of `qaoa-params`, while still allowing subsequent Quil
+to perform a bulk update of `qaoa-params`, while still allowing subsequent Quil
 code to reference `beta` and `gamma` individually.
 
 #### Portability of Aliased Declarations
