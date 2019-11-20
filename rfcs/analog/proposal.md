@@ -143,7 +143,7 @@ with a qubit in common with the pulse frame.
 ##### NONBLOCKING
 
 In certain instances it may be desirable to support multiple concurrent pulses
-on the same frame, for example in measurements where `CAPTURE` performs a
+on the same qubit, for example in measurements where `CAPTURE` performs a
 readout which may overlap with a transmission `PULSE`. 
 
 A pulse operation (`PULSE`, `CAPTURE`, and `RAW-CAPTURE`) with the `NONBLOCKING`
