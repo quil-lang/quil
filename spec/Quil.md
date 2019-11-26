@@ -178,7 +178,7 @@ also be placed after an instruction and will similarly be ignored.
 Qubit :: Natural
 ```
 
-A qubit in Quil is referred to by a positive integer. Interpretation of this
+A qubit in Quil is referred to by a nonnegative integer. Interpretation of this
 integer is at the discretion of the interpreter of the Quil input. Some
 interpreters may require qubits be contiguous, others (such as quantum
 processors) may use a numbering scheme based on particular physical qubits.
