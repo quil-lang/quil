@@ -23,8 +23,8 @@ directive.
 
 ```
 DefFrame :: DEFFRAME Frame (: FrameSpec+ )?
-FrameSpec :: Indent FrameAttr : Expression
-FrameAttr :: SAMPLE-RATE | INITIAL-FREQUENCY
+FrameSpec :: Indent FrameAttr : ( Expression | String )
+FrameAttr :: SAMPLE-RATE | INITIAL-FREQUENCY | DIRECTION
 ```
 
 All frames used in a program must have a corresponding top-level definition.
@@ -44,6 +44,15 @@ Examples (names only):
 "ro"  # eg. for the readout pulse
 "out" # eg. for the capture line
 ```
+
+
+##### Frame Attributes
+
+Frame attributes represent quantities associated with a given frame which need not be specified by the programmer, but which are ultimately required to fully link and execute a Quilt program on a physical device.
+
+- `SAMPLE-RATE` is a floating point number indicating the rate (in Hz) of the digital-to-analog converter on the control hardware associated with this frame.
+- `INITIAL-FREQUENCY` is a floating point number indicating the initial frame frequency.
+- `DIRECTION` is one of `"tx"` or `"rx"`.
 
 ### Waveforms
 
