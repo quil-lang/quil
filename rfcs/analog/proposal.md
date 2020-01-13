@@ -24,7 +24,7 @@ through Quil language bindings and used by compilers and simulators.
 See the diff on Quil.md for the syntax of the introduction of a number of new
 Quil instruction types:
 - DEFCAL
-- DEFWAVEFORM
+- DEFFRAME, DEFWAVEFORM
 - DELAY
 - FENCE
 - PULSE
