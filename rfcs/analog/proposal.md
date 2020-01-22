@@ -29,7 +29,8 @@ Quil instruction types:
 - FENCE
 - PULSE
 - CAPTURE, RAW-CAPTURE
-- SET-FREQUENCY, SET-SCALE
+- SET-SCALE
+- SET-FREQUENCY, SHIFT-FREQUENCY
 - SET-PHASE, SHIFT-PHASE, SWAP-PHASES
 
 ### Frames and Waveforms
@@ -178,7 +179,7 @@ any instructions involving the fenced qubits which follow the `FENCE`
 
 #### Frame Mutations
 
-Single frame mutations (`SET-FREQUENCY`, `SET-PHASE`, `SHIFT-PHASE`,
+Single frame mutations (`SET-FREQUENCY`, `SHIFT-FREQUENCY`, `SET-PHASE`, `SHIFT-PHASE`,
 `SET-SCALE`) have a hardware dependent duration (which may be effectively zero).
 These operations block pulses on the targeted frame.
 
