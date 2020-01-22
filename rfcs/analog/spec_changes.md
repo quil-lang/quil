@@ -18,7 +18,7 @@ of the qubits matters. In particular, the above frame may differ from `1 0
 
 #### DEFFRAME
 
-There are no built-in frames. Frames must be defined using the `DEFFRAME`
+Quilt itself has no built-in frames. Frames must be defined using the `DEFFRAME`
 directive.
 
 ```
@@ -161,16 +161,17 @@ corresponding frame's sample rate is undefined.
 
 ```
 SetFrequency :: SET-FREQUENCY Frame Float
+ShiftFrequency :: SHIFT-FREQUENCY Frame Float
 ```
 
-Each frame has a frequency which is tracked throughout the program. Initially
-the frequency starts out as not defined.
+Each frame has a frequency which is tracked throughout the program. Initial
+frame frequencies are specified in the frame definition's `INITIAL-FREQUENCY`
+attribute. Subsequent code may update this, either assigning an absolute value (`SET-FREQUENCY`) or a relative offset (`SHIFT-FREQUENCY`).
 
-Set instructions are local to the surrounding scope.
 
 ```
 SET-FREQUENCY 0 "xy" 5.4e9
-SET-FREQUENCY 0 "ro" 6.1e9
+SHIFT-FREQUENCY 0 "ro" 6.1e9
 ```
 
 #### Phase
@@ -188,9 +189,6 @@ with other frames.
 The phase must be a rational real number. There is also support for
 shifted the phase based on some expression, as long as that expression returns
 a real number.
-
-Set instructions are local to the surrounding scope, however shifting and
-swapping have global effect to the frame across the entire program.
 
 Example:
 ```
@@ -210,8 +208,6 @@ SetScale :: SET-SCALE Frame Float
 
 Each frame has a scale which is tracked throughout the program. Initially the
 scale starts out as 1.
-
-Set instructions are local to the surrounding scope.
 
 Example:
 ```
