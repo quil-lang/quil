@@ -175,7 +175,8 @@ qubit frames on qubit 0, but does not affect `0 1 "cz"`.
 The `FENCE` instruction provides a means of synchronization of all frames
 involving a set of qubits. In particular, it guarantees that all instructions
 involving any of the fenced qubits preceding the `FENCE` are completed before
-any instructions involving the fenced qubits which follow the `FENCE`
+any instructions involving the fenced qubits which follow the `FENCE`. If `FENCE`
+has no arguments, then it applies to all qubits on the device.
 
 #### Frame Mutations
 

@@ -319,7 +319,7 @@ and neither match `DAGGER DAGGER T 0`.
 
 ```
 Delay :: DELAY Qubit+ FrameName* Expression
-Fence :: FENCE Qubit+
+Fence :: FENCE Qubit*
 ```
 
 Delay allows for the insertion of a gap within a list of pulses or gates with
@@ -334,7 +334,8 @@ unaffected.
 
 Fence ensures that all operations involving the specified qubits that follow the
 fence statement happen after all operations involving the specified qubits that
-preceed the fence statement.
+preceed the fence statement. If no qubits are specified, the `FENCE` operation
+implicitly applies to all qubits on the device.
 
 Examples:
 ```
