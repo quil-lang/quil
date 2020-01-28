@@ -24,16 +24,17 @@ directive.
 ```
 DefFrame :: DEFFRAME Frame (: FrameSpec+ )?
 FrameSpec :: Indent FrameAttr : ( Expression | String )
-FrameAttr :: SAMPLE-RATE | INITIAL-FREQUENCY | DIRECTION
+FrameAttr :: SAMPLE-RATE | INITIAL-FREQUENCY | DIRECTION | HARDWARE-OBJECT
 ```
 
 All frames used in a program must have a corresponding top-level definition.
 
 
 Before execution, a Quilt program is linked with a specific system of control
-hardware, and frames are mapped to suitable hardware objects. Native or
-canonical frame definitions may be provided by a hardware vendor. Some examples
-of Rigetti's canonical frames are listed below, but this is subject to change.
+hardware, and frames are mapped to suitable hardware objects (cf. the
+`HARDWARE-OBJECT` frame attribute below). Native or canonical frame definitions may be
+provided by a hardware vendor. Some examples of Rigetti's canonical frames are
+listed below, but this is subject to change.
 
 Examples (names only):
 ```
@@ -53,6 +54,7 @@ Frame attributes represent quantities associated with a given frame which need n
 - `SAMPLE-RATE` is a floating point number indicating the rate (in Hz) of the digital-to-analog converter on the control hardware associated with this frame.
 - `INITIAL-FREQUENCY` is a floating point number indicating the initial frame frequency.
 - `DIRECTION` is one of `"tx"` or `"rx"`.
+- `HARDWARE-OBJECT` is a string indicating the (implementation-specific) hardware object that the frame is associated with.
 
 ### Waveforms
 
