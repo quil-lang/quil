@@ -1,5 +1,9 @@
 # Quil: A Portable Quantum Instruction Language
 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3677540.svg)](https://doi.org/10.5281/zenodo.3677540)
+
+
 <img src="quil-rectangle.png" style="zoom:48%;" />
 
 This repository contains the reference specification for the Quil language in
