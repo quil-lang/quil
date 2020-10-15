@@ -11,7 +11,7 @@ Frame :: Qubit+ FrameName
 
 A frame encapsulates any rotating frame relative to which control/readout
 waveforms may be defined. For the purposes of scheduling and execution on
-possibly heterogenous hardware, frames are specified with respect to a specific
+possibly heterogeneous hardware, frames are specified with respect to a specific
 list of qubits. Thus, `0 1 "cz"` is the "cz" frame on qubits 0 and 1. The order
 of the qubits matters. In particular, the above frame may differ from `1 0
 "cz"`.
@@ -76,7 +76,7 @@ All frames have an associated frequency and sample rate. Additionally, operation
 Frame attributes represent quantities associated with a given frame which need not be specified by the programmer, but which are ultimately required to fully link and execute a Quilt program on a physical device.
 
 - `HARDWARE-OBJECT` is a string indicating the (implementation-specific) hardware object that the frame is associated with, used for program linkage.
-- `CENTER-FREQUENCY` is an optional attribute, consisting of a floating point value indicting the frame frequency which should be considered the "center" for the purposes digital-to-analog or analog-to-digital conversion.
+- `CENTER-FREQUENCY` is an optional attribute, consisting of a floating point value indicating the frame frequency which should be considered the "center" for the purposes digital-to-analog or analog-to-digital conversion.
 
 ### Waveforms
 
@@ -116,7 +116,7 @@ The built-in waveform generators are:
       Hertz
     - `alpha` is a rational number for the dimensionless drag parameter
 - `erfsquare(duration, risetime, padleft, padright)` creates a pulse with a flat
-    top and edges that are error functions (erfs) where:
+    top and edges that are error functions (erf) where:
     - `duration` is a rational number representing the duration of the
       waveform in seconds
     - `risetime` is a rational number representing the rise and fall sections of
@@ -356,7 +356,7 @@ unaffected.
 
 Fence ensures that all operations involving the specified qubits that follow the
 fence statement happen after all operations involving the specified qubits that
-preceed the fence statement. If no qubits are specified, the `FENCE` operation
+precede the fence statement. If no qubits are specified, the `FENCE` operation
 implicitly applies to all qubits on the device.
 
 Examples:
