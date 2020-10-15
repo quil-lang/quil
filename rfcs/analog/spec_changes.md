@@ -48,7 +48,8 @@ Examples (names only):
 Relevant characteristics of a particular frame are indicated in the
 body of a `DEFFRAME` by way of frame attributes. Certain of these
 attributes are standardized, whereas others are hardware or vendor
-specific.
+specific. The specific set of required and optional frame attributes
+is vendor specific.
 
 Here is an example of a full frame definition:
 
@@ -64,11 +65,11 @@ DEFFRAME 0 1 "cz":
 
 ##### Standard Frame Attributes
 
-All frames have an associated frequency and sample rate. Additionally, operations on frames must respect a certain sort of type safety: namely, certain frames can have `PULSE` applied, others can have `CAPTURE` applied, and the two are assumed to be exclusive. 
+All frames have an associated frequency and sample rate. Additionally, operations on frames must respect a certain sort of type safety: namely, certain frames can have `PULSE` applied, others can have `CAPTURE` applied, and the two are assumed to be exclusive.
 
 - `SAMPLE-RATE` is a floating point number indicating the rate (in Hz) of the digital-to-analog converter on the control hardware associated with this frame.
 - `INITIAL-FREQUENCY` is a floating point number indicating the initial frame frequency.
-- `DIRECTION` is one of `"tx"` or `"rx"`, and indicates whether the frame is available for pulse operations (`"tx"`) or capture operations (`"rx"`). These are mutually exclusive. Under circumstances where an underlying physical resource is bidirectional, it is perfectly acceptable for hardware vendors to alias multiple frames to this resource.
+- `DIRECTION` is one of `"tx"` or `"rx"`, and indicates whether the frame is available for pulse operations (`"tx"`) or capture operations (`"rx"`).
 
 
 ##### Rigetti Native Frame Attributes
