@@ -162,8 +162,8 @@ corresponding frame's sample rate is undefined.
 #### Frequency
 
 ```
-SetFrequency :: SET-FREQUENCY Frame Float
-ShiftFrequency :: SHIFT-FREQUENCY Frame Float
+SetFrequency :: SET-FREQUENCY Frame Expression
+ShiftFrequency :: SHIFT-FREQUENCY Frame Expression
 ```
 
 Each frame has a frequency which is tracked throughout the program. Initial
@@ -179,7 +179,7 @@ SHIFT-FREQUENCY 0 "ro" 6.1e9
 #### Phase
 
 ```
-SetPhase :: SET-PHASE Frame Float
+SetPhase :: SET-PHASE Frame Expression
 ShiftPhase :: SHIFT-PHASE Frame Expression
 SwapPhases :: SWAP-PHASES Frame Frame
 ```
@@ -205,7 +205,7 @@ SWAP-PHASE 0 "xy" 1 "xy"
 #### Scale
 
 ```
-SetScale :: SET-SCALE Frame Float
+SetScale :: SET-SCALE Frame Expression
 ```
 
 Each frame has a scale which is tracked throughout the program. Initially the
