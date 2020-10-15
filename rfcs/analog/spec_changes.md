@@ -183,6 +183,12 @@ corresponding frame's sample rate is undefined.
 
 ### Frame Mutations
 
+The state of a frame may be updated by one of several "frame
+mutations". In what follows, frame mutations may take as arguments
+arbitrary real-valued expressions. However, conforming Quilt
+implementations may restrict the arguments to literal reals, memory
+references, or vendor specific combinations thereof.
+
 #### Frequency
 
 ```
@@ -190,9 +196,11 @@ SetFrequency :: SET-FREQUENCY Frame Expression
 ShiftFrequency :: SHIFT-FREQUENCY Frame Expression
 ```
 
-Each frame has a frequency which is tracked throughout the program. Initial
-frame frequencies are specified in the frame definition's `INITIAL-FREQUENCY`
-attribute. Subsequent code may update this, either assigning an absolute value (`SET-FREQUENCY`) or a relative offset (`SHIFT-FREQUENCY`).
+Each frame has a real frequency which is tracked throughout the
+program. Initial frame frequencies are specified in the frame
+definition's `INITIAL-FREQUENCY` attribute. Subsequent code may update
+this, either assigning an absolute value (`SET-FREQUENCY`) or a
+relative offset (`SHIFT-FREQUENCY`).
 
 
 ```
@@ -208,13 +216,9 @@ ShiftPhase :: SHIFT-PHASE Frame Expression
 SwapPhases :: SWAP-PHASES Frame Frame
 ```
 
-Each frame has a phase which is tracked throughout the program. Initially the
+Each frame has a real phase which is tracked throughout the program. Initially the
 phase starts out as 0. It may be set or shifted up and down, as well as swapped
 with other frames.
-
-The phase must be a rational real number. There is also support for
-shifted the phase based on some expression, as long as that expression returns
-a real number.
 
 Example:
 ```
@@ -232,7 +236,7 @@ SWAP-PHASE 0 "xy" 1 "xy"
 SetScale :: SET-SCALE Frame Expression
 ```
 
-Each frame has a scale which is tracked throughout the program. Initially the
+Each frame has a real scale which is tracked throughout the program. Initially the
 scale starts out as 1.
 
 Example:
