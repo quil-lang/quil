@@ -18,23 +18,22 @@ of the qubits matters. In particular, the above frame may differ from `1 0
 
 #### DEFFRAME
 
-Quilt itself has no built-in frames. Frames must be defined using the `DEFFRAME`
-directive.
+Frames represent basic physical resources manipulated by Quilt
+program, and in any implementation will involve a certain amount of
+coupling with the underlying control hardware. As such, Quilt itself
+has no built-in frames. Native or canonical frame definitions may be
+provided by a hardware vendor, and are exposed to Quilt programs via
+the `DEFFRAME` directive.
 
 ```
 DefFrame :: DEFFRAME Frame (: FrameSpec+ )?
 FrameSpec :: Indent FrameAttr : ( Expression | String )
-FrameAttr :: SAMPLE-RATE | INITIAL-FREQUENCY | DIRECTION | HARDWARE-OBJECT
+FrameAttr :: Identifier
 ```
 
-All frames used in a program must have a corresponding top-level definition.
-
-
-Before execution, a Quilt program is linked with a specific system of control
-hardware, and frames are mapped to suitable hardware objects (cf. the
-`HARDWARE-OBJECT` frame attribute below). Native or canonical frame definitions may be
-provided by a hardware vendor. Some examples of Rigetti's canonical frames are
-listed below, but this is subject to change.
+All frames used in a program must have a corresponding top-level
+definition. Some examples of Rigetti's canonical frames are listed
+below, but this is subject to change.
 
 Examples (names only):
 ```
@@ -46,15 +45,38 @@ Examples (names only):
 "out" # eg. for the capture line
 ```
 
+Relevant characteristics of a particular frame are indicated in the
+body of a `DEFFRAME` by way of frame attributes. Certain of these
+attributes are standardized, whereas others are hardware or vendor
+specific.
 
-##### Frame Attributes
+Here is an example of a full frame definition:
 
-Frame attributes represent quantities associated with a given frame which need not be specified by the programmer, but which are ultimately required to fully link and execute a Quilt program on a physical device.
+```
+DEFFRAME 0 1 "cz":
+    DIRECTION: "tx"
+    INITIAL-FREQUENCY: 220487409.16137844
+    CENTER-FREQUENCY: 375000000.0
+    HARDWARE-OBJECT: "q0_ff"
+    SAMPLE-RATE: 1000000000.0
+```
+
+
+##### Standard Frame Attributes
+
+All frames have an associated frequency and sample rate. Additionally, operations on frames must respect a certain sort of type safety: namely, certain frames can have `PULSE` applied, others can have `CAPTURE` applied, and the two are assumed to be exclusive. 
 
 - `SAMPLE-RATE` is a floating point number indicating the rate (in Hz) of the digital-to-analog converter on the control hardware associated with this frame.
 - `INITIAL-FREQUENCY` is a floating point number indicating the initial frame frequency.
-- `DIRECTION` is one of `"tx"` or `"rx"`.
-- `HARDWARE-OBJECT` is a string indicating the (implementation-specific) hardware object that the frame is associated with.
+- `DIRECTION` is one of `"tx"` or `"rx"`, and indicates whether the frame is available for pulse operations (`"tx"`) or capture operations (`"rx"`). These are mutually exclusive. Under circumstances where an underlying physical resource is bidirectional, it is perfectly acceptable for hardware vendors to alias multiple frames to this resource.
+
+
+##### Rigetti Native Frame Attributes
+
+Frame attributes represent quantities associated with a given frame which need not be specified by the programmer, but which are ultimately required to fully link and execute a Quilt program on a physical device.
+
+- `HARDWARE-OBJECT` is a string indicating the (implementation-specific) hardware object that the frame is associated with, used for program linkage.
+- `CENTER-FREQUENCY` is an optional attribute, consisting of a floating point value indicting the frame frequency which should be considered the "center" for the purposes digital-to-analog or analog-to-digital conversion.
 
 ### Waveforms
 
