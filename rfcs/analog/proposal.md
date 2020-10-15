@@ -40,18 +40,13 @@ or "ro". A frame is an abstraction that captures the instantaneous frequency and
 phase that will be mixed into the control signal. The frame frequencies are with
 respect to the absolute "lab frame".
 
-Quilt has two notions of _waveforms_. Custom waveforms are defined using
-DEFWAVEFORM as a list of complex numbers which represent the desired waveform
-envelope, along with a sample rate. Each complex number represents one sample of
-the waveform. The exact time to play a waveform can be determined by dividing by
-the _sample rate_, which is in units of samples per second.
+Quilt has two notions of _waveforms_. Custom waveforms are defined
+using DEFWAVEFORM as a list of complex numbers which represent the
+desired waveform envelope. Each complex number represents one sample
+of the waveform. The exact time to play a waveform on a particular
+frame can be determined by dividing the number of samples by the
+_sample rate_ of the frame, which is in units of samples per second.
 
-**NOTE**: Quilt frames also have an associated sample rate, which may be
-specified in the corresponding `DEFFRAME` block, and are ultimately
-determined/enforced at link time by the underlying control hardware which the
-frame is associated to. If a custom waveform is applied (via `PULSE` or
-`CAPTURE`) to a frame for which it has an incompatible sample rate, the behavior
-is undefined.
 
 There are also some built-in waveform generators which take as a parameter the
 duration of the waveform in seconds, alleviating the need to know the sample
