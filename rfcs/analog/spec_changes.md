@@ -278,7 +278,7 @@ RAW-CAPTURE 0 "out" 200e-6 iqs
 
 ```
 GateModifier :: CONTROLLED | DAGGER | FORKED
-CalibrationDefinition :: DEFCAL OpModifier* Name ( Parameter+ ) Qubit+ : Instruction+
+CalibrationDefinition :: DEFCAL GateModifier* Name ( Parameter+ ) Qubit+ : Instruction+
 MeasureCalibrationDefinition :: DEFCAL Name Qubit? Parameter : Instruction+
 ```
 
