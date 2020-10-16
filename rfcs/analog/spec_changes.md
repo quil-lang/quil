@@ -145,7 +145,7 @@ The meaning of these are as follows
       padding to add to the left of the pulse
     - `padright` is a rational number representing the amount of zero-amplitude
       padding to add to the right of the pulse
-	  
+      
 At present, all `Expression` values above must be statically determinable, as template resolution occurs prior to execution time.
 
 #### Defining new waveforms
@@ -325,7 +325,7 @@ DEFCAL X 0:
 
 # Parameterized gate on qubit 0
 DEFCAL RX(%theta) 0:
-	SET-SCALE 0 "xy" %theta/(2*pi)
+    SET-SCALE 0 "xy" %theta/(2*pi)
     PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)
 
 # Applying RZ to any qubit
