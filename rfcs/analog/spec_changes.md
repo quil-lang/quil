@@ -18,12 +18,12 @@ of the qubits matters. In particular, the above frame may differ from `1 0
 
 #### DEFFRAME
 
-Frames represent basic physical resources manipulated by Quilt
-program, and in any implementation will involve a certain amount of
-coupling with the underlying control hardware. As such, Quilt itself
-has no built-in frames. Native or canonical frame definitions may be
-provided by a hardware vendor, and are exposed to Quilt programs via
-the `DEFFRAME` directive.
+Frames are the basic resources manipulated by Quilt programs, and in
+any implementation will involve a certain amount of coupling with the
+underlying control hardware. As such, Quilt itself has no built-in
+frames. Native or canonical frame definitions may be provided by a
+hardware vendor, and are exposed to Quilt programs via the `DEFFRAME`
+directive.
 
 ```
 DefFrame :: DEFFRAME Frame (: FrameSpec+ )?
@@ -47,9 +47,9 @@ Examples (names only):
 
 Relevant characteristics of a particular frame are indicated in the
 body of a `DEFFRAME` by way of frame attributes. Certain of these
-attributes are standardized, whereas others are hardware or vendor
-specific. The specific set of required and optional frame attributes
-is vendor specific.
+attributes are standardized, whereas others are hardware or
+implementation specific. The specific set of required and optional
+frame attributes is implementation specific.
 
 Here is an example of a full frame definition:
 
@@ -89,10 +89,10 @@ NamedParam :: Name : Expression
 
 There are two sorts of waveform references present in Quilt. Custom
 waveforms, defined with `DEFWAVEFORM`, are referenced directly by
-name. A hardware vendor or Quilt implementation may also support
-"template waveforms", which are referenced using functional notation.
-For example `foo(a: 1, b: 2)` denotes a template waveform named `foo`
-with template parameter `a` set to `1` and `b` set to `2`.
+name. Quilt implementations may also support a number of "template
+waveforms", which are denoted using functional notation.  For example
+`foo(a: 1, b: 2)` denotes a template waveform named `foo` with
+template parameter `a` set to `1` and `b` set to `2`.
 
 Although the values of template parameters may be expressions in
 general, specific implementations of Quilt are free to restrict this
@@ -200,7 +200,7 @@ The state of a frame may be updated by one of several "frame
 mutations". In what follows, frame mutations may take as arguments
 arbitrary real-valued expressions. However, conforming Quilt
 implementations may restrict the arguments to literal reals, memory
-references, or vendor specific combinations thereof.
+references, or specific combinations thereof.
 
 #### Frequency
 
