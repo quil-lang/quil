@@ -79,34 +79,53 @@ Frame attributes represent quantities associated with a given frame which need n
 - `HARDWARE-OBJECT` is a string indicating the (implementation-specific) hardware object that the frame is associated with, used for program linkage.
 - `CENTER-FREQUENCY` is an optional attribute, consisting of a floating point value indicating the frame frequency which should be considered the "center" for the purposes digital-to-analog or analog-to-digital conversion.
 
-### Waveforms
+### Waveform References
 
 ```
 Waveform :: Name
-Waveform :: flat ( duration: Expression, iq: Expression )
-Waveform :: gaussian ( duration: Expression, fwhm: Expression, t0: Expression )
-Waveform :: draggaussian ( duration: Expression, fwhm: Expression, t0: Expression,
-    anh: Expression, alpha: Expression )
-Waveform :: erfsquare ( duration: Expression, risetime: Expression,
-    padleft: Expression, padright: Expression )
+Waveform :: Name '(' NamedParam ( , NamedParam )* ')'
+NamedParam :: Name : Expression
 ```
 
-Waveforms are referenced either by name or by a built-in waveform generator.
+There are two sorts of waveform references present in Quilt. Custom
+waveforms, defined with `DEFWAVEFORM`, are referenced directly by
+name. A hardware vendor or Quilt implementation may also support
+"template waveforms", which are referenced using functional notation.
+For example `foo(a: 1, b: 2)` denotes a template waveform named `foo`
+with template parameter `a` set to `1` and `b` set to `2`.
 
-The built-in waveform generators are:
-- `flat(duration, iq)` creates a flat waveform where:
+Although the values of template parameters may be expressions in
+general, specific implementations of Quilt are free to restrict this
+in a suitable fashion (e.g. to literal real or complex values). 
+
+#### Rigetti's Template Waveforms
+
+Some examples of the template waveforms made available by Rigetti include:
+
+```
+Waveform :: flat '(' duration: Expression, iq: Expression ')'
+Waveform :: gaussian '(' duration: Expression, fwhm: Expression, t0: Expression ')'
+Waveform :: draggaussian '(' duration: Expression, fwhm: Expression, t0: Expression,
+    anh: Expression, alpha: Expression ')'
+Waveform :: erfsquare '(' duration: Expression, risetime: Expression,
+    padleft: Expression, padright: Expression ')'
+```
+
+The meaning of these are as follows
+
+- `flat(duration, iq)` denotes a flat waveform where:
     - `duration` is a rational number representing the duration of the
       waveform in seconds
     - `iq` is a complex number representing the IQ value to play for the
       duration of the waveform
-- `gaussian(duration, fwhm, t0)` creates a Gaussian waveform where:
+- `gaussian(duration, fwhm, t0)` denotes a Gaussian waveform where:
     - `duration` is a rational number representing the duration of the
       waveform in seconds
     - `fwhm` is a rational number representing the full-width-half-max of
       the waveform in seconds
     - `t0` is a rational number representing the center time coordinate of
       the waveform in seconds
-- `draggaussian(duration, fwhm, t0, anh, alpha)` creates a DRAG gaussian pulse where:
+- `draggaussian(duration, fwhm, t0, anh, alpha)` denotes a DRAG gaussian pulse where:
     - `duration` is a rational number representing the duration of the
       waveform in seconds
     - `fwhm` is a rational number representing the full-width-half-max of
@@ -116,7 +135,7 @@ The built-in waveform generators are:
     - `anh` is a rational number representing the anharmonicity of the qubit in
       Hertz
     - `alpha` is a rational number for the dimensionless drag parameter
-- `erfsquare(duration, risetime, padleft, padright)` creates a pulse with a flat
+- `erfsquare(duration, risetime, padleft, padright)` denotes a pulse with a flat
     top and edges that are error functions (erf) where:
     - `duration` is a rational number representing the duration of the
       waveform in seconds
@@ -126,27 +145,24 @@ The built-in waveform generators are:
       padding to add to the left of the pulse
     - `padright` is a rational number representing the amount of zero-amplitude
       padding to add to the right of the pulse
+	  
+At present, all `Expression` values above must be statically determinable, as template resolution occurs prior to execution time.
 
 #### Defining new waveforms
 
 ```
 SampleRate :: Float
-WaveformDefinition :: DEFWAVEFORM Name ( Parameter+ ) : MatrixRow
+WaveformDefinition :: DEFWAVEFORM Name : MatrixRow
 MatrixRow :: Indent (Expression ,)+
 ```
 
 New waveforms may be defined by by listing out all the IQ values as
-complex numbers, separated by commas. Waveform definitions may also be
-parameterized, although note that Quil has no support for vector level
-operations.
+complex numbers, separated by commas.
 
 Example:
 ```
 DEFWAVEFORM my_custom_waveform:
     1+2i, 3+4i, 5+6i
-
-DEFWAVEFORM my_custom_parameterized_waveform(%a):
-    (1+2i)*%a, (3+4i)*%a, (5+6i)*%a
 ```
 
 The duration (in seconds) of a custom waveform applied on a particular
@@ -166,9 +182,6 @@ Examples:
 ```
 # Simple pulse with previously defined waveform
 PULSE 0 "xy" my_custom_waveform
-
-# Pulse with previously defined parameterized waveform
-PULSE 0 "xy" my_custom_parameterized_waveform(0.5)
 
 # Pulse with built-in waveform generator
 PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)
@@ -265,7 +278,7 @@ Example:
 ```
 # Simple capture of an IQ point
 DECLARE iq REAL[2]
-CAPTURE 0 "out" flat(1e-6, 2+3i) iq
+CAPTURE 0 "out" flat(duration: 1e-6, iq: 2+3i) iq
 
 # Raw capture
 DECLARE iqs REAL[400] # length needs to be determined based on the sample rate of the `0 "out"` frame
@@ -312,7 +325,8 @@ DEFCAL X 0:
 
 # Parameterized gate on qubit 0
 DEFCAL RX(%theta) 0:
-    PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)*%theta/(2*pi)
+	SET-SCALE 0 "xy" %theta/(2*pi)
+    PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)
 
 # Applying RZ to any qubit
 DEFCAL RZ(%theta) %qubit:
@@ -321,7 +335,7 @@ DEFCAL RZ(%theta) %qubit:
 # Measurement and classification
 DEFCAL MEASURE 0 %dest:
     DECLARE iq REAL[2]
-    CAPTURE 0 "out" flat(1e-6, 2+3i) iq
+    CAPTURE 0 "out" flat(duration: 1e-6, iq: 2+3i) iq
     LT %dest iq[0] 0.5 # thresholding
 ```
 
