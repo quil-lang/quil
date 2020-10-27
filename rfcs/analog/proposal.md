@@ -65,7 +65,7 @@ that can be modified throughout the program using SET-* instructions (and
 additional instructions for phase).
 
 Here's a table explaining the differences between these three values that are
-tracked through the program:
+tracked per frame through the program:
 
 | Name      | Initial Value | Valid Values          | Can be parameterized? |
 |-----------|---------------|-----------------------|-----------------------|
