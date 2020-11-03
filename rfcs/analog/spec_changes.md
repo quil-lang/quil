@@ -77,7 +77,7 @@ All frames have an associated frequency and sample rate. Additionally, operation
 Frame attributes represent quantities associated with a given frame which need not be specified by the programmer, but which are ultimately required to fully link and execute a Quilt program on a physical device.
 
 - `HARDWARE-OBJECT` is a string indicating the (implementation-specific) hardware object that the frame is associated with, used for program linkage.
-- `CENTER-FREQUENCY` is an optional attribute, consisting of a floating point value indicating the frame frequency which should be considered the "center" for the purposes digital-to-analog or analog-to-digital conversion.
+- `CENTER-FREQUENCY` is an optional attribute, consisting of a floating point value indicating the frame frequency which should be considered the "center" for the purposes of digital-to-analog or analog-to-digital conversion.
 
 ### Waveform References
 
