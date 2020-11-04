@@ -7,11 +7,19 @@ grammar Quil;
 quil                : allInstr? ( NEWLINE+ allInstr )* NEWLINE* EOF ;
 
 allInstr            : defGate
+                    | defGateAsPauli
                     | defCircuit
+                    | defFrame
+                    | defWaveform
+                    | defCalibration
+                    | defMeasCalibration
                     | instr
                     ;
 
-instr               : gate
+instr               : fence
+                    | fenceAll
+                    | delay
+                    | gate
                     | measure
                     | defLabel
                     | halt
@@ -28,7 +36,16 @@ instr               : gate
                     | nop
                     | include
                     | pragma
-                    | memoryDescriptor
+                    | pulse
+                    | setFrequency
+                    | shiftFrequency
+                    | setPhase
+                    | shiftPhase
+                    | swapPhase
+                    | setScale
+                    | capture
+                    | rawCapture
+                    | memoryDescriptor // this is a little unusual, but it's in steven's example
                     ;
 
 // C. Static and Parametric Gates
@@ -41,18 +58,23 @@ qubit               : INT ;
 param               : expression ;
 
 modifier            : CONTROLLED
-                    | DAGGER ;
+                    | DAGGER
+                    | FORKED ;
 
 // D. Gate Definitions
 
-defGate             : DEFGATE name ( ( LPAREN variable ( COMMA variable )* RPAREN ) | ( AS gateType ) )? COLON NEWLINE matrix ;
+defGate             : DEFGATE name (( LPAREN variable ( COMMA variable )* RPAREN ) | ( AS gatetype ))? COLON NEWLINE matrix ;
+defGateAsPauli      : DEFGATE name ( LPAREN variable ( COMMA variable )* RPAREN )? qubitVariable+ AS PAULISUM COLON NEWLINE pauliTerms ;
 
 variable            : PERCENTAGE IDENTIFIER ;
-
-gateType            : MATRIX | PERMUTATION ;
+gatetype            : MATRIX
+                    | PERMUTATION ;
 
 matrix              : ( matrixRow NEWLINE )* matrixRow ;
 matrixRow           : TAB expression ( COMMA expression )* ;
+
+pauliTerms          : ( pauliTerm NEWLINE )* pauliTerm;
+pauliTerm           : TAB IDENTIFIER LPAREN expression RPAREN qubitVariable+ ;
 
 // E. Circuits
 
@@ -115,8 +137,8 @@ include             : INCLUDE STRING ;
 
 // M. Pragma Support
 
-pragma              : PRAGMA IDENTIFIER pragma_name* STRING? ;
-pragma_name         : IDENTIFIER | INT ;
+pragma              : PRAGMA ( IDENTIFIER | keyword ) pragma_name* STRING? ;
+pragma_name         : IDENTIFIER | keyword | INT ;
 
 // Expressions (in order of precedence)
 
@@ -141,9 +163,53 @@ number              : MINUS? ( realN | imaginaryN | I | PI ) ;
 imaginaryN          : realN I ;
 realN               : FLOAT | INT ;
 
+// Analog control
+
+waveformName        : name (DIVIDE name)? ;
+
+defFrame            : DEFFRAME frame ( COLON frameSpec+ )? ;
+frameSpec           : NEWLINE TAB frameAttr COLON ( expression | STRING ) ;
+frameAttr           : SAMPLERATE | INITIALFREQUENCY | DIRECTION | HARDWAREOBJECT | CENTERFREQUENCY;
+
+defWaveform         : DEFWAVEFORM waveformName ( LPAREN param (COMMA param)* RPAREN )? COLON NEWLINE matrix ;
+defCalibration      : DEFCAL name (LPAREN param ( COMMA param )* RPAREN)? qubitOrFormal+ COLON ( NEWLINE TAB instr )* ;
+defMeasCalibration  : DEFCAL MEASURE qubitOrFormal ( name )? COLON ( NEWLINE TAB instr )* ;
+
+pulse               : NONBLOCKING? PULSE frame waveform ;
+capture             : NONBLOCKING? CAPTURE frame waveform addr ;
+rawCapture          : NONBLOCKING? RAWCAPTURE frame expression addr ;
+
+setFrequency        : SETFREQUENCY frame expression ;
+shiftFrequency      : SHIFTFREQUENCY frame expression ;
+setPhase            : SETPHASE frame expression ;
+shiftPhase          : SHIFTPHASE frame expression ;
+swapPhase           : SWAPPHASE frame frame ;
+setScale            : SETSCALE frame expression ;
+
+delay               : DELAY qubitOrFormal+ STRING* expression ;
+fenceAll            : FENCE ;
+fence               : FENCE qubitOrFormal+ ;
+
+qubitOrFormal       : qubit | qubitVariable ;
+namedParam          : IDENTIFIER COLON expression ;
+waveform            : waveformName (LPAREN namedParam ( COMMA namedParam )* RPAREN)? ;
+frame               : qubitOrFormal+ STRING ;
+
+// built-in waveform types include: "flat", "gaussian", "draggaussian", "erfsquare"
+
+
 ////////////////////
 // LEXER
 ////////////////////
+
+keyword             : DEFGATE | DEFCIRCUIT | MEASURE | LABEL | HALT | JUMP | JUMPWHEN | JUMPUNLESS
+                    | RESET | WAIT | NOP | INCLUDE | PRAGMA | DECLARE | SHARING | OFFSET | AS | MATRIX
+                    | PERMUTATION | NEG | NOT | TRUE | FALSE | AND | IOR | XOR | OR | ADD | SUB | MUL
+                    | DIV | MOVE | EXCHANGE | CONVERT | EQ | GT | GE | LT | LE | LOAD | STORE | PI | I
+                    | SIN | COS | SQRT | EXP | CIS | CAPTURE | DEFCAL | DEFFRAME | DEFWAVEFORM
+                    | DELAY | DIRECTION | FENCE | INITIALFREQUENCY | CENTERFREQUENCY | NONBLOCKING | PULSE | SAMPLERATE
+                    | SETFREQUENCY | SETPHASE | SETSCALE | SHIFTPHASE | SWAPPHASE | RAWCAPTURE
+                    | CONTROLLED | DAGGER | FORKED ;
 
 // Keywords
 
@@ -166,6 +232,11 @@ PRAGMA              : 'PRAGMA' ;
 DECLARE             : 'DECLARE' ;
 SHARING             : 'SHARING' ;
 OFFSET              : 'OFFSET' ;
+
+AS                  : 'AS' ;
+MATRIX              : 'MATRIX' ;
+PERMUTATION         : 'PERMUTATION' ;
+PAULISUM            : 'PAULI-SUM';
 
 NEG                 : 'NEG' ;
 NOT                 : 'NOT' ;
@@ -204,9 +275,6 @@ SQRT                : 'SQRT' ;
 EXP                 : 'EXP' ;
 CIS                 : 'CIS' ;
 
-MATRIX              : 'MATRIX' ;
-PERMUTATION         : 'PERMUTATION' ;
-
 // Operators
 
 PLUS                : '+' ;
@@ -215,10 +283,34 @@ TIMES               : '*' ;
 DIVIDE              : '/' ;
 POWER               : '^' ;
 
+// analog keywords
+
+CAPTURE             : 'CAPTURE' ;
+DEFCAL              : 'DEFCAL' ;
+DEFFRAME            : 'DEFFRAME' ;
+DEFWAVEFORM         : 'DEFWAVEFORM' ;
+DELAY               : 'DELAY' ;
+DIRECTION           : 'DIRECTION' ;
+FENCE               : 'FENCE' ;
+HARDWAREOBJECT      : 'HARDWARE-OBJECT' ;
+INITIALFREQUENCY    : 'INITIAL-FREQUENCY' ;
+CENTERFREQUENCY     : 'CENTER-FREQUENCY' ;
+NONBLOCKING         : 'NONBLOCKING' ;
+PULSE               : 'PULSE' ;
+SAMPLERATE          : 'SAMPLE-RATE' ;
+SETFREQUENCY        : 'SET-FREQUENCY' ;
+SHIFTFREQUENCY      : 'SHIFT-FREQUENCY' ;
+SETPHASE            : 'SET-PHASE' ;
+SETSCALE            : 'SET-SCALE' ;
+SHIFTPHASE          : 'SHIFT-PHASE' ;
+SWAPPHASE           : 'SWAP-PHASE' ;
+RAWCAPTURE          : 'RAW-CAPTURE' ;
+
 // Modifiers
 
 CONTROLLED          : 'CONTROLLED' ;
 DAGGER              : 'DAGGER' ;
+FORKED              : 'FORKED' ;
 
 // Identifiers
 
@@ -231,7 +323,7 @@ FLOAT               : [0-9]+ ( '.' [0-9]+ )? ( ( 'e'|'E' ) ( '+' | '-' )? [0-9]+
 
 // String
 
-STRING              : '"' ~( '\n' | '\r' )* '"';
+STRING              : '"' ~( '\n' | '\r' | '"' )* '"';
 
 // Punctuation
 
