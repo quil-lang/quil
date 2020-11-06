@@ -265,8 +265,6 @@ to pulses by the compiler, or they can resolve the pulses themselves
 
 Here are some example calibrations for various types of gates and measurements.
 
-Here are some example calibrations for various types of gates and measurements.
-
 Setting up frequencies:
 ```
 SET-FREQUENCY 0 "xy" 4678266018.71412
