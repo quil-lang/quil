@@ -121,10 +121,8 @@ Roughly speaking:
 4. Pulses on distinct frames which involve a common resource may not overlap in
    time unless one is marked as `NONBLOCKING`.
    
-A more precise specification of the timing semantics is provided in
+A more precise specification of the timing semantics is proposed in
 [scheduling.md](./scheduling.md).
-
-TODO Erik?
 
 #### Pulse Operations
 
