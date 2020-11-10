@@ -1,57 +1,55 @@
-# Analog Control RFC
+# Quilt Overview and Proposal
 
 ## Introduction
 
-Quil enables users to specify high-level, gate-based, timing-agnostic quantum
-programs. Only a subset of experiments can be specified this way (albeit a
-large subset), others require lower level control.
+Quil enables users to specify high-level, gate-based, timing-agnostic quantum programs. Only a subset of experiments can be specified this way (albeit a large subset), others require lower level control.
 
 In particular there is a desire to:
+
 - be able to define custom waveforms
 - have full control over pulse timing and length
-- be able to introduce more sophisticated translation for ideas eg. dynamic
-decoupling, crosstalk correction, gate decompositions, etc.
-- define new gates (e.g. Toffoli and Fredkin) by composing pulses on frames
-and/or that exploit levels beyond the two level qubit approximation
-- remove channels where discrepancies between internal and external performance
-can be introduced
+- be able to introduce more sophisticated translation for ideas eg. dynamic decoupling, crosstalk correction, gate decompositions, etc.
+- define new gates (e.g. Toffoli and Fredkin) by composing pulses on frames and/or that exploit levels beyond the two level qubit approximation
+- remove channels where discrepancies between internal and external performance can be introduced
 
-This RFC proposes adding analog control to Quil which will be accessible
-through Quil language bindings and used by compilers and simulators.
+This RFC proposes adding analog control to Quil which will be accessible through Quil language bindings and used by compilers and simulators.
 
 ## Language Proposal
 
-See the diff on Quil.md for the syntax of the introduction of a number of new
-Quil instruction types:
-- DEFCAL
-- DEFFRAME, DEFWAVEFORM
-- DELAY
-- FENCE
-- PULSE
-- CAPTURE, RAW-CAPTURE
-- SET-SCALE
-- SET-FREQUENCY, SHIFT-FREQUENCY
-- SET-PHASE, SHIFT-PHASE, SWAP-PHASES
+Quilt extends Quil with the following new instructions
+
+- `DEFCAL`
+- `DEFFRAME`, `DEFWAVEFORM`
+- `DELAY`
+- `FENCE`
+- `PULSE`
+- `CAPTURE`, `RAW-CAPTURE`
+- `SET-SCALE`
+- `SET-FREQUENCY`, `SHIFT-FREQUENCY`
+- `SET-PHASE`, `SHIFT-PHASE`, `SWAP-PHASES`
 
 ### Frames and Waveforms
 
-Each qubit can have multiple frames, denoted by string names such as "xy", "cz",
-or "ro". A frame is an abstraction that captures the instantaneous frequency and
-phase that will be mixed into the control signal. The frame frequencies are with
-respect to the absolute "lab frame".
+Quilt has two notions of _waveforms_. Custom waveforms are defined using
+`DEFWAVEFORM` as a list of complex numbers which represent the desired waveform
+envelope, along with a sample rate. Each complex number represents one sample of
+the waveform. The exact duration (in seconds) of a waveform can be determined by dividing
+the length of the waveform by the _sample rate_ of the frame, which is in units of samples 
+per second.
 
-Quilt has two notions of _waveforms_. Custom waveforms are defined
-using DEFWAVEFORM as a list of complex numbers which represent the
-desired waveform envelope. Each complex number represents one sample
-of the waveform. The exact time to play a waveform on a particular
-frame can be determined by dividing the number of samples by the
-_sample rate_ of the frame, which is in units of samples per second.
+As an example, a custom waveform representing a "linear ramp" might be defined as
 
+```
+DEFWAVEFORM linear_ramp:
+    0.001, 0.002, 0.003, 0.004, ...
+```
 
 There are also some built-in waveform generators which take as a parameter the
 duration of the waveform in seconds, alleviating the need to know the sample
 rate to calculate duration. These are valid for use regardless of the frame's
 underlying sample rate.
+
+#### Frame State
 
 In order to materialize the precise waveforms to be played the waveform
 envelopes must be modulated by the frame's frequency, in addition to applying
@@ -65,14 +63,13 @@ that can be modified throughout the program using SET-* instructions (and
 additional instructions for phase).
 
 Here's a table explaining the differences between these three values that are
-tracked per frame through the program:
+tracked through the program:
 
-| Name      | Initial Value | Valid Values          | Can be parameterized? |
-|-----------|---------------|-----------------------|-----------------------|
-| Frequency | (not set)     | Real numbers          | No                    |
-| Phase     | 0.0           | Real numbers          | Yes                   |
-| Scale     | 1.0           | Real numbers          | No                    |
-
+| Name      | Initial Value                     | Valid Values          | Can be parameterized? |
+|-----------|-----------------------------------|-----------------------|-----------------------|
+| Frequency | INITIAL-FREQUENCY in DEFFRAME     | Real numbers          | Yes                   |
+| Phase     | 0.0                               | Real numbers          | Yes                   |
+| Scale     | 1.0                               | Real numbers          | Yes                   |
 
 ### Pulses
 
@@ -102,11 +99,11 @@ as an integration kernel. The inner product of the integration kernel and the
 list of measured IQ values is evaluated to produce a single complex result.
 
 This complex number needs to be stored in Quil classical memory. Quil does not
-currently support complex numbers, so a real array of length 2 is used instead:
+currently support complex typed memory regions, so a real array of length 2 is used instead:
 ```
 # Simple capture of an IQ point
 DECLARE iq REAL[2]
-CAPTURE 0 "ro" flat(duration: 1e-6, iq: 2+3i) iq
+CAPTURE 0 "ro" boxcar_kernel(duration: 1e-6) iq
 ```
 
 ### Timing
@@ -124,7 +121,7 @@ Roughly speaking:
 4. Pulses on distinct frames which involve a common resource may not overlap in
    time unless one is marked as `NONBLOCKING`.
    
-A more precise specification of the timing semantics is provided in
+A more precise specification of the timing semantics is proposed in
 [scheduling.md](./scheduling.md).
 
 #### Pulse Operations
@@ -148,12 +145,12 @@ in
 
 ```
 NONBLOCKING PULSE 0 "xy" flat(duration: 1.0, iq: 1.0)
-PULSE 0 1 "ff" flat(duration: 1.0, iq: 1.0)
+NONBLOCKING PULSE 0 1 "ff" flat(duration: 1.0, iq: 1.0)
 ```
 
 the two pulses could be emitted simultaneously. Nonetheless, a `NONBLOCKING`
 pulse does still exclude the usage of the pulse frame, so e.g. `NONBLOCKING
-PULSE 0 "xy" ... ; PULSE 0 "xy" ...` would require serial execution.
+PULSE 0 "xy" ... ; NONBLOCKING PULSE 0 "xy" ...` would require serial execution.
 
 #### Delay
 
@@ -193,9 +190,11 @@ Calibrations can be parameterized and include concrete values, which are
 resolved in "Haskell-style", with later definitions being prioritized over
 earlier ones. For example, given the following list of calibration definitions
 in this order:
-1. `DEFCAL RX(%theta) %qubit:`
-2. `DEFCAL RX(%theta) 0:`
-3. `DEFCAL RX(pi/2) 0:`
+
+1. `DEFCAL RX(%theta) qubit: ...`
+2. `DEFCAL RX(%theta) 0: ...`
+3. `DEFCAL RX(pi/2) 0: ...`
+
 The instruction `RX(pi/2) 0` would match (3), the instruction `RX(pi) 0` would
 match (2), and the instruction `RX(pi/2) 1` would match (1).
 
@@ -299,9 +298,9 @@ DEFCAL RX(pi/2) 0:
 
 RZ:
 ```
-DEFCAL RZ(%theta) %qubit:
+DEFCAL RZ(%theta) qubit:
     # RZ of +theta corresponds to a frame change of -theta
-    SHIFT-PHASE %qubit "xy" -%theta
+    SHIFT-PHASE qubit "xy" -%theta
 ```
 
 Calibrations of CZ:
@@ -313,23 +312,23 @@ DEFCAL CZ 0 1:
 
 # With no parallel 2Q gates
 DEFCAL CZ 0 1:
-    FENCE 0 1 2 3 4 5 6 7 10 11 12 13 14 15 16 17
+    FENCE
     PULSE 0 1 "cz" erfsquare(duration: 340e-9, risetime: 20e-9, padleft: 8e-9, padright: 8e-9)
     SHIFT-PHASE 0 "xy" 0.00181362669
     SHIFT-PHASE 1 "xy" 3.44695296672
-    FENCE 0 1 2 3 4 5 6 7 10 11 12 13 14 15 16 17
+    FENCE
 ```
 
 Readout:
 ```
-DEFCAL MEASURE 0 %dest:
+DEFCAL MEASURE 0 dest:
     DECLARE iq REAL[2]
     PULSE 0 "ro" flat(duration: 1.2e-6, iq: ???)
     CAPTURE 0 "out" flat(duration: 1.2e-6, iq: ???) iq
     LT %dest iq[0] ??? # thresholding
 ```
 
-Toffoli gate (from Colm):
+Toffoli gate:
 ```
 SET-FREQUENCY 12 13 "cz" 283.5e6
 SET-FREQUENCY 13 14 "iswap" 181e6
@@ -351,19 +350,6 @@ DEFCAL CCNOT 12 13 14:
     FENCE 12 13 14
 ```
 
-Active Reset Calibration:
-```
-DEFCAL RESET %qubit:
-    DECLARE ro BIT
-    MEASURE %qubit ro[0]
-    JUMP-UNLESS ro @delay
-    RX(pi) %qubit
-    JUMP @end
-    LABEL delay
-    DELAY %qubit 60e-9
-    LABEL end
-```
-
 Single point of a parametric gate chevron:
 (parameterized in amplitude, frequency, and time)
 ```
@@ -372,6 +358,19 @@ RX(pi) 1
 SET-FREQUENCY 0 "cz" 160e6
 SET-SCALE 0 "cz" 0.45
 PULSE 0 1 "cz" erfsquare(duration: 100e-9, risetime: 20e-9, padleft: 0, padright: 0)
+```
+
+Active Reset Calibration:
+```
+DEFCAL RESET qubit:
+    DECLARE ro BIT
+    MEASURE qubit ro[0]
+    JUMP-UNLESS ro @delay
+    RX(pi) qubit
+    JUMP @end
+    LABEL delay
+    DELAY qubit 60e-9
+    LABEL end
 ```
 
 ## FAQs
