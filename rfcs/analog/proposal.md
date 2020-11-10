@@ -103,7 +103,7 @@ currently support complex typed memory regions, so a real array of length 2 is u
 ```
 # Simple capture of an IQ point
 DECLARE iq REAL[2]
-CAPTURE 0 "ro" boxcar_kernel(duration: 1e-6) iq
+CAPTURE 0 "ro" flat(duration: 1e-6, iq: 2+3i) iq
 ```
 
 ### Timing
