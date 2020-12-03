@@ -172,7 +172,7 @@ frameSpec           : NEWLINE TAB frameAttr COLON ( expression | STRING ) ;
 frameAttr           : SAMPLERATE | INITIALFREQUENCY | DIRECTION | HARDWAREOBJECT | CENTERFREQUENCY;
 
 defWaveform         : DEFWAVEFORM waveformName ( LPAREN param (COMMA param)* RPAREN )? COLON NEWLINE matrix ;
-defCalibration      : DEFCAL name (LPAREN param ( COMMA param )* RPAREN)? qubitOrFormal+ COLON ( NEWLINE TAB instr )* ;
+defCalibration      : DEFCAL name (LPAREN param ( COMMA param )* RPAREN)? qubitOrFormal+ COLON ( NEWLINE TAB instr )+ ;
 defMeasCalibration  : DEFCAL MEASURE qubitOrFormal ( name )? COLON ( NEWLINE TAB instr )* ;
 
 pulse               : NONBLOCKING? PULSE frame waveform ;
