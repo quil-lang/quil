@@ -321,11 +321,17 @@ DEFCAL CZ 0 1:
 
 Readout:
 ```
-DEFCAL MEASURE 0 dest:
-    DECLARE iq REAL[2]
-    PULSE 0 "ro" flat(duration: 1.2e-6, iq: ???)
-    CAPTURE 0 "out" flat(duration: 1.2e-6, iq: ???) iq
-    LT %dest iq[0] ??? # thresholding
+DEFCAL MEASURE 0 addr:
+    FENCE 0
+    DECLARE q0_unclassified REAL[2]
+    NONBLOCKING PULSE 0 "ro_tx" flat(duration: 1.68e-06, iq: 1.0, scale: 0.04466835921509615, phase: 0.0, detuning: 0.0)
+    NONBLOCKING CAPTURE 0 "ro_rx" boxcar_kernel(duration: 1.68e-06, scale: 1.0, phase: 2.6571617075901393, detuning: 0.0) q0_unclassified[0]
+    PRAGMA FILTER-NODE q0_unclassified "{'module':'lodgepole.filters.io','filter_type':'DataBuffer','source':'q0_ro_rx/filter','publish':true,'params':{},'_type':'FilterNode'}"
+    PRAGMA LOAD-MEMORY q0_unclassified "q0_unclassified[0]"
+    PRAGMA FILTER-NODE q0_classified "{'module':'lodgepole.filters.classifiers','filter_type':'SingleQLinear','source':'q0_ro_rx/filter','publish':false,'params':{'a':[1.0,0.0],'threshold':0.000241237408735565},'_type':'FilterNode'}"
+    PRAGMA FILTER-NODE q0 "{'module':'lodgepole.filters.io','filter_type':'DataBuffer','source':'q0_classified','publish':true,'params':{},'_type':'FilterNode'}"
+    PRAGMA LOAD-MEMORY q0 "addr"
+    FENCE 0
 ```
 
 Toffoli gate:
