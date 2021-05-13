@@ -59,6 +59,7 @@ Quil, such as the @quil{INCLIDE} directive for including files.}
 
 @syntax[:name "Instruction"]{
      @ms{Gate Application}
+@alt @ms{Measurement Instruction}
 @alt @ms{Circuit Application}
 @alt @ms{Classical Memory Instruction}
 @alt @ms{Reset Instruction}
@@ -67,12 +68,42 @@ Quil, such as the @quil{INCLIDE} directive for including files.}
 @alt @ms{Halt Instruction}
 }
 
-@section[:title "Syntax"]
+@subsection[:title "Comments"]
 
-@subsection[:title "Identifiers"]
+@p{Comments may exist syntactically, but do not change the semantics
+of the program. Text including and following the '@c{#}' character are ignored up
+to the end of the line.}
+
+@syntax[:name "Comment"]{
+#[^\n]*
+}
+
+@section[:title "Syntactic Rudiments"]
+
+@p{Before proceeding to describe each component of a Quil program, it
+will be useful to establish a few common pieces of syntax which will
+be used later.}
+
+@p{Non-negative integers are written as usual. Leading zeros do not
+change the interpretation of these numeric literals.}
+
+@syntax[:name "Non-Negative Integer"]{
+[0-9]+
+}
+
+@p{Strings are characters bounded by double-quotation mark characters
+'@c{"}'. If a double-quotation mark should be used within the string,
+it must be escaped with a backslash, like so: '@c{\"}'. Similarly, if
+a backslash should be used within a string, it must be escaped, like
+so: '@c{\\}'.}
+
+@syntax[:name "String"]{
+"([^\"] | \" | \\)*"
+}
 
 @p{Identifiers in Quil are alphanumeric Latin characters, along with
-hyphens and underscores.}
+hyphens and underscores. Identifiers may neither start not end with a
+hyphen '@c{-}'.}
 
 @syntax[:name "Identifier"]{
 [A-Za-z_] | [A-Za-z_][A-Za-z0-9\-_]*[A-Za-z0-9_]
@@ -84,31 +115,6 @@ hyphens and underscores.}
 DEFGATE DEFCIRCUIT PRAGMA ...
 }
 }
-
-@subsection[:title "String Literals"]
-
-@p{Some instructions, such as @quil{PRAGMA}, take a string literal. Strings are characters bounded by double-quotation mark characters @c{"}. If a double-quotation mark should be used within the string, it must be escaped with a backslash @c{\}.}
-
-@syntax[:name "String"]{
-\"([^\"]|\\\")*\"
-}
-
-@subsection[:title "Comments"]
-
-@syntax[:name "Comment"]{
-# [^\n]*
-}
-
-@p{Text including and following the @c{#} character are ignored up to the end of the line.}
-
-@subsection[:title "Qubit Indexes"]
-
-@p{Qubits are indexed by a non-negative integer.}
-
-@syntax[:name "Qubit"]{
-[0-9]+
-}
-
 
 @section[:title "Test Area"]
 
