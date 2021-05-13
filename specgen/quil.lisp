@@ -134,8 +134,24 @@
     :body (append
            (include (spec/ "sec-intro.scr")))))
 
+;;; Section Counters
+
+(defun make-counter ()
+  (make-array 10 :initial-element 0))
+
+(defun heading-counter-string (counter level)
+  (format nil "~{~D~^.~}"
+          (coerce
+           (subseq counter 0 level)
+           'list)))
+
+(defun incf-heading (counter level)
+  (incf (aref counter (1- level)))
+  (fill counter 0 :start level))
 
 ;;; HTML Generation and Export
+
+(defvar *section-counter*)
 
 (defvar *path* nil)
 (defun current-path ()
@@ -162,25 +178,23 @@
 
 
 (defmethod html (stream (o document))
-  (cl-who:with-html-output (s stream :prologue t :indent t)
-    (:html
-     (cl-who:fmt "~&<!-- This document was automatically generated on ~A. -->"
-                 (local-time:format-timestring nil (local-time:now)))
-     (:head
-      (:title (cl-who:esc (title o)))
-      #+ignore
-      (:link :rel "stylesheet"
-             :href "https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css")
-      (:link :rel "stylesheet"
-             :href "spec-style.css")
-      (:script :src "https://polyfill.io/v3/polyfill.min.js?features=es6")
-      (:script :id "MathJax-script"
-               :src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"))
-     (:body
-      (:h1 (cl-who:esc (title o)))
-      (:p (:b "Authors: ") (cl-who:esc (document-author o)))
-      (:p (:b "Language Version: ") (cl-who:esc (document-version o)))
-      (html-body s o)))))
+  (let ((*section-counter* (make-counter)))
+    (cl-who:with-html-output (s stream :prologue t :indent t)
+      (:html
+       (cl-who:fmt "~&<!-- This document was automatically generated on ~A. -->"
+                   (local-time:format-timestring nil (local-time:now)))
+       (:head
+        (:title (cl-who:esc (title o)))
+        (:link :rel "stylesheet"
+               :href "spec-style.css")
+        (:script :src "https://polyfill.io/v3/polyfill.min.js?features=es6")
+        (:script :id "MathJax-script"
+                 :src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"))
+       (:body
+        (:h1 (cl-who:esc (title o)))
+        (:p (:b "Authors: ") (cl-who:esc (document-author o)))
+        (:p (:b "Language Version: ") (cl-who:esc (document-version o)))
+        (html-body s o))))))
 
 (defmethod html (stream (o string))
   (cl-who:with-html-output (s stream)
@@ -210,13 +224,19 @@
      (html-body s o))))
 
 (defmethod html (stream (o heading-section))
+  (incf-heading *section-counter* 1)
   (cl-who:with-html-output (s stream)
     (:h2
+     (cl-who:str (heading-counter-string *section-counter* 1))
+     (cl-who:str ". ")
      (html s (title o)))))
 
 (defmethod html (stream (o heading-subsection))
+  (incf-heading *section-counter* 2)
   (cl-who:with-html-output (s stream)
     (:h3
+     (cl-who:str (heading-counter-string *section-counter* 2))
+     (cl-who:str ". ")
      (html s (title o)))))
 
 (defmethod html (stream (o aside))
@@ -263,11 +283,7 @@
                    (cl-who:esc " ⩴ ")
                    (cl-who:htm
                     (:code
-                     (html-body s o)))))
-                 #+ig
-                 (:details
-                  (:summary "Side Note")
-                  (html-body s o)))))))))
+                     (html-body s o))))))))))))
 
 (defmethod html (stream (o syntax-alt))
   (cl-who:with-html-output (s stream)
