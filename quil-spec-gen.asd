@@ -1,7 +1,7 @@
 (defsystem #:quil-spec-gen
   :description "Quil spec and code to generate it as a document."
   :author "Robert Smith"
-  :depends-on (#:scrawl #:cl-who #:local-time)
+  :depends-on (#:scrawl #:cl-who #:local-time #:split-sequence)
   :pathname "specgen/"
   :serial t
   :components ((:file "quil")

@@ -34,12 +34,12 @@ p.aside {
     padding: 12px;
 }
 
-p.syntax {
+div.syntax {
     background-color: #f9fae8;
     border-left: solid 4px #f4ff26;
     line-height: 18px;
     overflow: hidden;
-    padding: 12px;
+    padding-left: 12px;
 }
 
 span.meta-syntax {
