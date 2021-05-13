@@ -64,6 +64,11 @@
 (setf (gethash 'display-syntax *commands*) 'display-syntax)
 (setf (gethash 'syntax *commands*) 'display-syntax)
 
+(defclass syntax-alt ()
+  ())
+(setf (gethash 'syntax-alt *commands*) 'syntax-alt)
+(setf (gethash 'alt *commands*) 'syntax-alt)
+
 (defclass inline-quil (inline-code)
   ())
 (setf (gethash 'inline-quil *commands*) 'inline-quil)
@@ -97,6 +102,10 @@
                                         (body nil body-present-p))
   (let ((class (gethash operator *commands*)))
     (cond
+      ((not (symbolp operator))
+       (assert (null options))
+       (assert (null body))
+       operator)
       (class
        (when body-present-p
          (setf (getf options ':body) body))
@@ -220,18 +229,49 @@
      (:summary "Side Note")
      (html-body s o))))
 
+(defun syntax-alt-p (x)
+  (typep x 'syntax-alt))
+
 (defmethod html (stream (o display-syntax))
+  (let ((ms (make-instance 'inline-meta-syntax
+              :body (list (display-syntax-name o)))))
+    (cl-who:with-html-output (s stream)
+      (:div :class "syntax"
+            (let ((body (body o)))
+              (cond
+                ((find-if #'syntax-alt-p body)
+                 (let ((alternatives
+                         (split-sequence:split-sequence-if #'syntax-alt-p body)))
+                   (cl-who:htm
+                    (:table :border 0 :cellpadding 4
+                            (:tr
+                             (:td
+                              :style "text-align:right"
+                              (html s ms)
+                              (cl-who:esc " ⩴"))
+                             (:td
+                              (html-list s (pop alternatives))))
+                            (loop :for alt :in alternatives
+                                  :do (cl-who:htm
+                                       (:tr
+                                        (:td :style "text-align:right" (cl-who:esc "|"))
+                                        (:td (html-list s alt)))))))))
+                (t
+                 (cl-who:htm
+                  (:p
+                   (html s ms)
+                   (cl-who:esc " ⩴ ")
+                   (cl-who:htm
+                    (:code
+                     (html-body s o)))))
+                 #+ig
+                 (:details
+                  (:summary "Side Note")
+                  (html-body s o)))))))))
+
+(defmethod html (stream (o syntax-alt))
   (cl-who:with-html-output (s stream)
-    (:p :class "syntax"
-        (html s (make-instance 'inline-meta-syntax
-                  :body (list (display-syntax-name o))))
-        (cl-who:esc " ⩴ ")
-        (:code
-         (html-body s o)))
-    #+ig
-    (:details
-     (:summary "Side Note")
-     (html-body s o))))
+    (:code " | ")))
 
 (defmethod html (stream (o display-code))
   (cl-who:with-html-output (s stream :indent t)

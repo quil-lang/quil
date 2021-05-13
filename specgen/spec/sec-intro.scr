@@ -4,7 +4,7 @@
 classical/quantum computations.}
 
 @p{Quil is an instruction-based language; each line of a Quil program
-generally corresponds to a single, discrete action. Desoite its
+generally corresponds to a single, discrete action. Despite its
 resemblance, Quil is @emph{not} an assembly language.}
 
 @aside{An @emph{assembly language} is a textual format for the machine
@@ -22,6 +22,49 @@ Here, we can see the use of both classical data and quantum data. The
 qubit numbered @c{0} is prepared in a uniform superposition by the
 Hadamard gate @c{H}, and then measured in the computational basis,
 depositing the resulting bit into a classic bit register named @c{ro}.
+}
+
+@section[:title "Structure of a Quil Program"]
+
+@p{A Quil program consists of declarations, directives, and
+instructions.}
+
+@syntax[:name "Program"]{
+@ms{Program Element}*
+}
+
+@syntax[:name "Program Element"]{
+@ms{Declaration} | @ms{Directive} |  @ms{Instruction}
+}
+
+@p{A @emph{declaration} typically specifies the existence of a named
+object, like classical memory registers.}
+
+@syntax[:name "Declaration"]{
+     @ms{Gate Definition}
+@alt @ms{Circuit Definition}
+@alt @ms{Classical Memory Declaration}
+}
+
+@p{A @emph{directive} specifies information to software processing
+Quil, such as the @quil{INCLIDE} directive for including files.}
+
+@syntax[:name "Directive"]{
+     @ms{Pragma}
+@alt @ms{Label}
+@alt @ms{File Include}
+}
+
+@p{An @emph{instruction} is an actual run-time executable effect.}
+
+@syntax[:name "Instruction"]{
+     @ms{Gate Application}
+@alt @ms{Circuit Application}
+@alt @ms{Classical Memory Instruction}
+@alt @ms{Reset Instruction}
+@alt @ms{Wait Instruction}
+@alt @ms{Branch Instruction}
+@alt @ms{Halt Instruction}
 }
 
 @section[:title "Syntax"]
