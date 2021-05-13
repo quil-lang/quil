@@ -1,0 +1,72 @@
+@section[:title "Introduction"]
+
+@p{This is the language specification for Quil, a language for hybrid
+classical/quantum computations.}
+
+@p{Quil is an instruction-based language; each line of a Quil program
+generally corresponds to a single, discrete action. Desoite its
+resemblance, Quil is @emph{not} an assembly language.}
+
+@aside{An @emph{assembly language} is a textual format for the machine
+code of a specific computer architecture.}
+
+@p{This is an example Quil program which simulates a coin flip:
+
+@clist{
+DECLARE ro BIT[1]
+H 0
+MEASURE 0 ro[0]
+}
+
+Here, we can see the use of both classical data and quantum data. The
+qubit numbered @c{0} is prepared in a uniform superposition by the
+Hadamard gate @c{H}, and then measured in the computational basis,
+depositing the resulting bit into a classic bit register named @c{ro}.
+}
+
+@section[:title "Syntax"]
+
+@subsection[:title "Identifiers"]
+
+@p{Identifiers in Quil are alphanumeric Latin characters, along with
+hyphens and underscores.}
+
+@syntax[:name "Identifier"]{
+[A-Za-z_] | [A-Za-z_][A-Za-z0-9\-_]*[A-Za-z0-9_]
+}
+
+@p{The following identifiers are reserved:
+
+@clist{
+DEFGATE DEFCIRCUIT PRAGMA ...
+}
+}
+
+@subsection[:title "String Literals"]
+
+@p{Some instructions, such as @quil{PRAGMA}, take a string literal. Strings are characters bounded by double-quotation mark characters @c{"}. If a double-quotation mark should be used within the string, it must be escaped with a backslash @c{\}.}
+
+@syntax[:name "String"]{
+\"([^\"]|\\\")*\"
+}
+
+@subsection[:title "Comments"]
+
+@syntax[:name "Comment"]{
+# [^\n]*
+}
+
+@p{Text including and following the @c{#} character are ignored up to the end of the line.}
+
+@subsection[:title "Qubit Indexes"]
+
+@p{Qubits are indexed by a non-negative integer.}
+
+@syntax[:name "Qubit"]{
+[0-9]+
+}
+
+
+@section[:title "Test Area"]
+
+@p{Let @m{a,b,c\in\mathbb{R}} in @dm{ax^2+bx+c=0,} which is a quadratic equation whose solutions are @dm{x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}.}}
