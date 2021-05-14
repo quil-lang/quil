@@ -42,7 +42,19 @@ div.syntax {
     padding-left: 12px;
 }
 
+span.meta-syntax-identifier {
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+span.meta-syntax-descriptive {
+    font-family: serif;
+    font-style: italic;
+    color: #777777;
+}
+
 span.meta-syntax {
     font-family: sans-serif;
     font-weight: bold;
+    color: #777777;
 }

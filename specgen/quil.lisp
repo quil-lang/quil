@@ -69,6 +69,25 @@
 (setf (gethash 'syntax-alt *commands*) 'syntax-alt)
 (setf (gethash 'alt *commands*) 'syntax-alt)
 
+(defclass syntax-group (body-mixin)
+  ())
+(setf (gethash 'syntax-group *commands*) 'syntax-group)
+(setf (gethash 'group *commands*) 'syntax-group)
+
+(defclass syntax-descriptive (body-mixin)
+  ())
+(setf (gethash 'syntax-descriptive *commands*) 'syntax-descriptive)
+
+(defclass syntax-repetition (body-mixin)
+  ((min :initarg :min
+        :initform 0
+        :reader syntax-repetition-min)
+   (max :initarg :max
+        :initform nil
+        :reader syntax-repetition-max)))
+(setf (gethash 'syntax-repetition *commands*) 'syntax-repetition)
+(setf (gethash 'rep *commands*) 'syntax-repetition)
+
 (defclass inline-quil (inline-code)
   ())
 (setf (gethash 'inline-quil *commands*) 'inline-quil)
@@ -84,27 +103,35 @@
 (setf (gethash 'inline-meta-syntax *commands*) 'inline-meta-syntax)
 (setf (gethash 'ms *commands*) 'inline-meta-syntax)
 
-(defclass heading-section (titled-mixin)
+(defclass heading-mixin ()
+  ())
+
+(defclass heading-section (titled-mixin heading-mixin)
   ())
 (setf (gethash 'heading-section *commands*) 'heading-section)
 (setf (gethash 'section *commands*) 'heading-section)
 
-(defclass heading-subsection (titled-mixin)
+(defclass heading-subsection (titled-mixin heading-mixin)
   ())
 (setf (gethash 'heading-subsection *commands*) 'heading-subsection)
 (setf (gethash 'subsection *commands*) 'heading-subsection)
+
+(defclass heading-subsubsection (titled-mixin heading-mixin)
+  ())
+(setf (gethash 'heading-subsubsection *commands*) 'heading-subsubsection)
+(setf (gethash 'subsubsection *commands*) 'heading-subsubsection)
 
 (defclass document (titled-mixin body-mixin)
   ((author :initarg :author :reader document-author)
    (version :initarg :version :reader document-version)))
 
-(defun clos-form-handler (operator &key options
+(defun clos-form-handler (operator &key (options nil options-present-p)
                                         (body nil body-present-p))
   (let ((class (gethash operator *commands*)))
     (cond
-      ((not (symbolp operator))
-       (assert (null options))
-       (assert (null body))
+      ((and (not (symbolp operator))
+            (not options-present-p)
+            (not body-present-p))
        operator)
       (class
        (when body-present-p
@@ -167,7 +194,10 @@
   (:method (stream object)
     (cl-who:with-html-output (s stream :indent t)
       (:span :style "color:tomato"
-             (cl-who:esc (format nil "<unknown ~A>~2%" (class-name (class-of object))))))))
+             (cl-who:esc (format nil "<unknown ~A>~2%" (class-name (class-of object)))))))
+  (:method :before (stream (o heading-mixin))
+    (unless (= 1 (length (current-path)))
+      (error "Can't have nested headings. Found ~A nested inside of ~A" o (current-path)))))
 
 (defun html-list (stream list)
   (loop :for x :in list
@@ -212,11 +242,10 @@
 
 (defmethod html (stream (o inline-meta-syntax))
   (cl-who:with-html-output (s stream)
-    (:span
-     (cl-who:esc "⟨")
-     (:span :class "meta-syntax"
-      (html-body s o))
-     (cl-who:esc "⟩"))))
+    (:span :class "meta-syntax-identifier"
+           (cl-who:esc "⟨")
+           (html-body s o)
+           (cl-who:esc "⟩"))))
 
 (defmethod html (stream (o inline-code))
   (cl-who:with-html-output (s stream)
@@ -236,6 +265,14 @@
   (cl-who:with-html-output (s stream)
     (:h3
      (cl-who:str (heading-counter-string *section-counter* 2))
+     (cl-who:str ". ")
+     (html s (title o)))))
+
+(defmethod html (stream (o heading-subsubsection))
+  (incf-heading *section-counter* 3)
+  (cl-who:with-html-output (s stream)
+    (:h4
+     (cl-who:str (heading-counter-string *section-counter* 3))
      (cl-who:str ". ")
      (html s (title o)))))
 
@@ -270,12 +307,15 @@
                               (html s ms)
                               (cl-who:esc " ⩴"))
                              (:td
-                              (html-list s (pop alternatives))))
+                              (:code
+                               (html-list s (pop alternatives)))))
                             (loop :for alt :in alternatives
                                   :do (cl-who:htm
                                        (:tr
                                         (:td :style "text-align:right" (cl-who:esc "|"))
-                                        (:td (html-list s alt)))))))))
+                                        (:td
+                                         (:code
+                                          (html-list s alt))))))))))
                 (t
                  (cl-who:htm
                   (:p
@@ -288,6 +328,43 @@
 (defmethod html (stream (o syntax-alt))
   (cl-who:with-html-output (s stream)
     (:code " | ")))
+
+(defmethod html (stream (o syntax-group))
+  (cl-who:with-html-output (s stream)
+    (:span :class "meta-syntax"
+           (cl-who:esc "("))
+    (html-body s o)
+    (:span :class "meta-syntax"
+           (cl-who:esc ")"))))
+
+(defmethod html (stream (o syntax-descriptive))
+  (cl-who:with-html-output (s stream)
+    (:span :class "meta-syntax"
+           (cl-who:esc "⟨"))
+    (:span :class "meta-syntax-descriptive"
+           (html-body s o))
+    (:span :class "meta-syntax"
+           (cl-who:esc "⟩"))))
+
+(defmethod html (stream (o syntax-repetition))
+  (let ((min (syntax-repetition-min o))
+        (max (syntax-repetition-max o)))
+    (cl-who:with-html-output (s stream)
+      (html-body s o)
+      (:span :class "meta-syntax"
+             (:sup
+              (cond
+                ((null max)
+                 (cond
+                   ((zerop min)
+                    (cl-who:esc "*"))
+                   ((= 1 min)
+                    (cl-who:esc "+"))
+                   (t
+                    (cl-who:esc
+                     (format nil "[~D,∞)" min)))))
+                (t
+                 (cl-who:fmt "[~D,~D]" min max))))))))
 
 (defmethod html (stream (o display-code))
   (cl-who:with-html-output (s stream :indent t)
