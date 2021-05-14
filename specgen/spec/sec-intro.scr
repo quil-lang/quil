@@ -26,11 +26,13 @@ depositing the resulting bit into a classic bit register named @c{ro}.
 
 @section[:title "Structure of a Quil Program"]
 
+@subsection[:title "Main Program Elements"]
+
 @p{A Quil program consists of declarations, directives, and
 instructions.}
 
 @syntax[:name "Program"]{
-@ms{Program Element}*
+@rep{@ms{Program Element}}
 }
 
 @syntax[:name "Program Element"]{
@@ -75,7 +77,7 @@ of the program. Text including and following the '@c{#}' character are ignored u
 to the end of the line.}
 
 @syntax[:name "Comment"]{
-#[^\n]*
+#@rep{[^\n]}
 }
 
 @section[:title "Syntactic Rudiments"]
@@ -84,11 +86,27 @@ to the end of the line.}
 will be useful to establish a few common pieces of syntax which will
 be used later.}
 
+@p{A newline is a single ASCII carriage return.}
+
+@syntax[:name "Newline"]{
+@syntax-descriptive{ASCII 10}
+}
+
+@p{An indent is defined as exactly four spaces at the start of a line.}
+
+@syntax[:name "Indent"]{
+@group{@syntax-descriptive{start of file} @alt @ms{Newline}}
+@syntax-descriptive{ASCII 32}
+@syntax-descriptive{ASCII 32}
+@syntax-descriptive{ASCII 32}
+@syntax-descriptive{ASCII 32}
+}
+
 @p{Non-negative integers are written as usual. Leading zeros do not
 change the interpretation of these numeric literals.}
 
 @syntax[:name "Non-Negative Integer"]{
-[0-9]+
+@rep[:min 1]{[0-9]}
 }
 
 @p{Strings are characters bounded by double-quotation mark characters
@@ -98,7 +116,7 @@ a backslash should be used within a string, it must be escaped, like
 so: '@c{\\}'.}
 
 @syntax[:name "String"]{
-"([^\"] | \" | \\)*"
+"@rep{@group{[^\"] | \" | \\}}"
 }
 
 @p{Identifiers in Quil are alphanumeric Latin characters, along with
@@ -106,7 +124,7 @@ hyphens and underscores. Identifiers may neither start not end with a
 hyphen '@c{-}'.}
 
 @syntax[:name "Identifier"]{
-[A-Za-z_] | [A-Za-z_][A-Za-z0-9\-_]*[A-Za-z0-9_]
+[A-Za-z_] @alt [A-Za-z_]@rep{[A-Za-z0-9\-_]}[A-Za-z0-9_]
 }
 
 @p{The following identifiers are reserved:
@@ -115,6 +133,52 @@ hyphen '@c{-}'.}
 DEFGATE DEFCIRCUIT PRAGMA ...
 }
 }
+
+@section[:title "Quantum Gates"]
+
+@subsection[:title "General Remarks"]
+
+@p{Simple and parametric gates}
+
+@subsection[:title "Quantum Gate Definitions"]
+
+@subsubsection[:title "Structure of a Gate Definition"]
+
+@p{A gate definition in general has the following (informal) structure:}
+
+@clist{
+DEFGATE <name>(<params>) AS <kind>:
+    <body>
+}
+
+@p{Here, the @c{<name>} names the gate, the @c{<kind>} states how we
+are defining the gate, and the @c{<body>} depends on the @c{kind}. For
+certain gates, @c{<params>} specifies parameters to the gate.}
+
+@syntax[:name "Gate Definition"]{
+     @ms{Matrix Gate Definition}
+@alt @ms{Permutation Gate Definition}
+@alt @ms{Pauli Gate Definition}
+}
+
+@subsubsection[:title "Definition by Matrix"]
+
+@subsubsection[:title "Definition by Permutation"]
+
+@syntax[:name "Permutation Gate Definition"]{
+DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Newline}@ms{Indent}@ms{Permutation}
+}
+
+@subsubsection[:title "Definition by Pauli Sum"]
+
+@subsection[:title "Standard Gate Definitions"]
+
+@subsection[:title "Quantum Gate Applications"]
+
+@subsubsection[:title "Gate Modifiers"]
+
+
+
 
 @section[:title "Test Area"]
 
