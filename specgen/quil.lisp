@@ -103,20 +103,21 @@
 (setf (gethash 'inline-meta-syntax *commands*) 'inline-meta-syntax)
 (setf (gethash 'ms *commands*) 'inline-meta-syntax)
 
-(defclass heading-mixin ()
-  ())
+(defclass heading-mixin (titled-mixin)
+  ((number :initarg :number :accessor heading-number
+           :initform nil)))
 
-(defclass heading-section (titled-mixin heading-mixin)
+(defclass heading-section (heading-mixin)
   ())
 (setf (gethash 'heading-section *commands*) 'heading-section)
 (setf (gethash 'section *commands*) 'heading-section)
 
-(defclass heading-subsection (titled-mixin heading-mixin)
+(defclass heading-subsection (heading-mixin)
   ())
 (setf (gethash 'heading-subsection *commands*) 'heading-subsection)
 (setf (gethash 'subsection *commands*) 'heading-subsection)
 
-(defclass heading-subsubsection (titled-mixin heading-mixin)
+(defclass heading-subsubsection (heading-mixin)
   ())
 (setf (gethash 'heading-subsubsection *commands*) 'heading-subsubsection)
 (setf (gethash 'subsubsection *commands*) 'heading-subsubsection)
@@ -124,6 +125,51 @@
 (defclass document (titled-mixin body-mixin)
   ((author :initarg :author :reader document-author)
    (version :initarg :version :reader document-version)))
+
+;;; Post-Processing
+
+;; Heading Numbers
+
+(defun make-counter ()
+  (make-array 10 :initial-element 0))
+
+(defun heading-counter-string (counter level)
+  (format nil "~{~D~^.~}"
+          (coerce
+           (subseq counter 0 level)
+           'list)))
+
+(defun incf-heading (counter level)
+  (incf (aref counter (1- level)))
+  (fill counter 0 :start level))
+
+(defun assign-heading-numbers (document)
+  (let ((counter (make-counter)))
+    (dolist (item (body document))
+      (typecase item
+        (heading-section
+         (incf-heading counter 1)
+         (setf (heading-number item) (heading-counter-string counter 1)))
+        (heading-subsection
+         (incf-heading counter 2)
+         (setf (heading-number item) (heading-counter-string counter 2)))
+        (heading-subsubsection
+         (incf-heading counter 3)
+         (setf (heading-number item) (heading-counter-string counter 3)))))))
+
+
+(defclass table-of-contents ()
+  ((headings :initarg :headings :reader table-of-contents-headings)))
+
+(defun headingp (x)
+  (typep x 'heading-mixin))
+
+(defun generate-toc (doc)
+  (let ((headings (remove-if-not #'headingp (body doc))))
+    (make-instance 'table-of-contents
+      :headings headings)))
+
+;;; Generating the Document
 
 (defun clos-form-handler (operator &key (options nil options-present-p)
                                         (body nil body-present-p))
@@ -154,31 +200,17 @@
             :collect r))))
 
 (defun make-quil-spec-document ()
-  (make-instance 'document
-    :title "Quil Specification"
-    :author "many"
-    :version "2021.1"
-    :body (append
-           (include (spec/ "sec-intro.scr")))))
-
-;;; Section Counters
-
-(defun make-counter ()
-  (make-array 10 :initial-element 0))
-
-(defun heading-counter-string (counter level)
-  (format nil "~{~D~^.~}"
-          (coerce
-           (subseq counter 0 level)
-           'list)))
-
-(defun incf-heading (counter level)
-  (incf (aref counter (1- level)))
-  (fill counter 0 :start level))
+  (let ((doc (make-instance 'document
+               :title "Quil Specification"
+               :author "many"
+               :version "2021.1"
+               :body (append
+                      (include (spec/ "sec-intro.scr"))))))
+    (assign-heading-numbers doc)
+    (push (generate-toc doc) (slot-value doc 'body))
+    doc))
 
 ;;; HTML Generation and Export
-
-(defvar *section-counter*)
 
 (defvar *path* nil)
 (defun current-path ()
@@ -208,23 +240,38 @@
 
 
 (defmethod html (stream (o document))
-  (let ((*section-counter* (make-counter)))
-    (cl-who:with-html-output (s stream :prologue t :indent t)
-      (:html
-       (cl-who:fmt "~&<!-- This document was automatically generated on ~A. -->"
-                   (local-time:format-timestring nil (local-time:now)))
-       (:head
-        (:title (cl-who:esc (title o)))
-        (:link :rel "stylesheet"
-               :href "spec-style.css")
-        (:script :src "https://polyfill.io/v3/polyfill.min.js?features=es6")
-        (:script :id "MathJax-script"
-                 :src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"))
-       (:body
-        (:h1 (cl-who:esc (title o)))
-        (:p (:b "Authors: ") (cl-who:esc (document-author o)))
-        (:p (:b "Language Version: ") (cl-who:esc (document-version o)))
-        (html-body s o))))))
+  (cl-who:with-html-output (s stream :prologue t :indent t)
+    (:html
+     (cl-who:fmt "~&<!-- This document was automatically generated on ~A. -->"
+                 (local-time:format-timestring nil (local-time:now)))
+     (:head
+      (:title (cl-who:esc (title o)))
+      (:link :rel "stylesheet"
+             :href "spec-style.css")
+      #-ig(:script :src "https://polyfill.io/v3/polyfill.min.js?features=es6")
+      #-ig(:script :id "MathJax-script"
+                   :src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"))
+     (:body
+      (:h1 (cl-who:esc (title o)))
+      (:p (:b "Authors: ") (cl-who:esc (document-author o)))
+      (:p (:b "Language Version: ") (cl-who:esc (document-version o)))
+      (html-body s o)))))
+
+(defun heading-anchor (h)
+  (substitute-if-not #\- #'alphanumericp
+                     (concatenate 'string (heading-number h) (title h))))
+
+(defmethod html (stream (o table-of-contents))
+  (cl-who:with-html-output (s stream :indent t)
+    (:h2 "Table of Contents")
+    (:ul
+     (dolist (heading (table-of-contents-headings o))
+       (cl-who:htm
+        (:li (:a :href (concatenate 'string "#" (heading-anchor heading))
+                 (cl-who:esc
+                  (format nil "~A. ~A"
+                          (heading-number heading)
+                          (title heading))))))))))
 
 (defmethod html (stream (o string))
   (cl-who:with-html-output (s stream)
@@ -252,27 +299,29 @@
     (:tt
      (html-body s o))))
 
+(defmethod html :around (stream (o heading-mixin))
+  (cl-who:with-html-output (s stream)
+    (:a :name (heading-anchor o)
+        (call-next-method))))
+
 (defmethod html (stream (o heading-section))
-  (incf-heading *section-counter* 1)
   (cl-who:with-html-output (s stream)
     (:h2
-     (cl-who:str (heading-counter-string *section-counter* 1))
+     (cl-who:str (heading-number o))
      (cl-who:str ". ")
      (html s (title o)))))
 
 (defmethod html (stream (o heading-subsection))
-  (incf-heading *section-counter* 2)
   (cl-who:with-html-output (s stream)
     (:h3
-     (cl-who:str (heading-counter-string *section-counter* 2))
+     (cl-who:str (heading-number o))
      (cl-who:str ". ")
      (html s (title o)))))
 
 (defmethod html (stream (o heading-subsubsection))
-  (incf-heading *section-counter* 3)
   (cl-who:with-html-output (s stream)
     (:h4
-     (cl-who:str (heading-counter-string *section-counter* 3))
+     (cl-who:str (heading-number o))
      (cl-who:str ". ")
      (html s (title o)))))
 
@@ -305,7 +354,7 @@
                              (:td
                               :style "text-align:right"
                               (html s ms)
-                              (cl-who:esc " ⩴"))
+                              (cl-who:esc " ::="))
                              (:td
                               (:code
                                (html-list s (pop alternatives)))))
@@ -320,7 +369,7 @@
                  (cl-who:htm
                   (:p
                    (html s ms)
-                   (cl-who:esc " ⩴ ")
+                   (cl-who:esc " ::= ")
                    (cl-who:htm
                     (:code
                      (html-body s o))))))))))))
