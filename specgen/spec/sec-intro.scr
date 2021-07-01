@@ -8,9 +8,10 @@ generally corresponds to a single, discrete action. Despite its
 resemblance, Quil is @emph{not} an assembly language.}
 
 @aside{An @emph{assembly language} is a textual format for the machine
-code of a specific computer architecture.}
+code of a specific computer architecture. Quil is not that, and may be
+used for a variety of quantum computer architectures.}
 
-@p{This is an example Quil program which simulates a coin flip:
+@p{This is an example Quil program that simulates a coin flip:
 
 @clist{
 DECLARE ro BIT[1]
@@ -24,7 +25,98 @@ Hadamard gate @c{H}, and then measured in the computational basis,
 depositing the resulting bit into a classic bit register named @c{ro}.
 }
 
+@p{The remainder of this document serves as a reference for all Quil
+language syntax constructs and their associated semantics.}
+
 @section[:title "Structure of a Quil Program"]
+
+@subsection[:title "Syntactic Rudiments"]
+
+@p{Before proceeding to describe each component of a Quil program, it
+will be useful to establish a few common pieces of syntax which will
+be used later.}
+
+@p{The Quil language is represented as text. The text must be encoded
+as UTF-8. The standard language constructs of Quil are all expressible
+in the ASCII subset of UTF-8, but user programs may use codepoints
+outside of UTF-8.}
+
+@p{Except when noted explicitly, whitespace has no significance and is
+ignored. Tokens can be separated by arbitrary amounts and kinds of
+whitespace.}
+
+@p{A newline is a single ASCII carriage return.}
+
+@syntax[:name "Newline"]{
+@syntax-descriptive{ASCII 10}
+}
+
+@p{A @emph{terminator} is used to terminate most components of a Quil
+program syntactically.}
+
+@syntax[:name "Terminator"]{
+     @ms{Newline}
+@alt ;
+@alt @syntax-descriptive{End of File}
+}
+
+@p{An @emph{indent} is defined as exactly four spaces at the start of
+a line. Indents in Quil programs can only happen following a newline.}
+
+@syntax[:name "Indent"]{
+@ms{Newline}
+@syntax-descriptive{ASCII 32}
+@syntax-descriptive{ASCII 32}
+@syntax-descriptive{ASCII 32}
+@syntax-descriptive{ASCII 32}
+}
+
+@p{Note that since indents must follow a newline, we include the
+newline as a part of the syntax definition of an indent.}
+
+@p{Non-negative integers are written as usual. Leading zeros do not
+change the interpretation of these numeric literals.}
+
+@syntax[:name "Non-Negative Integer"]{
+@rep[:min 1]{[0-9]}
+}
+
+@p{Strings are characters bounded by double-quotation mark characters
+'@c{"}'. If a double-quotation mark should be used within the string,
+it must be escaped with a backslash, like so: '@c{\"}'. Similarly, if
+a backslash should be used within a string, it must be escaped, like
+so: '@c{\\}'.}
+
+@syntax[:name "String"]{
+"@rep{@group{[^\"] | \" | \\}}"
+}
+
+@p{Identifiers in Quil are alphanumeric Latin characters, along with
+hyphens and underscores. Identifiers cannot start or end with a
+hyphen '@c{-}'.}
+
+@syntax[:name "Identifier"]{
+[A-Za-z_] @alt [A-Za-z_]@rep{[A-Za-z0-9\-_]}[A-Za-z0-9_]
+}
+
+@p{The following identifiers are reserved (as Quil keywords):
+
+@clist{
+ADD AND AS CONTROLLED CONVERT DAGGER DECLARE DEFCIRCUIT DEFGATE DIV EQ
+EXCHANGE FORKED GE GT HALT INCLUDE IOR JUMP JUMP-UNLESS JUMP-WHEN
+LABEL LE LOAD LT MATRIX MEASURE MOVE MUL NEG NOP NOT OFFSET PAULI-SUM
+PERMUTATION PRAGMA RESET SHARING STORE SUB WAIT XOR
+}
+}
+
+@p{The following identifiers are also reserved (for standard gate
+definitions):
+
+@clist{
+CAN CCNOT CNOT CPHASE CPHASE00 CPHASE01 CPHASE10 CSWAP CZ H I ISWAP
+PHASE PISWAP PSWAP RX RY RZ S SWAP T X XY Y Z
+}
+}
 
 @subsection[:title "Main Program Elements"]
 
@@ -36,7 +128,9 @@ instructions.}
 }
 
 @syntax[:name "Program Element"]{
-@ms{Declaration} | @ms{Directive} |  @ms{Instruction}
+     @ms{Declaration} @group{@ms{Newline} | @syntax-descriptive{End of File}}
+@alt @ms{Directive} @ms{Terminator}
+@alt @ms{Instruction} @ms{Terminator}
 }
 
 @p{A @emph{declaration} typically specifies the existence of a named
@@ -49,7 +143,7 @@ object, like classical memory registers.}
 }
 
 @p{A @emph{directive} specifies information to software processing
-Quil, such as the @quil{INCLIDE} directive for including files.}
+Quil, such as the @quil{INCLUDE} directive for including files.}
 
 @syntax[:name "Directive"]{
      @ms{Pragma}
@@ -80,67 +174,37 @@ to the end of the line.}
 #@rep{[^\n]}
 }
 
-@section[:title "Syntactic Rudiments"]
+@p{There are no block comments.}
 
-@p{Before proceeding to describe each component of a Quil program, it
-will be useful to establish a few common pieces of syntax which will
-be used later.}
-
-@p{A newline is a single ASCII carriage return.}
-
-@syntax[:name "Newline"]{
-@syntax-descriptive{ASCII 10}
-}
-
-@p{An indent is defined as exactly four spaces at the start of a line.}
-
-@syntax[:name "Indent"]{
-@group{@syntax-descriptive{start of file} @alt @ms{Newline}}
-@syntax-descriptive{ASCII 32}
-@syntax-descriptive{ASCII 32}
-@syntax-descriptive{ASCII 32}
-@syntax-descriptive{ASCII 32}
-}
-
-@p{Non-negative integers are written as usual. Leading zeros do not
-change the interpretation of these numeric literals.}
-
-@syntax[:name "Non-Negative Integer"]{
-@rep[:min 1]{[0-9]}
-}
-
-@p{Strings are characters bounded by double-quotation mark characters
-'@c{"}'. If a double-quotation mark should be used within the string,
-it must be escaped with a backslash, like so: '@c{\"}'. Similarly, if
-a backslash should be used within a string, it must be escaped, like
-so: '@c{\\}'.}
-
-@syntax[:name "String"]{
-"@rep{@group{[^\"] | \" | \\}}"
-}
-
-@p{Identifiers in Quil are alphanumeric Latin characters, along with
-hyphens and underscores. Identifiers may neither start not end with a
-hyphen '@c{-}'.}
-
-@syntax[:name "Identifier"]{
-[A-Za-z_] @alt [A-Za-z_]@rep{[A-Za-z0-9\-_]}[A-Za-z0-9_]
-}
-
-@p{The following identifiers are reserved:
-
-@clist{
-DEFGATE DEFCIRCUIT PRAGMA ...
-}
-}
 
 @section[:title "Quantum Gates"]
 
-@subsection[:title "General Remarks"]
+@subsection[:title "Qubits and Quantum State"]
 
-@p{Simple and parametric gates}
+@p{A Quil program manipulates quantum resources called @emph{qubits}. Qubits are indexed by non-negative integers.}
+
+@syntax[:name "Qubit"]{
+@ms{Non-Negative Integer}
+}
+
+@p{Qubit indexes have no significance on their own. Qubits must always
+be referred to by their index. There is no bound on the number of
+qubits in a Quil program, and any finite collection of qubits may
+interact.}
+
+@p{Quil has no provisions for allocating an unbounded or
+non-deterministic number of qubits at run-time. The number of qubits
+used by a program can always be statically determined.}
+
+@p{A program with @m{n} qubits manipulates a quantum state of
+dimension @m{2^n}.}
+
+@p{TODO: cite paper? how deep to go?}
 
 @subsection[:title "Quantum Gate Definitions"]
+
+
+
 
 @subsubsection[:title "Structure of a Gate Definition"]
 
@@ -177,8 +241,11 @@ DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Newline}@ms{Indent}@ms{Permutation}
 
 @subsubsection[:title "Gate Modifiers"]
 
+@section[:title "Measurement"]
 
+@section[:title "Quantum State Reset"]
 
+@section[:title "Classical Memory"]
 
 @section[:title "Test Area"]
 
