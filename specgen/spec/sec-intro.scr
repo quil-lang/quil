@@ -28,6 +28,50 @@ depositing the resulting bit into a classic bit register named @c{ro}.
 @p{The remainder of this document serves as a reference for all Quil
 language syntax constructs and their associated semantics.}
 
+@section[:title "Operational Semantic Devices"]
+
+@subsection[:title "Mathematical Preliminaries"]
+
+@p{Define @m{\mathcal{B}} to be a Hilbert space isomorphic to @m{\mathbb{C}^2}. Some texts refer to this space as a @emph{qubit}. We may refer to it as a @emph{qubit space}.}
+
+@p{Define @m{\mathsf{U}(d)} to be the @emph{projective special unitary group of dimension @m{d}}. Note that many texts write "PSU" instead of "U". We will often say "unitary" when we really mena "projective special unitary".}
+
+@subsection[:title "The Quantum Abstract Machine"]
+
+@p{The semantics of Quil are defined operationally; that is, each
+instruction of a Quil program is described by a change of some
+state. This state is described by a mathematical object called the
+"quantum abstract machine".}
+
+@p{A @emph{quantum abstract machine} or @emph{QAM} is specified as:
+@itemize{
+
+    @item{A non-negative integer @m{N}, representing the number of
+    qubits available to the machine; and a non-negative integer @m{M},
+    representing the number of bits available to the machine;}
+
+    @item{A pure quantum state (or @emph{wavefunction}) @m{\Psi},
+    which is a value in Hilbert space @m{\mathcal{B}^{\otimes N}};}
+
+    @item{A classical state @m{C} of @m{M} bits;}
+
+    @item{A set @m{G} of static quantum gates, each of which is a
+    unitary map of dimension @m{2^N};}
+
+    @item{A set @m{G'} of parametric quantum gates, each of which is a
+    @m{k}-ary function @m{\mathbb{C}^k\to \mathsf{U}(2^N)}, where
+    @m{k} can vary;}
+
+    @item{A program @m{P} consisting of an ordered list of Quil
+    instructions; and}
+
+    @item{A program counter @m{0 \le \kappa \le \vert P\vert}
+    represented as an integer indicating the "current" instruction.}
+    }
+
+This forms a @m{6}-tuple @m{(\Phi, C, G, G', P, \kappa)}.
+}
+
 @section[:title "Structure of a Quil Program"]
 
 @subsection[:title "Syntactic Rudiments"]
@@ -45,7 +89,7 @@ outside of UTF-8.}
 ignored. Tokens can be separated by arbitrary amounts and kinds of
 whitespace.}
 
-@p{A newline is a single ASCII carriage return.}
+@p{A newline is a single ASCII newline.}
 
 @syntax[:name "Newline"]{
 @syntax-descriptive{ASCII 10}
@@ -65,10 +109,7 @@ a line. Indents in Quil programs can only happen following a newline.}
 
 @syntax[:name "Indent"]{
 @ms{Newline}
-@syntax-descriptive{ASCII 32}
-@syntax-descriptive{ASCII 32}
-@syntax-descriptive{ASCII 32}
-@syntax-descriptive{ASCII 32}
+@rep[:min 4 :max 4]{@syntax-descriptive{ASCII 32}}
 }
 
 @p{Note that since indents must follow a newline, we include the
@@ -161,6 +202,7 @@ Quil, such as the @quil{INCLUDE} directive for including files.}
 @alt @ms{Reset Instruction}
 @alt @ms{Wait Instruction}
 @alt @ms{Branch Instruction}
+@alt @ms{No-Operation Instruction}
 @alt @ms{Halt Instruction}
 }
 
@@ -230,8 +272,10 @@ certain gates, @c{<params>} specifies parameters to the gate.}
 @subsubsection[:title "Definition by Permutation"]
 
 @syntax[:name "Permutation Gate Definition"]{
-DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Newline}@ms{Indent}@ms{Permutation}
+DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Indent}@ms{Permutation}
 }
+
+@p{Recall that a @ms{Indent} has a newline.}
 
 @subsubsection[:title "Definition by Pauli Sum"]
 
@@ -246,6 +290,16 @@ DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Newline}@ms{Indent}@ms{Permutation}
 @section[:title "Quantum State Reset"]
 
 @section[:title "Classical Memory"]
+
+@section[:title "Other Instructions and Directives"]
+
+@subsection[:title "No-Operation Instruction"]
+
+@p{The @emph{no-operation instruction} or @emph{@c{NOP} instruction} is an instruction which does not affect the classical or quantum state of the QAM. It only affects the control state by incrementing the program counter by @m{1}.}
+
+@syntax[:name "No-Operation Instruction"]{
+NOP
+}
 
 @section[:title "Test Area"]
 
