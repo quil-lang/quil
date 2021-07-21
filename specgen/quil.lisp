@@ -122,6 +122,15 @@
 (setf (gethash 'heading-subsubsection *commands*) 'heading-subsubsection)
 (setf (gethash 'subsubsection *commands*) 'heading-subsubsection)
 
+(defclass itemize (body-mixin)
+  ())
+(setf (gethash 'itemize *commands*) 'itemize)
+
+(defclass list-item (body-mixin)
+  ())
+(setf (gethash 'list-item *commands*) 'list-item)
+(setf (gethash 'item *commands*) 'list-item)
+
 (defclass document (titled-mixin body-mixin)
   ((author :initarg :author :reader document-author)
    (version :initarg :version :reader document-version)))
@@ -325,6 +334,15 @@
      (cl-who:str ". ")
      (html s (title o)))))
 
+(defmethod html (stream (o itemize))
+  (cl-who:with-html-output (s stream)
+    (:ul
+     (dolist (item (body o))
+       (unless (typep item 'list-item)
+         (error "Found something that's not a LIST-ITEM in an INTEMIZE: ~S" o))
+       (cl-who:htm
+        (:li (html-body s item)))))))
+
 (defmethod html (stream (o aside))
   (cl-who:with-html-output (s stream :indent t)
     (:p :class "aside"
@@ -412,6 +430,13 @@
                    (t
                     (cl-who:esc
                      (format nil "[~D,∞)" min)))))
+                ((= 0 min max)
+                 (error "min and max can't be 0 in a @rep"))
+                ((= 1 min max)
+                 nil)
+                ((= min max)
+                 (cl-who:esc
+                  (format nil "~D" min)))
                 (t
                  (cl-who:fmt "[~D,~D]" min max))))))))
 
