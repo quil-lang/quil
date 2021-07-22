@@ -434,6 +434,9 @@
                  (error "min and max can't be 0 in a @rep"))
                 ((= 1 min max)
                  nil)
+                ((and (= 0 min)
+                      (= 1 max))
+                 (cl-who:esc "?"))
                 ((= min max)
                  (cl-who:esc
                   (format nil "~D" min)))
