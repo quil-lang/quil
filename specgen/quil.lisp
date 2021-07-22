@@ -339,7 +339,7 @@
     (:ul
      (dolist (item (body o))
        (unless (typep item 'list-item)
-         (error "Found something that's not a LIST-ITEM in an INTEMIZE: ~S" o))
+         (error "Found something that's not a LIST-ITEM in an ITEMIZE: ~S" o))
        (cl-who:htm
         (:li (html-body s item)))))))
 
