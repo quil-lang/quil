@@ -291,6 +291,24 @@ DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Indent}@ms{Permutation}
 
 @section[:title "Classical Memory"]
 
+@section[:title "Classical Control"]
+
+@subsection[:title "Halting the Program"]
+
+@p{The program is @emph{halted} if it is no longer executing. This may happen under one of three conditions:
+@itemize{
+    @item{The @c{HALT} instruction was executed,}
+    @item{The program counter reaches @m{\vert P\vert}, or}
+    @item{An implementation-dependent error condition has happened.}
+}}
+
+@syntax[:name "Halt Instruction"]{
+    HALT
+}
+
+@p{Error conditions may happen, for instance, when a division-by-zero
+occurs. There may be other ways in which an implementation may error.}
+
 @section[:title "Other Instructions and Directives"]
 
 @subsection[:title "No-Operation Instruction"]
