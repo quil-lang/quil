@@ -126,6 +126,10 @@
   ())
 (setf (gethash 'itemize *commands*) 'itemize)
 
+(defclass enumerate (body-mixin)
+  ())
+(setf (gethash 'enumerate *commands*) 'enumerate)
+
 (defclass list-item (body-mixin)
   ())
 (setf (gethash 'list-item *commands*) 'list-item)
@@ -339,7 +343,16 @@
     (:ul
      (dolist (item (body o))
        (unless (typep item 'list-item)
-         (error "Found something that's not a LIST-ITEM in an ITEMIZE: ~S" o))
+         (error "Found something that's not a LIST-ITEM in an ITEMIZE: ~S" item))
+       (cl-who:htm
+        (:li (html-body s item)))))))
+
+(defmethod html (stream (o enumerate))
+  (cl-who:with-html-output (s stream)
+    (:ol
+     (dolist (item (body o))
+       (unless (typep item 'list-item)
+         (error "Found something that's not a LIST-ITEM in an ENUMERATE: ~S" item))
        (cl-who:htm
         (:li (html-body s item)))))))
 
