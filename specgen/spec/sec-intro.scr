@@ -721,7 +721,8 @@ octets, and is guaranteed to hold at least the values @m{-127} to
 @m{128}.}
 
 @syntax[:name "Type"]{
-   @ms{Base Type} @rep[:min 0 :max 1]{@group{[@ms{Non-Negative Integer}]}}
+        @ms{Base Type}
+   @alt @ms{Base Type}[@ms{Non-Negative Integer}]
 }
 
 @p{There are currently no provisions for adding additional types.}
@@ -938,10 +939,10 @@ RZ(theta) 16
 }
 }
 
-@subsection[:title "Dereferencing Memory"]
+@subsection[:title "Memory Access and Dereferencing"]
 
 @p{Memory is dereferenced in a Quil program using common array
-dereferencing syntax. In particular, given a name @c{x} pointing to
+access syntax. In particular, given a name @c{x} pointing to
 memory of type @m{T}, and a non-negative integer offset @m{n}, the
 syntax @c{x[@m{n}]} refers to the @m{n}th element of type @m{T} indexing
 off of @c{x[0]}.}
@@ -950,8 +951,14 @@ off of @c{x[0]}.}
 @c{x} may be referred to simply by its name with no bracket. In this
 case, @c{x} and @c{x[0]} would be equivalent.}
 
-@p{Dereferencing with indirection, e.g., @c{x[y[3]]}, is supported
-through the @c{LOAD} and @c{STORE} instructions. For example,
+@syntax[:name "Memory Reference"]{
+         @ms{Identifier}
+    @alt @ms{Identifier}[@ms{Non-Negative Integer}]
+}
+
+@p{Dereferencing with indirection, e.g., something akin to
+@c{x[y[3]]}, is supported through the @c{LOAD} and @c{STORE}
+instructions. For example,
 
 @clist{
 DECLARE x INTEGER[16]
@@ -980,17 +987,17 @@ INSTR   a b             # Pseudocode meaning
 
 @p{The possibilities for @c{<typeXY>} are:
 
-@clist{
-<!int>  : Immediate (literal) integer, also used for octets (0-255) and bits (0-1)
-<int>   : Memory reference to an integer
-<int*>  : Name of a vector of declared integers
-<!real> : Immediate (literal) real
-<real>  : Memory reference to a real
-<real*> : Name of a vector of declared reals
-<bit>   : Memory reference to a bit
-<bit*>  : Name of a vector of declared bits
-<oct>   : Memory reference to an octet
-<oct*>  : Name of a vector of declared octets
+@itemize{
+@item{@c{<!int>}  : Immediate (literal) integer, also used for octets (@c{0} to @c{255}) and bits (@c{0} and @c{1})}
+@item{@c{<int>}   : Memory reference to an integer}
+@item{@c{<int*>}  : Name of a vector of declared integers}
+@item{@c{<!real>} : Immediate (literal) real}
+@item{@c{<real>}  : Memory reference to a real}
+@item{@c{<real*>} : Name of a vector of declared reals}
+@item{@c{<bit>}   : Memory reference to a bit}
+@item{@c{<bit*>}  : Name of a vector of declared bits}
+@item{@c{<oct>}   : Memory reference to an octet}
+@item{@c{<oct*>}  : Name of a vector of declared octets}
 }
 }
 
