@@ -301,6 +301,19 @@ associativity directions.
 @p{A @emph{constant expression} is an arithmetic expression which does
 not contain any parameters, memory references, or identifiers.}
 
+@p{We use comma-separated lists of arithmetic expressions frequently
+enough to warrant their own production.}
+
+@syntax[:name "Expression List"]{
+    @ms{Expression}
+    @rep[:min 0]{
+        @group{
+            ,
+            @ms{Expression}
+        }
+    }
+}
+
 @subsection[:title "Main Program Elements"]
 
 @p{A Quil program consists of declarations, directives, and
@@ -380,9 +393,15 @@ interact.}
 number of qubits at run-time. The number of qubits used by a program
 can always be statically determined.}
 
+@p{Sometimes, a qubit may instead have a formal argument in its
+place. This may not be possible in all cases.}
+
+@syntax[:name "Formal Qubit"]{
+         @ms{Qubit}
+    @alt @ms{Parameter}
+}
 
 @subsection[:title "Quantum Gate Definitions"]
-
 
 @subsubsection[:title "Structure of a Gate Definition"]
 
@@ -440,7 +459,14 @@ parameters of the defined gate.}
 
 @subsubsection[:title "Definition by Permutation"]
 
-@p{A @emph{permutation gate} is one that permutes the coefficients of the wavefunction. A permutation @m{p} can be specified mathematically as an ordering of the integers between @m{0} and @m{n-1} written out as a list @dm{(p_1\;p_2\;\ldots\;p_n).} Here, @m{p} is a map on vectors such that if @m{x} is a column vector @dm{(x_1,\ldots,x_n)^{\intercal}} then @m{p(x)} is a column vector @dm{(x_{p_1}, x_{p_2}, \ldots, x_{p_n})^{\intercal}.} We specify permutation gates exactly by these numbers.}
+@p{A @emph{permutation gate} is one that permutes the coefficients of
+the wavefunction. A permutation @m{p} can be specified mathematically
+as an ordering of the integers between @m{0} and @m{n-1} written out
+as a list @dm{(p_1\;p_2\;\ldots\;p_n).} Here, @m{p} is a map on
+vectors such that if @m{x} is a column vector
+@dm{(x_1,\ldots,x_n)^{\intercal}} then @m{p(x)} is a column vector
+@dm{(x_{p_1}, x_{p_2}, \ldots, x_{p_n})^{\intercal}.} We specify
+permutation gates exactly by these numbers.}
 
 @syntax[:name "Permutation Gate Definition"]{
 DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Indent}@ms{Permutation}
@@ -480,6 +506,23 @@ DEFGATE @ms{Identifier} AS PAULI-SUM:@ms{Pauli Terms}
 
 @subsection[:title "Quantum Gate Applications"]
 
+
+@p{TODO: allow formal arguments}
+
+@syntax[:name "Gate Application"]{
+    @rep[:min 0]{@ms{Modifier}}
+    @ms{Identifier}
+    @rep[:min 0 :max 1]{
+        @group{
+            (
+                @rep[:min 0 :max 1]{@ms{Expression List}}
+            )
+        }
+    }
+    @rep[:min 1]{@ms{Formal Qubit}}
+}
+
+
 @subsubsection[:title "Gate Modifiers"]
 
 @section[:title "Quantum State Reset"]
@@ -493,7 +536,7 @@ DEFGATE @ms{Identifier} AS PAULI-SUM:@ms{Pauli Terms}
 @p{Instead, one may reset an individual qubit.}
 
 @syntax[:name "Qubit Reset Instruction"]{
-    RESET @ms{Qubit}
+    RESET @ms{Formal Qubit}
 }
 
 @p{This has the semantics corresponding to the following pseudo-code:}
@@ -513,8 +556,39 @@ if 1 == MEASURE(qubit) then X(qubit)
 
 @section[:title "Measurement"]
 
-;; measurement for effect
-;; measurement for record
+@p{Measurement is the only way in which the quantum state can affect
+classical memory. Measurement comes in two flavors:
+@emph{measurement-for-effect} and @emph{measurement-for-record}.}
+
+@p{Measurement-for-effect measures a single qubit and discards the
+result.}
+
+@syntax[:name "Measurement for Effect"]{
+    MEASURE @ms{Formal Qubit}
+}
+
+@p{Measurement will stochastically project the qubit into either the
+zero-state or the one-state depending on its probability of such
+dictated by the wavefunction amplitudes.}
+
+@syntax[:name "Measurement for Record"]{
+    MEASURE @ms{Formal Qubit} @ms{Memory Reference}
+}
+
+@p{Here, the memory reference must be either of type @c{BIT} or
+@c{INTEGER}. In either case, a @m{0} is deposited at the memory
+location if the qubit was measured to be in the zero-state, and a
+@m{1} otherwise.}
+
+@p{These measurement varieties make up all measurement instructions.}
+
+@syntax[:name "Measurement Instruction"]{
+         @ms{Measurement for Effect}
+    @alt @ms{Measurement for Record}
+}
+
+@p{Note that there is no way in Quil to measure all qubits
+simultaneously.}
 
 @section[:title "Classical Control"]
 
