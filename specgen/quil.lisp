@@ -302,9 +302,11 @@
 
 (defmethod html (stream (o inline-meta-syntax))
   (cl-who:with-html-output (s stream)
+    (:span :class "meta-syntax"
+           (cl-who:esc "⟨"))
     (:span :class "meta-syntax-identifier"
-           (cl-who:esc "⟨")
-           (html-body s o)
+           (html-body s o))
+    (:span :class "meta-syntax"
            (cl-who:esc "⟩"))))
 
 (defmethod html (stream (o inline-code))
@@ -392,7 +394,9 @@
                             (loop :for alt :in alternatives
                                   :do (cl-who:htm
                                        (:tr
-                                        (:td :style "text-align:right" (cl-who:esc "|"))
+                                        (:td :style "text-align:right"
+                                             (:span :class "meta-syntax"
+                                                    (cl-who:esc "|")))
                                         (:td
                                          (:code
                                           (html-list s alt))))))))))
@@ -407,7 +411,8 @@
 
 (defmethod html (stream (o syntax-alt))
   (cl-who:with-html-output (s stream)
-    (:code " | ")))
+    (:span :class "meta-syntax"
+           (cl-who:esc " | "))))
 
 (defmethod html (stream (o syntax-group))
   (cl-who:with-html-output (s stream)
