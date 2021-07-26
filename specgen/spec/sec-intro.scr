@@ -154,14 +154,14 @@ change the interpretation of these numeric literals.}
 @p{Real numbers are written in usual floating-point number syntax.}
 
 @syntax[:name "Real"]{
-  @rep[:min 0 :max 1]{@group{- | +}}
+  @rep[:min 0 :max 1]{@group{- @alt +}}
   @rep[:min 0 :max 1]{@ms{Non-Negative Integer}}
   @rep[:min 0 :max 1]{.}
   @ms{Non-Negative Integer}
   @rep[:min 0 :max 1]{
     @group{
-      @group{e | E}
-      @rep[:min 0 :max 1]{@group{- | +}}
+      @group{e @alt E}
+      @rep[:min 0 :max 1]{@group{- @alt +}}
       @ms{Non-Negative Integer}
     }
   }
@@ -170,7 +170,7 @@ change the interpretation of these numeric literals.}
 @p{Complex numbers are an extension of this.}
 
 @syntax[:name "Complex Number"]{
-       @rep[:min 0 :max 1]{@group{- | +}} @ms{Non-Negative Integer}
+       @rep[:min 0 :max 1]{@group{- @alt +}} @ms{Non-Negative Integer}
   @alt @ms{Real}
   @alt @rep[:min 0 :max 1]{@ms{Real}} i
   @alt pi
@@ -183,7 +183,7 @@ a backslash should be used within a string, it must be escaped, like
 so: '@c{\\}'.}
 
 @syntax[:name "String"]{
-    "@rep{@group{[^\"] | \" | \\}}"
+    "@rep{@group{[^\"] @alt \" @alt \\}}"
 }
 
 @p{Identifiers in Quil are alphanumeric Latin characters, along with
@@ -311,7 +311,7 @@ instructions.}
 }
 
 @syntax[:name "Program Element"]{
-     @ms{Declaration} @group{@ms{Newline} | @syntax-descriptive{End of File}}
+     @ms{Declaration} @group{@ms{Newline} @alt @syntax-descriptive{End of File}}
 @alt @ms{Directive} @ms{Terminator}
 @alt @ms{Instruction} @ms{Terminator}
 }
@@ -603,7 +603,7 @@ information in a program which does not otherwise affect execution
 semantics.}
 
 @syntax[:name "Pragma"]{
-    PRAGMA @ms{Identifier} @rep{@group{@ms{Identifier} | @ms{Integer}}} @rep[:max 1]{@ms{String}}
+    PRAGMA @ms{Identifier} @rep{@group{@ms{Identifier} @alt @ms{Integer}}} @rep[:max 1]{@ms{String}}
 }
 
 @subsection[:title "File Inclusion"]
