@@ -579,7 +579,7 @@ additional attached interpretation. What gives a byte interpretation
 is the literal machinery attached to the registers in which the bytes
 are stored. Implicit in the machinery, usually electrical circuitry,
 is a way of transforming bytes into a new ones. This machinery is
-invoked with an *opcode*. Since opcodes relate to physical machinery,
+invoked with an @emph{opcode}. Since opcodes relate to physical machinery,
 opcodes are often only pertinent to a subset of registers that a
 machine has. From here, we get a usual partitioning of registers:
 registers that deal with general integer arithmetic, registers that
@@ -642,7 +642,8 @@ multiple type lenses. In C, we accomplish this by casting pointers and
 dereferencing. Since we don't have a notion of pointers, we accomplish
 this with explicit declaration and aliasing.}
 
-@p{With Quil's classical memory model, we can write code which does the following:
+@p{With Quil's classical memory model, we can write code which does
+the following:
 
 @clist{
 DECLARE count INTEGER
@@ -700,6 +701,13 @@ signed integer, and @c{REAL} which represents a machine-sized real
 number. The formats/layouts of these are specific to the machine being
 run on.}
 
+@syntax[:name "Base Type"]{
+        BIT
+   @alt OCTET
+   @alt INTEGER
+   @alt REAL
+}
+
 @p{When we speak of @emph{size}, we mean the number of octets that a
 type represents. The notion of @emph{size} is distinct from
 @emph{length}, which instead refers to some count of elements of a
@@ -711,6 +719,10 @@ type that represents five real numbers in sequence. The type
 @c{INTEGER} is guaranteed to be large enough to hold a valid length of
 octets, and is guaranteed to hold at least the values @m{-127} to
 @m{128}.}
+
+@syntax[:name "Type"]{
+   @ms{Base Type} @rep[:min 0 :max 1]{@group{[@ms{Non-Negative Integer}]}}
+}
 
 @p{There are currently no provisions for adding additional types.}
 
@@ -731,14 +743,20 @@ which Quil is executed.}
 memory. There are three variants: plain declaration, aliased
 declaration, and aliased declaration with offset.}
 
-@subsubsection[:title "Plain Declaration"]
-
-@clist{
-DECLARE <name> <type>
+@syntax[:name "Classical Memory Declaration"]{
+         @ms{Plain Memory Declaration}
+    @alt @ms{Aliased Memory Declaration}
+    @alt @ms{Offset Memory Declaration}
 }
 
-@p{This declares that @c{<name>} designates memory which can hold
-@c{<type>}. If @c{<type>} is a scalar type, then it is assumed to
+@subsubsection[:title "Declaring Memory"]
+
+@syntax[:name "Plain Memory Declaration"]{
+    DECLARE @ms{Identifier} @ms{Type}
+}
+
+@p{This declares that @ms{Identifier} designates memory which can hold
+@ms{Type}. If @ms{Type} is a scalar type, then it is assumed to
 designate a vector of length 1. That is, the following two lines are
 equivalent:
 
@@ -748,37 +766,47 @@ DECLARE x INTEGER[1]
 }
 }
 
-@p{In the program that follows, @c{x} or equivalently @c{x[0]}  will refer to an integer quantity.}
+@p{In the program that would follow either of these declarations,
+@c{x} or equivalently @c{x[0]} will refer to an integer quantity.}
 
-@subsubsection[:title "Aliased Declaration"]
+@subsubsection[:title "Declaring Aliased Memory"]
 
-@clist{
-DECLARE <name> <type> SHARING <other-name>
+@syntax[:name "Aliased Memory Declaration"]{
+DECLARE @ms[:sub 1]{Identifier} @ms{Type} SHARING @ms[:sub 2]{Identifier}
 }
 
-@p{This declares that @c{<name>} designates memory which can hold
-@c{<type>}, but @c{<name>} shares memory with that which is designated
-by @c{<other-name>}. Here, the total memory size pointed to by
-@c{<name>} shall not exceed the total memory size pointed to by
-@c{<other-name>}.}
+@p{This declares that @ms[:sub 1]{Identifier} designates memory which can hold
+@ms{Type}, but @ms[:sub 1]{Identifier} shares memory with that which is designated
+by @ms[:sub 2]{Identifier}. Here, the total memory size pointed to by
+@ms[:sub 1]{Identifier} shall not exceed the total memory size pointed to by
+@ms[:sub 2]{Identifier}.}
 
 @p{An implementation is free to reject programs where particular
 instances of sharing is invalid (e.g., alignment is violated;
 disparate memories are unshareable; etc.).}
 
-@subsubsection[:title "Aliased Declaration with Offset"]
+@subsubsection[:title "Declaring Aliased Memory Declaration with an Offset"]
 
-@clist{
-DECLARE <name> <type> SHARING <other-name> OFFSET <integer_1> <offset-type_1> <integer_2> <offset-type_2> ...
+@syntax[:name "Offset Memory Declaration"]{
+DECLARE @ms[:sub 1]{Identifier}
+        @ms{Type}
+        SHARING @ms[:sub 2]{Identifier}
+        OFFSET
+        @rep[:min 1]{
+          @group{
+            @ms[:sub "i"]{Non-Negative Integer}
+            @ms[:sub "i"]{Type}
+          }
+        }
 }
 
 @p{This is similar to the aliased declaration, but it allows
-@c{<name>} to designate memory in the middle of that which is
-designated by @c{<other-name>}. In particular, @c{<name>} will point
-to memory a total of @dm{\sum_i \langle\texttt{integer}_i\rangle\cdot
-\text{sizeof}(\langle\texttt{offset-type}_i\rangle)} octets after the start of
-@c{<other-name>}. As with an aliased declaration, the memory at
-@c{<name>} must not overflow the end of @c{<other-name>}.}
+@ms[:sub 1]{Identifier} to designate memory in the middle of that which is
+designated by @ms[:sub 2]{Identifier}. In particular, @ms[:sub 1]{Identifier} will point
+to memory a total of @dm{\sum_i \langle\texttt{Non-Negative Integer}_i\rangle\cdot
+\text{sizeof}(\langle\texttt{Type}_i\rangle)} bits after the start of
+@ms[:sub 2]{Identifier}. As with an aliased declaration, the memory at
+@ms[:sub 1]{Identifier} must not overflow the end of @ms[:sub 2]{Identifier}.}
 
 @p{Implementations may enforce alignment by way of erroring if the
 stated declaration is invalid. Implementations must @emph{not} round
