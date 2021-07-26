@@ -99,7 +99,7 @@
 (setf (gethash 'emph *commands*) 'inline-emph)
 
 (defclass inline-meta-syntax (body-mixin)
-  ())
+  ((sub :initarg :sub :reader inline-meta-syntax-sub)))
 (setf (gethash 'inline-meta-syntax *commands*) 'inline-meta-syntax)
 (setf (gethash 'ms *commands*) 'inline-meta-syntax)
 
@@ -314,6 +314,13 @@
            (cl-who:esc "⟨"))
     (:span :class "meta-syntax-identifier"
            (html-body s o))
+    (when (slot-boundp o 'sub)
+      (cl-who:htm
+       (:sub
+        (:span :class "meta-syntax-identifier"
+               (cl-who:esc
+                (princ-to-string
+                 (inline-meta-syntax-sub o)))))))
     (:span :class "meta-syntax"
            (cl-who:esc "⟩"))))
 
