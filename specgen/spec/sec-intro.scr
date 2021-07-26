@@ -32,7 +32,9 @@ language syntax constructs and their associated semantics.}
 
 @subsection[:title "Mathematical Preliminaries"]
 
-@p{Define @m{\mathscr{B}} to be a Hilbert space isomorphic to @m{\mathbb{C}^2}. Some texts refer to this space as a @emph{qubit}. We may refer to it as a @emph{qubit space}.}
+@p{Define @m{\mathscr{B}} to be a Hilbert space isomorphic to
+@m{\mathbb{C}^2}. Some texts refer to this space as a @emph{qubit}. We
+may refer to it as a @emph{qubit space}.}
 
 @p{We fix any orthonormal basis of @m{V := \mathscr{B}^{\otimes n}}
 and call it the @emph{computational basis}. We use uppercase letters
@@ -135,8 +137,8 @@ program syntactically.}
 a line. Indents in Quil programs can only happen following a newline.}
 
 @syntax[:name "Indent"]{
-@ms{Newline}
-@rep[:min 4 :max 4]{@syntax-descriptive{ASCII 32}}
+    @ms{Newline}
+    @rep[:min 4 :max 4]{@syntax-descriptive{ASCII 32}}
 }
 
 @p{Note that since indents must follow a newline, we include the
@@ -146,7 +148,32 @@ newline as a part of the syntax definition of an indent.}
 change the interpretation of these numeric literals.}
 
 @syntax[:name "Non-Negative Integer"]{
-@rep[:min 1]{[0-9]}
+    @rep[:min 1]{[0-9]}
+}
+
+@p{Real numbers are written in usual floating-point number syntax.}
+
+@syntax[:name "Real"]{
+  @rep[:min 0 :max 1]{@group{- | +}}
+  @rep[:min 0 :max 1]{@ms{Non-Negative Integer}}
+  @rep[:min 0 :max 1]{.}
+  @ms{Non-Negative Integer}
+  @rep[:min 0 :max 1]{
+    @group{
+      @group{e | E}
+      @rep[:min 0 :max 1]{@group{- | +}}
+      @ms{Non-Negative Integer}
+    }
+  }
+}
+
+@p{Complex numbers are an extension of this.}
+
+@syntax[:name "Complex Number"]{
+       @rep[:min 0 :max 1]{@group{- | +}} @ms{Non-Negative Integer}
+  @alt @ms{Real}
+  @alt @rep[:min 0 :max 1]{@ms{Real}} i
+  @alt pi
 }
 
 @p{Strings are characters bounded by double-quotation mark characters
@@ -156,7 +183,7 @@ a backslash should be used within a string, it must be escaped, like
 so: '@c{\\}'.}
 
 @syntax[:name "String"]{
-"@rep{@group{[^\"] | \" | \\}}"
+    "@rep{@group{[^\"] | \" | \\}}"
 }
 
 @p{Identifiers in Quil are alphanumeric Latin characters, along with
@@ -164,7 +191,15 @@ hyphens and underscores. Identifiers cannot start or end with a
 hyphen '@c{-}'.}
 
 @syntax[:name "Identifier"]{
-[A-Za-z_] @alt [A-Za-z_]@rep{[A-Za-z0-9\-_]}[A-Za-z0-9_]
+         [A-Za-z_]
+    @alt [A-Za-z_]@rep{[A-Za-z0-9\-_]}[A-Za-z0-9_]
+}
+
+@p{However, the following are @emph{not} identifiers:
+
+@clist{
+i pi
+}
 }
 
 @p{The following identifiers are reserved (as Quil keywords):
@@ -185,6 +220,86 @@ CAN CCNOT CNOT CPHASE CPHASE00 CPHASE01 CPHASE10 CSWAP CZ H I ISWAP
 PHASE PISWAP PSWAP RX RY RZ S SWAP T X XY Y Z
 }
 }
+
+@p{A @emph{formal parameter} is an identifier prefixed with a percent
+sign, with no whitespace in between.}
+
+@syntax[:name "Parameter"]{
+    %@ms{Identifier}
+}
+
+@p{Multiple parameters may be separated by commas.}
+
+@syntax[:name "Parameters"]{
+    @rep[:min 0 :max 1]{
+        @group{
+            @ms{Parameter}
+            @rep[:min 0]{
+                @group{
+                , @ms{Parameter}
+                }
+            }
+        }
+    }
+}
+
+@p{A @emph{formal argument} is simply an identifier.}
+
+@syntax[:name "Argument"]{
+    @ms{Identifier}
+}
+
+@p{Several formal arguments are separated by spaces, unlike
+parameters.}
+
+@syntax[:name "Arguments"]{
+    @rep[:min 1]{@ms{Argument}}
+}
+
+@subsubsection[:title "Arithmetic Expressions"]
+
+@p{Frequently, various kinds of arithmetic expressions are needed. A
+simple and not unusual grammar defines these arithmetic expressions.}
+
+@p{Depending on the specific grammatical context, arithmetic
+expressions may or may not include references to formal parameters or
+memory segments. Below, we define the grammar as including all of
+these things, but certain contexts may disallow either or both of
+them.}
+
+@p{Precedence of binary operators is defined in the following
+order of descending tightness. Along with the operators are their
+associativity directions.
+
+@clist{
+^     RIGHT
+* /   LEFT
++ -   LEFT
+}
+}
+
+@syntax[:name "Expression"]{
+         @ms{Expression} + @ms{Expression}
+    @alt @ms{Expression} - @ms{Expression}
+    @alt @ms{Expression} * @ms{Expression}
+    @alt @ms{Expression} / @ms{Expression}
+    @alt @ms{Expression} ^ @ms{Expression}
+    @alt @ms{Term}
+}
+
+@syntax[:name "Term"]{
+         - @ms{Expression}
+    @alt @ms{Identifier} ( @ms{Expression} )
+    @alt ( @ms{Expression} )
+    @alt @ms{Non-Negative Integer}
+    @alt @ms{Complex}
+    @alt @ms{Parameter}
+    @alt @ms{Memory Reference}
+    @alt @ms{Identifier}
+}
+
+@p{A @emph{constant expression} is an arithmetic expression which does
+not contain any parameters, memory references, or identifiers.}
 
 @subsection[:title "Main Program Elements"]
 
@@ -261,23 +376,19 @@ be referred to by their index. There is no bound on the number of
 qubits in a Quil program, and any finite collection of qubits may
 interact.}
 
-@p{Quil has no provisions for allocating an unbounded or
-non-deterministic number of qubits at run-time. The number of qubits
-used by a program can always be statically determined.}
+@p{Quil has no ways to allocate an unbounded or non-deterministic
+number of qubits at run-time. The number of qubits used by a program
+can always be statically determined.}
 
-@p{A program with @m{n} qubits manipulates a quantum state of
-dimension @m{2^n}.}
-
-@p{TODO: cite paper? how deep to go?}
 
 @subsection[:title "Quantum Gate Definitions"]
 
 
-
-
 @subsubsection[:title "Structure of a Gate Definition"]
 
-@p{A gate definition in general has the following (informal) structure:}
+@p{A gate definition allows us to name a unitary operation for
+subsequent use in a program. A gate definition in general has the
+following structure:}
 
 @clist{
 DEFGATE <name>(<params>) AS <kind>:
@@ -291,20 +402,79 @@ certain gates, @c{<params>} specifies parameters to the gate.}
 @syntax[:name "Gate Definition"]{
      @ms{Matrix Gate Definition}
 @alt @ms{Permutation Gate Definition}
-@alt @ms{Pauli Gate Definition}
+@alt @ms{Pauli Sum Gate Definition}
 }
 
 @subsubsection[:title "Definition by Matrix"]
 
+@p{A gate can be defined by its matrix of complex numbers represented
+in the computational basis with the aforementioned ordering.}
+
+@syntax[:name "Matrix Gate Definition"]{
+DEFGATE @ms{Identifier}
+@rep[:min 0 :max 1]{@group{(@ms{Parameters})}}
+@rep[:min 0 :max 1]{@group{AS MATRIX}}:
+@ms{Matrix Entries}
+}
+
+@p{A gate definitions with no parameters represents a static
+gate. Otherwise it is a parametric gate.}
+
+@p{For readability, matrix entries are typically broken up into
+lines.}
+
+@syntax[:name "Matrix Entries"]{
+    @rep[:min 1]{@group{@ms{Indent}@ms{Matrix Entry Line}}}
+}
+
+@p{Each line contains a list of comma-separated arithmetic
+expressions, most often simple integers or real numbers.}
+
+@syntax[:name "Matrix Entry Line"]{
+    @ms{Expression} @rep[:min 0]{@group{, @ms{Expression}}}
+}
+
+@p{The arithmetic expressions may either be constant or refer to the
+parameters of the defined gate.}
+
+
 @subsubsection[:title "Definition by Permutation"]
+
+@p{A @emph{permutation gate} is one that permutes the coefficients of the wavefunction. A permutation @m{p} can be specified mathematically as an ordering of the integers between @m{0} and @m{n-1} written out as a list @dm{(p_1\;p_2\;\ldots\;p_n).} Here, @m{p} is a map on vectors such that if @m{x} is a column vector @dm{(x_1,\ldots,x_n)^{\intercal}} then @m{p(x)} is a column vector @dm{(x_{p_1}, x_{p_2}, \ldots, x_{p_n})^{\intercal}.} We specify permutation gates exactly by these numbers.}
 
 @syntax[:name "Permutation Gate Definition"]{
 DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Indent}@ms{Permutation}
 }
 
-@p{Recall that a @ms{Indent} has a newline.}
+@p{Here, the permutation is a comma-separated list of non-negative
+integers.}
+
+@syntax[:name "Permutation"]{
+    @ms{Non-Negative Integer}
+    @rep[:min 1]{
+    @group{
+        ,
+        @ms{Non-Negative Integer}
+    }
+    }
+}
+
+@p{There must be at least two integers specified, and the number of
+integers specified must be a power-of-two.}
 
 @subsubsection[:title "Definition by Pauli Sum"]
+
+@syntax[:name "Pauli Sum Gate Definition"]{
+DEFGATE @ms{Identifier} AS PAULI-SUM:@ms{Pauli Terms}
+}
+
+@syntax[:name "Pauli Terms"]{
+    @rep[:min 1]{@group{@ms{Indent}@ms{Pauli Term}}}
+}
+
+@syntax[:name "Pauli Term"]{
+    ...
+}
 
 @subsection[:title "Standard Gate Definitions"]
 
