@@ -122,6 +122,11 @@
 (setf (gethash 'heading-subsubsection *commands*) 'heading-subsubsection)
 (setf (gethash 'subsubsection *commands*) 'heading-subsubsection)
 
+(defclass heading-subsubsubsection (heading-mixin)
+  ())
+(setf (gethash 'heading-subsubsubsection *commands*) 'heading-subsubsubsection)
+(setf (gethash 'subsubsubsection *commands*) 'heading-subsubsubsection)
+
 (defclass itemize (body-mixin)
   ())
 (setf (gethash 'itemize *commands*) 'itemize)
@@ -168,7 +173,10 @@
          (setf (heading-number item) (heading-counter-string counter 2)))
         (heading-subsubsection
          (incf-heading counter 3)
-         (setf (heading-number item) (heading-counter-string counter 3)))))))
+         (setf (heading-number item) (heading-counter-string counter 3)))
+        (heading-subsubsubsection
+         (incf-heading counter 4)
+         (setf (heading-number item) (heading-counter-string counter 4)))))))
 
 
 (defclass table-of-contents ()
@@ -334,6 +342,13 @@
      (html s (title o)))))
 
 (defmethod html (stream (o heading-subsubsection))
+  (cl-who:with-html-output (s stream)
+    (:h4
+     (cl-who:str (heading-number o))
+     (cl-who:str ". ")
+     (html s (title o)))))
+
+(defmethod html (stream (o heading-subsubsubsection))
   (cl-who:with-html-output (s stream)
     (:h4
      (cl-who:str (heading-number o))
