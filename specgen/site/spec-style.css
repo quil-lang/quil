@@ -54,7 +54,7 @@ span.meta-syntax-descriptive {
 }
 
 span.meta-syntax {
-    font-family: sans-serif;
-    font-weight: bold;
+    font-family: serif;
+    font-size: 130%;
     color: #777777;
 }
