@@ -175,7 +175,6 @@ change the interpretation of these numeric literals.}
 @p{Real numbers are written in usual floating-point number syntax.}
 
 @syntax[:name "Real"]{
-  @rep[:min 0 :max 1]{@group{- @alt +}}
   @rep[:min 0 :max 1]{@ms{Non-Negative Integer}}
   @rep[:min 0 :max 1]{.}
   @ms{Non-Negative Integer}
@@ -191,7 +190,7 @@ change the interpretation of these numeric literals.}
 @p{Complex numbers are an extension of this.}
 
 @syntax[:name "Complex Number"]{
-       @rep[:min 0 :max 1]{@group{- @alt +}} @ms{Non-Negative Integer}
+       @ms{Non-Negative Integer}
   @alt @ms{Real}
   @alt @rep[:min 0 :max 1]{@ms{Real}} i
   @alt pi
