@@ -103,6 +103,27 @@ to such a tuple as a QAM.}
 
 @section[:title "Structure of a Quil Program"]
 
+@subsection[:title "Meta-Syntax"]
+
+@p{In order to describe the syntax and semantics of a Quil program, we
+use a syntax that is similar to @emph{extended Backus-Naur form},
+though we deviate occasionally for convenience. While Quil's grammar
+is context-free, specifying it is somewhat laborious due to the
+possibility of identifiers being able to be used in some syntactic
+constructs and other times not. As such, for syntactic constructs
+which permit identifiers, we would need one set of productions, and
+for those which don't, we would need another (nearly identical) set.}
+
+@p{In order to avoid this laborious repetition, we write productions
+of the grammar to always include sometimes forbidden elements, and
+instead specify in the surrounding text the context in which those
+elements are or are not allowed.}
+
+@aside{When writing a recursive-descent parser, one would likely use
+contextual flags to allow or disallow certain parsing rules, like
+flags indicating the permission or lack thereof to use
+identifiers. This leads to considerably shorter and clearer code.}
+
 @subsection[:title "Syntactic Rudiments"]
 
 @p{Before proceeding to describe each component of a Quil program, it
@@ -972,9 +993,41 @@ LOAD t x t             # t := x[t]
 
 @subsection[:title "Classical Instructions"]
 
-@p{With typed memory comes a bag of new instructions. In the following
-table, we use the following notation to denote an instruction
-@c{INSTR} and its modes:
+@p{With typed memory comes a bag of new instructions. Classical
+instructions come in unary (single-argument), binary
+(double-argument), and ternary (triple-argument) forms. They all share
+the same syntax.}
+
+@syntax[:name "Classical Memory Instruction"]{
+         @ms{Classical Unary} @ms{Memory Reference}
+    @alt @ms{Classical Binary} @rep[:min 2 :max 2]{@ms{Memory Reference}}
+    @alt @ms{Classical Ternary} @rep[:min 3 :max 3]{@ms{Memory Reference}}
+}
+
+@p{The unary instruction names are:}
+
+@syntax[:name "Classical Unary"]{
+    NOT @alt NEG
+}
+
+@p{The binary instruction names are:}
+
+@syntax[:name "Classical Binary"]{
+         MOVE @alt EXCHANGE @alt CONVERT
+    @alt AND @alt IOR @alt XOR
+    @alt ADD @alt SUB @alt MUL @alt DIV
+}
+
+@p{The ternary instruction names are:}
+
+@syntax[:name "Classical Ternary"]{
+    LOAD @alt STORE @alt EQ @alt GT @alt GE @alt LT @alt LE
+}
+
+@p{While the instructions all take memory references, they only take
+memory references of certain type combinations. Each combination is
+called an "instruction mode". In the following table, we use the
+following notation to denote an instruction @c{INSTR} and its modes:
 
 @clist{
 # Category of instruction
@@ -1008,7 +1061,7 @@ INSTR   a b             # Pseudocode meaning
 @clist{
 # Move like-typed data to different locations.
 # Also allows loading immediate values.
-MOVE     a b            # a := b
+MOVE     a b            # a := b; Store contents of b at a
          <oct> <!int>
          <oct> <oct>
          <int> <!int>
@@ -1019,7 +1072,7 @@ MOVE     a b            # a := b
          <bit> <bit>
 
 # Exchange the value at two like-typed locations.
-EXCHANGE a b            # a <=> b
+EXCHANGE a b            # Exchange contents of a and b; a <=> b
          <oct> <oct>
          <int> <int>
          <real> <real>
