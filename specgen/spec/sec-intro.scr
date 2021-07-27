@@ -525,8 +525,7 @@ DEFGATE @ms{Identifier} AS PAULI-SUM:@ms{Pauli Terms}
 
 @subsection[:title "Quantum Gate Applications"]
 
-
-@p{TODO: allow formal arguments}
+@p{A gate is applied via the following syntax.}
 
 @syntax[:name "Gate Application"]{
     @rep[:min 0]{@ms{Modifier}}
@@ -541,8 +540,252 @@ DEFGATE @ms{Identifier} AS PAULI-SUM:@ms{Pauli Terms}
     @rep[:min 1]{@ms{Formal Qubit}}
 }
 
+@p{TODO: semantics discussion}
 
-@subsubsection[:title "Gate Modifiers"]
+@syntax[:name "Modifier"]{
+         DAGGER
+    @alt CONTROLLED
+    @alt FORKED(@ms{Expression List})
+}
+
+@subsubsection[:title "DAGGER Gate Modifier"]
+
+@p{The @c{DAGGER} modifier represents the adjoint operation or
+complex-conjugate transpose. Since every gate is a unitary operator,
+this is just the inverse. For example, if @c{G} is a gate described by
+the one-qubit operator
+
+@dm{
+\begin{pmatrix}
+a & b\\
+c & d
+\end{pmatrix}
+}
+
+then @c{DAGGER G} is
+
+@dm{
+\begin{pmatrix}
+a^* & c^*\\
+b^* & d^*
+\end{pmatrix}
+}
+
+where @m{z^*} is the complex-conjugate of @m{z}.
+}
+
+@p{Because @c{DAGGER} is the inverse, the sequence of Quil
+instructions
+
+@clist{
+G q1 ... qn
+DAGGER G q1 ... qn
+}
+
+acts as an identity gate. As another example, consider the gate
+@c{PHASE}, which is defined as
+
+@clist{
+DEFGATE PHASE(%alpha):
+    1, 0
+    0, cis(%alpha)
+}
+
+where
+@dm{\operatorname{cis}\alpha := \cos\alpha + i \sin\alpha = e^{i\alpha}.}
+Then
+
+@clist{
+DAGGER PHASE(t) q
+}
+
+is equivalent to
+
+@clist{
+PHASE(-t) q
+}
+
+for all @m{\mathtt{t}\in\mathbb{R}}.
+}
+
+
+@subsubsection[:title "CONTROLLED Gate Modifier"]
+
+@p{The @c{CONTROLLED} modifier takes some gate @c{G} acting on some
+number of qubits @c{q1} to @c{qn} and makes it conditioned on the
+state of some new qubit @c{c}. In terms of the matrix representation,
+if @c{c} is in the one-state, then @c{G} is applied to the remaining
+qubits; and if @c{c} is in the zero-state, no operation is
+applied. Therefore, an application of the @m{n}-qubit operator @c{G}
+as in
+
+@clist{
+G q1 ... qn
+}
+
+has the controlled variant with @c{CONTROLLED G} an (n+1)-qubit
+operator:
+
+@clist{
+CONTROLLED G c q1 ... qn
+}
+}
+
+@p{For example, the gate @c{CONTROLLED X 1 0} is the familiar
+controlled-not gate, which can also be written using the standard
+built-in Quil gate @c{CNOT 1 0}.}
+
+@p{Specifically, when acting on a gate @c{G} that can be represented
+as an @m{N \times N} matrix @m{U}, @c{CONTROLLED G} produces a gate
+@c{G'} described by the @m{2N \times 2N} matrix @m{C(U)} such that
+@m{C(U) := I \oplus U}, where @m{I} is the @m{N \times N} identity
+matrix and @m{\oplus} is a direct sum. For example, if @m{U} is the
+one-qubit operator
+
+@dm{
+\begin{pmatrix}
+a & b \\
+c & d
+\end{pmatrix}
+}
+
+then @m{C(U)} is
+
+@dm{
+\begin{pmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & a & b \\
+0 & 0 & c & d \\
+\end{pmatrix}.
+}
+}
+
+
+@subsubsection[:title "FORKED Gate Modifier"]
+
+@p{Let @c{G} be a parametric gate of @m{k} parameters @c{r1} to @c{rk}
+and @m{n} qubits @c{q1} to @c{qn}. This is written:
+
+@clist{
+G(r1, ..., rk) q1 ... qn
+}
+
+Next, consider a second set of @m{k} parameters @c{s1} to @c{sk}. The
+@c{FORKED} modifier takes such a gate @c{G} and allows either set of
+parameters to be used conditioned on an additional qubit @c{c}.
+
+@clist{
+FORKED G(r1, ..., rk, s1, ..., sk) c q1 ... qn
+}
+
+Roughly speaking, in terms of the matrix representation of the
+operator, this is equivalent to the pseudocode:
+
+@clist{
+if c = 0:
+    G(r1, ..., rk) q1 ... qn
+else if c = 1:
+    G(s1, ..., sk) q1 ... qn
+}
+}
+
+@aside{It is @emph{very} important to note that both @c{CONTROLLED}
+and @c{FORKED} are purely quantum, unitary operations. There is no
+"actual" conditional branching. The use of the above pseudocode is to
+illustrate how one might write the matrix representation in the
+standard computational basis.}
+
+@p{For example, the built-in gate @c{RX} takes a single @c{%theta}
+parameter and acts on a single qubit, like so @c{RX(pi/2)
+0}. Therefore, @c{FORKED RX(pi/2, pi/4) 1 0} produces a "forked"
+version of @c{RX}, conditioned on qubit @c{1}. If qubit @c{1} is in
+the zero-state, this corresponds to @c{RX(pi/2) 0} and to @c{RX(pi/4)
+0} if qubit @c{1} is in the one-state.}
+
+@c{In general, when acting on a parametric gate @c{G} of @m{k}
+parameters that can be represented as an @m{N \times N} matrix
+
+@dm{U(p_1,\ldots,p_k),}
+
+@c{FORKED G} produces a @m{2N \times 2N} matrix
+
+@dm{F(U)(p_1,\ldots,p_k,p_{k+1},\ldots,p_{2k})
+:=
+U(p_1,\ldots,p_k) \oplus U(p_{k+1},\ldots,p_{2k}),}
+
+where @m{\oplus} is the direct sum.
+}
+
+@p{For example, the gate @c{RZ} is defined as
+
+@clist{
+DEFGATE RZ(%theta):
+    cis(-%theta/2), 0
+    0,              cis(%theta/2)
+}
+
+Therefore, @c{FORKED RZ(@m{\theta_0}, @m{\theta_1}) 1 0}, for real
+numbers @m{\theta_0} and @m{\theta_1} results in a two-qubit operator
+that can be described by the matrix
+
+@dm{
+\begin{pmatrix}
+\operatorname{cis}(-\theta_0/2) & 0         & 0          & 0         \\
+0          & \operatorname{cis}(\theta_0/2) & 0          & 0         \\
+0          & 0         & \operatorname{cis}(-\theta_1/2) & 0         \\
+0          & 0         & 0          & \operatorname{cis}(\theta_1/2) \\
+\end{pmatrix}.
+}
+}
+
+
+@subsubsection[:title "Chaining Modifiers"]
+
+@p{When gate modifiers are chained, they consume qubits left-to-right,
+so that in the following example, the @c{CONTROLLED} modifier is
+conditioned on qubit @c{0}, @c{FORKED} on qubit @c{1}, and the gate
+@c{G} acts on qubit @c{2}.
+
+@clist{
+CONTROLLED FORKED DAGGER G 0 1 2
+    |         |          | ^ ^ ^
+    |         |          | | | |
+    |         |          +-|-|-+
+    |         +------------|-+
+    +----------------------+
+}
+}
+
+@p{Note that chaining multiple @c{FORKED} modifiers causes the
+numbers of parameters consumed by the gate to double for each
+additional @c{FORKED}. For example:
+
+@clist{
+RX(pi) 0
+FORKED RX(pi, pi/2) 1 0
+FORKED FORKED RX(pi, pi/2, pi/4, pi/8) 2 1 0
+}
+
+You can think of that last example as representing the following
+decision tree, where an edge label like @c{q2=0} means that qubit
+@c{2} is in the zero state.
+
+@clist{
++----------------------------------------------------------------------------+
+|            FORKED FORKED RX(pi, pi/2, pi/4, pi/8) 2 1 0                    |
+|                    /                               \                       |
+|                 q2=0                              q2=1                     |
+|                  /                                   \                     |
+|     FORKED RX(pi, pi/2) 1 0                  FORKED RX(pi/4, pi/8) 1 0     |
+|        /              \                         /               \          |
+|     q1=0             q1=1                    q1=0              q1=1        |
+|      /                  \                     /                   \        |
+| RX(pi) 0              RX(pi/2) 0        RX(pi/4) 0              RX(pi/8) 0 |
++----------------------------------------------------------------------------+
+}
+}
+
 
 @section[:title "Quantum State Reset"]
 
@@ -975,6 +1218,10 @@ case, @c{x} and @c{x[0]} would be equivalent.}
     @alt @ms{Identifier}[@ms{Integer}]
 }
 
+@aside{Note that this memory reference is @emph{formal}. The lone
+@ms{Identifier} in certain contexts may refer to a named argument of,
+for example, a circuit definition.}
+
 @p{Dereferencing with indirection, e.g., something akin to
 @c{x[y[3]]}, is supported through the @c{LOAD} and @c{STORE}
 instructions. For example,
@@ -1246,7 +1493,7 @@ instructions:}
 }
 
 @p{The @c{JUMP-WHEN} (resp. @c{JUMP-UNLESS}) instruction branches if
-and only if @ms{Memory Reference} references a @bit{BIT}-typed value
+and only if @ms{Memory Reference} references a @c{BIT}-typed value
 that is non-zero (resp. exactly zero).}
 
 @p{Together, these form the branching instructions.}
@@ -1292,6 +1539,56 @@ inclusion.}
 @p{Here, @ms{String} denotes a file name. Implementations processing
 Quil must support and document individual file names, and may support
 operating-system-dependent file paths.}
+
+@section[:title "Circuits"]
+
+@subsection[:title "Circuit Syntax"]
+
+@p{Circuits in Quil are parameterized templates of instructions that
+can be filled in with parameters and arguments. Circuit applications
+within a program are expanded according to the circuit's definition in
+full before a Quil program is executed.}
+
+@aside{Circuits in Quil are more like C preprocessor macros than they
+are like functions. The QAM has no notion of a circuit as a part of
+its semantics; circuits are simply notational conveniences.}
+
+@p{A circuit is defined with the @c{DEFGATE} directive.}
+
+@syntax[:name "Circuit Definition"]{
+DEFCIRCUIT @ms{Identifier}
+@rep[:min 0 :max 1]{@group{(@ms{Parameters})}}
+@rep[:min 0 :max 1]{@ms{Arguments}}
+:
+@rep[:min 0]{@ms{Circuit Instruction}}
+}
+
+@p{Within the circuit body, we can write any Quil instruction,
+allowing for the named parameters and arguments to show up as
+instruction parameters or arguments.}
+
+@syntax[:name "Circuit Instruction"]{
+    @ms{Indent} @ms{Instruction} @ms{Terminator}
+}
+
+@p{A circuit may be used similarly to a gate:}
+
+@syntax[:name "Circuit Application"]{
+    @ms{Identifier}
+    @rep[:min 0 :max 1]{
+        @group{
+            (
+                @rep[:min 0 :max 1]{@ms{Expression List}}
+            )
+        }
+    }
+    @rep[:min 1]{@group{@ms{Formal Qubit} @alt @ms{Memory Reference}}}
+}
+
+@subsection[:title "Circuit Expansion"]
+
+@p{TODO: main points: (1) circuit expansion order, (2) infinite recursion, (3) presence of @c{LABEL}, (4) LABEL scope}
+
 
 @section[:title "Test Area"]
 
