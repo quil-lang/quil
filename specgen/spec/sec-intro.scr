@@ -168,29 +168,29 @@ newline as a part of the syntax definition of an indent.}
 @p{Non-negative integers are written as usual. Leading zeros do not
 change the interpretation of these numeric literals.}
 
-@syntax[:name "Non-Negative Integer"]{
+@syntax[:name "Integer"]{
     @rep[:min 1]{[0-9]}
 }
 
 @p{Real numbers are written in usual floating-point number syntax.}
 
 @syntax[:name "Real"]{
-  @rep[:min 0 :max 1]{@ms{Non-Negative Integer}}
+  @rep[:min 0 :max 1]{@ms{Integer}}
   @rep[:min 0 :max 1]{.}
-  @ms{Non-Negative Integer}
+  @ms{Integer}
   @rep[:min 0 :max 1]{
     @group{
       @group{e @alt E}
       @rep[:min 0 :max 1]{@group{- @alt +}}
-      @ms{Non-Negative Integer}
+      @ms{Integer}
     }
   }
 }
 
 @p{Complex numbers are an extension of this.}
 
-@syntax[:name "Complex Number"]{
-       @ms{Non-Negative Integer}
+@syntax[:name "Complex"]{
+       @ms{Integer}
   @alt @ms{Real}
   @alt @rep[:min 0 :max 1]{@ms{Real}} i
   @alt pi
@@ -311,7 +311,6 @@ associativity directions.
          - @ms{Expression}
     @alt @ms{Identifier} ( @ms{Expression} )
     @alt ( @ms{Expression} )
-    @alt @ms{Non-Negative Integer}
     @alt @ms{Complex}
     @alt @ms{Parameter}
     @alt @ms{Memory Reference}
@@ -401,7 +400,7 @@ to the end of the line.}
 @p{A Quil program manipulates quantum resources called @emph{qubits}. Qubits are indexed by non-negative integers.}
 
 @syntax[:name "Qubit"]{
-@ms{Non-Negative Integer}
+@ms{Integer}
 }
 
 @p{Qubit indexes have no significance on their own. Qubits must always
@@ -496,11 +495,11 @@ DEFGATE @ms{Identifier} AS PERMUTATION:@ms{Indent}@ms{Permutation}
 integers.}
 
 @syntax[:name "Permutation"]{
-    @ms{Non-Negative Integer}
+    @ms{Integer}
     @rep[:min 1]{
     @group{
         ,
-        @ms{Non-Negative Integer}
+        @ms{Integer}
     }
     }
 }
@@ -742,7 +741,7 @@ octets, and is guaranteed to hold at least the values @m{-127} to
 
 @syntax[:name "Type"]{
         @ms{Base Type}
-   @alt @ms{Base Type}[@ms{Non-Negative Integer}]
+   @alt @ms{Base Type}[@ms{Integer}]
 }
 
 @p{There are currently no provisions for adding additional types.}
@@ -815,7 +814,7 @@ DECLARE @ms[:sub 1]{Identifier}
         OFFSET
         @rep[:min 1]{
           @group{
-            @ms[:sub "i"]{Non-Negative Integer}
+            @ms[:sub "i"]{Integer}
             @ms[:sub "i"]{Type}
           }
         }
@@ -824,7 +823,7 @@ DECLARE @ms[:sub 1]{Identifier}
 @p{This is similar to the aliased declaration, but it allows
 @ms[:sub 1]{Identifier} to designate memory in the middle of that which is
 designated by @ms[:sub 2]{Identifier}. In particular, @ms[:sub 1]{Identifier} will point
-to memory a total of @dm{\sum_i \langle\texttt{Non-Negative Integer}_i\rangle\cdot
+to memory a total of @dm{\sum_i \langle\texttt{Integer}_i\rangle\cdot
 \text{sizeof}(\langle\texttt{Type}_i\rangle)} bits after the start of
 @ms[:sub 2]{Identifier}. As with an aliased declaration, the memory at
 @ms[:sub 1]{Identifier} must not overflow the end of @ms[:sub 2]{Identifier}.}
@@ -973,7 +972,7 @@ case, @c{x} and @c{x[0]} would be equivalent.}
 
 @syntax[:name "Memory Reference"]{
          @ms{Identifier}
-    @alt @ms{Identifier}[@ms{Non-Negative Integer}]
+    @alt @ms{Identifier}[@ms{Integer}]
 }
 
 @p{Dereferencing with indirection, e.g., something akin to
