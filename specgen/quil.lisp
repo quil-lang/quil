@@ -223,10 +223,19 @@
 (defun make-quil-spec-document ()
   (let ((doc (make-instance 'document
                :title "Quil Specification"
-               :author "many"
-               :version "2021.1"
+               :author "Robert S. Smith; Rigetti & Co. Inc.; and contributors"
+               :version "2021.1 (beta)"
                :body (append
-                      (include (spec/ "sec-intro.scr"))))))
+                      (include (spec/ "sec-intro.scr"))
+                      (include (spec/ "sec-opsem.s"))
+                      (include (spec/ "sec-structure.s"))
+                      (include (spec/ "sec-gates.s"))
+                      (include (spec/ "sec-reset.s"))
+                      (include (spec/ "sec-mem.s"))
+                      (include (spec/ "sec-measurement.s"))
+                      (include (spec/ "sec-control.s"))
+                      (include (spec/ "sec-other.s"))
+                      (include (spec/ "sec-circuits.s"))))))
     (assign-heading-numbers doc)
     (push (generate-toc doc) (slot-value doc 'body))
     doc))
