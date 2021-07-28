@@ -22,6 +22,12 @@ and other Rigetti-based contributors. This was code-named "Quilt" but
 was later finalized as "Quil-T". Quil-T lived as a proposed extension
 (called an "RFC") in the Git repository.}
 
+@p{In 2019, at Rigetti Computing, an addition to Quil to allow gates
+to be defined as exponentiated Pauli sums was developed by
+E. Peterson. This was code-named "defexpi" but was later finalized as
+syntax @c{DEFGATE AS PAULI-SUM}. This syntax lived as an RFC in the
+Git repository.}
+
 @p{In 2021, R. Smith (whose affiliation since changed to HRL
 Laboratories) and Rigetti Computing set up the @emph{Quil-Lang} GitHub
 organization for shared and collaborative governance of the definition

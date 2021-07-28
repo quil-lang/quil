@@ -22,7 +22,7 @@ place. This may not be possible in all cases.}
 
 @syntax[:name "Formal Qubit"]{
          @ms{Qubit}
-    @alt @ms{Parameter}
+    @alt @ms{Argument}
 }
 
 @subsection[:title "Quantum Gate Definitions"]
@@ -114,17 +114,173 @@ integers specified must be a power-of-two.}
 
 @subsubsection[:title "Definition by Pauli Sum"]
 
-@syntax[:name "Pauli Sum Gate Definition"]{
-DEFGATE @ms{Identifier} AS PAULI-SUM:@ms{Pauli Terms}
+@p{Quantum gates can be defined by an associated Hamiltonian, as in
+
+@dm{U(\mathbf t) = \exp(-i \mathcal H(\mathbf t))}
+
+for a Hermitian operator @m{\mathcal H}. Quil allows @m{\mathcal H} to
+be specified as a @emph{Pauli sum}, a sum of combinations of Pauli
+operators.
 }
+
+@p{The syntax is as follows.}
+
+@syntax[:name "Pauli Sum Gate Definition"]{
+DEFGATE @ms{Identifier}
+@rep[:min 0 :max 1]{@group{(@ms{Parameters})}}
+@ms{Arguments}
+AS PAULI-SUM:@ms{Pauli Terms}
+}
+
+@p{The collection of Pauli term must be written on their own lines.}
 
 @syntax[:name "Pauli Terms"]{
     @rep[:min 1]{@group{@ms{Indent}@ms{Pauli Term}}}
 }
 
+@p{Each Pauli term represents some coefficient multiplied against a
+tensor product of Pauli operators.}
+
 @syntax[:name "Pauli Term"]{
-    ...
+    @ms{Pauli Word}(@ms{Expression}) @ms{Arguments}
 }
+
+@p{A @c{PAULI-SUM} gate definition is subject to some restrictions:
+
+@itemize{
+
+    @item{The number of @ms{Arguments} must equal the length of the
+    @ms{Pauli Word}.}
+
+    @item{The @ms{Expression} must be a real-valued expression which
+    references only real numeric literals as well as parameters from
+    the @ms{Parameters} list of the gate definition.}
+
+    @item{@ms{Arguments} in a @ms{Pauli Term} must only refer to
+    arguments that exist in the gate definition.}
+
+}
+}
+
+@syntax[:name "Pauli Word"]{
+    @rep[:min 1]{@group{I @alt X @alt Y @alt Z}}
+}
+
+@subsubsubsection[:title "Semantics"]
+
+@p{We describe how one is intended to extract a matrix presentation of
+an operator from such a Pauli sum, and then we remit the discussion of
+semantics to that for @ms{Matrix Gate Definition}.
+
+@enumerate{
+
+    @item{Pad each Pauli word appearing in the sum with @c{I} letters,
+    so that all formal qubits appear in all terms.}
+
+    @item{Sort the qubit arguments appearing in each term to agree
+    with the qubit argument list in the definition
+    header. Simultaneously, sort the letters appearing in the Pauli
+    word to match.}
+
+    @item{Using the Quil-standard matrix definitions of @c{I}, @c{X},
+    @c{Y}, and @c{Z}, associate to each Pauli term's Pauli word the
+    ordered tensor product of these basic matrices.}
+
+   @item{Scale each such matrix by the Pauli term's @ms{Expression}.}
+
+   @item{Sum the matrices, multiply by @m{i=\sqrt{-1}}, and form the
+   matrix exponential.}
+}
+}
+
+@p{See the next sections for an example semantic reduction.}
+
+@subsubsubsection[:title "Example Syntax"]
+
+@p{Many standard examples of gates admit short expression in these terms:
+
+@clist{
+DEFGATE RY(%theta) q AS PAULI-SUM:
+    Y(-%theta/2) q
+}
+
+This also includes many standard multi-qubit operators:
+
+@clist{
+DEFGATE CPHASE(%theta) p q AS PAULI-SUM:
+    ZZ(-%theta/4) p q
+    Z(%theta/4) p
+    Z(%theta/4) q
+
+DEFGATE CAN(%alpha, %beta, %gamma) p q AS PAULI-SUM:
+    XX(%alpha/4) p q
+    YY(%beta/4)  p q
+    ZZ(%gamma/4) p q
+}
+
+It also includes some operators encountered in practice, e.g., the following reduction of an Ansatz appearing in the electronic structure simulation problem for @m{\mathrm H_2}:
+
+@clist{
+DEFGATE UCC-H2(%theta) p q r s AS PAULI-SUM:
+    YXXX(%theta) p q r s
+}
+}
+
+@subsubsubsection[:title "Example Semantic Reduction of CPHASE"]
+
+@p{In the example definition of @c{CPHASE} above, these steps proceed as follows:
+
+@enumerate{
+
+    @item{We replace @c{ZZ p q} with @c{ZZ p q} (i.e., no change), @c{Z p}
+    by @c{ZI p q}, and @c{Z q} by @c{ZI q p}, which each now apply
+    to all the available formal qubits.}
+
+    @item{We replace @c{ZZ p q} by @c{ZZ p q} (i.e., no change), @c{ZI
+    p q} by @c{ZI p q}, and @c{ZI q p} by @c{IZ p q}, which now all
+    end in @c{p q}.}
+
+    @item{The tensor products associated to these three terms are respectively
+
+      @dm{
+      \begin{align*}
+        ZZ &= \left( \begin{smallmatrix}1 \\ & -1 \\ & & -1 \\ & & & 1 \end{smallmatrix} \right) &
+        ZI &= \left( \begin{smallmatrix}1 \\ & 1 \\ & & -1 \\ & & & -1 \end{smallmatrix} \right) &
+        IZ &= \left( \begin{smallmatrix}1 \\ & -1 \\ & & 1 \\ & & & -1 \end{smallmatrix} \right),
+      \end{align*}
+      }
+      where we have elided zero entries.
+    }
+
+    @item{After rescaling by the associated expressions, these matrices become
+
+      @dm{
+        \left( \begin{smallmatrix}-\theta/4 \\ & \theta/4 \\ & & \theta/4 \\ & & & -\theta/4 \end{smallmatrix} \right)
+        \qquad
+        \left( \begin{smallmatrix}\theta/4 \\ & \theta/4 \\ & & -\theta/4 \\ & & & -\theta/4 \end{smallmatrix} \right)
+        \qquad
+        \left( \begin{smallmatrix}\theta/4 \\ & -\theta/4 \\ & & \theta/4 \\ & & & -\theta/4 \end{smallmatrix} \right).
+        }
+    }
+
+    @item{Taking the sum and multiplying by @m{i} yields
+
+      @dm{
+        \left( \begin{smallmatrix}i\theta/4 \\ & i\theta/4 \\ & & i\theta/4 \\ & & & -3i\theta/4 \end{smallmatrix} \right),
+      }
+
+      and exponentiating yields
+
+      @dm{
+        \mathtt{CPHASE}(\theta) = \left( \begin{smallmatrix}e^{i\theta/4} \\ & e^{i\theta/4} \\ & & e^{i\theta/4} \\ & & & e^{-3i\theta/4} \end{smallmatrix} \right).
+        }
+    }
+}
+
+Up to global phase, this is evidently equivalent to the usual @c{AS
+MATRIX} definition (as specified in the next section).
+}
+
 
 @subsection[:title "Standard Gate Definitions"]
 
@@ -348,6 +504,8 @@ It also has a straightforward definition as a @c{PAULI-SUM}.
 
 @subsection[:title "Quantum Gate Applications"]
 
+@subsubsection[:title "Syntax and Semantics"]
+
 @p{A gate is applied via the following syntax.}
 
 @syntax[:name "Gate Application"]{
@@ -363,13 +521,21 @@ It also has a straightforward definition as a @c{PAULI-SUM}.
     @rep[:min 1]{@ms{Formal Qubit}}
 }
 
-@p{TODO: semantics discussion}
+@p{We refer to Section II.A of @link[:target
+"https://arxiv.org/abs/1608.03355"]{@emph{A Practical Quantum
+Instruction Set Architecture}} for extensive and detailed mathematical
+discussion on the semantics of gate application realized as a matrix
+operator on the Hilbert space of the QAM.}
+
+@p{Quil supports three kinds of unitary modifiers.}
 
 @syntax[:name "Modifier"]{
          DAGGER
     @alt CONTROLLED
     @alt FORKED(@ms{Expression List})
 }
+
+@p{These are described in the next sections.}
 
 @subsubsection[:title "DAGGER Gate Modifier"]
 
