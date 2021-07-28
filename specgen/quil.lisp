@@ -226,7 +226,7 @@
                :author "Robert S. Smith; Rigetti & Co. Inc.; and contributors"
                :version "2021.1 (beta)"
                :body (append
-                      (include (spec/ "sec-intro.scr"))
+                      (include (spec/ "sec-intro.s"))
                       (include (spec/ "sec-opsem.s"))
                       (include (spec/ "sec-structure.s"))
                       (include (spec/ "sec-gates.s"))
