@@ -523,6 +523,224 @@ DEFGATE @ms{Identifier} AS PAULI-SUM:@ms{Pauli Terms}
 
 @subsection[:title "Standard Gate Definitions"]
 
+
+@subsubsection[:title "Pauli Gates"]
+
+@dm{
+\begin{align*}
+\texttt{I} &= \left(\begin{smallmatrix}
+1 & 0\\
+0 & 1
+\end{smallmatrix}\right)
+&
+\texttt{X} &= \left(\begin{smallmatrix}
+0 & 1\\
+1 & 0
+\end{smallmatrix}\right)
+&
+\texttt{Y} &= \left(\begin{smallmatrix}
+0 & -i\\
+i & 0
+\end{smallmatrix}\right)
+&
+\texttt{Z} &= \left(\begin{smallmatrix}
+1 & 0\\
+0 & -1
+\end{smallmatrix}\right)
+\end{align*}
+}
+
+@subsubsection[:title "Hadamard Gate"]
+
+@dm{
+\texttt{H} = \tfrac{1}{\sqrt{2}}\left(\begin{smallmatrix}
+1 & 1\\
+1 & -1
+\end{smallmatrix}\right)
+}
+
+@subsubsection[:title "Phase Gates"]
+
+@dm{
+\begin{align*}
+\texttt{PHASE}(\theta) &= \left(\begin{smallmatrix}
+1 & 0\\
+0 & e^{i\theta}
+\end{smallmatrix}\right)
+&
+\texttt{S} &= \texttt{PHASE}(\pi/2)
+&
+\texttt{T} &= \texttt{PHASE}(\pi/4)
+\end{align*}
+}
+
+@subsubsection[:title "Controlled-Phase Gates"]
+
+@dm{
+\begin{align*}
+\texttt{CPHASE00}(\theta) &= \operatorname{diag}(e^{i\theta},1,1,1) \\
+\texttt{CPHASE01}(\theta) &= \operatorname{diag}(1,e^{i\theta},1,1) \\
+\texttt{CPHASE10}(\theta) &= \operatorname{diag}(1,1,e^{i\theta},1) \\
+\texttt{CPHASE}(\theta) &= \operatorname{diag}(1,1,1,e^{i\theta}) \\
+\texttt{CZ} &= \texttt{CPHASE}(\pi)
+\end{align*}
+}
+
+@p{Note that one has the following equivalences in Quil:
+
+@clist{
+CZ == CONTROLLED Z
+CPHASE = CONTROLLED PHASE
+}
+}
+
+
+@subsubsection[:title "Cartesian Rotation Gates"]
+
+@dm{
+\begin{align*}
+\texttt{RX}(\theta) &= \left(\begin{smallmatrix}
+\cos\frac{\theta}{2} & -i\sin\frac{\theta}{2}\\
+-i\sin\frac{\theta}{2} & \cos\frac{\theta}{2}
+\end{smallmatrix}\right)\\
+\texttt{RY}(\theta) &= \left(\begin{smallmatrix}
+\cos\frac{\theta}{2} & -\sin\frac{\theta}{2}\\
+\sin\frac{\theta}{2} & \cos\frac{\theta}{2}
+\end{smallmatrix}\right)\\
+\texttt{RZ}(\theta) &= \left(\begin{smallmatrix}
+e^{-i\theta/2} & 0\\
+0 & e^{i\theta/2}
+\end{smallmatrix}\right)
+\end{align*}
+}
+
+@subsubsection[:title "Controlled-X Gates"]
+
+@dm{
+\begin{align*}
+\texttt{CNOT} &=
+\left(
+\begin{smallmatrix}
+1 & 0 & 0 & 0\\
+0 & 1 & 0 & 0\\
+0 & 0 & 0 & 1\\
+0 & 0 & 1 & 0
+\end{smallmatrix}
+\right) &
+\texttt{CCNOT} &=
+\left(
+\begin{smallmatrix}
+    1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+    0 & 0 & 0 & 0 & 0 & 0 & 1 & 0
+\end{smallmatrix}
+\right)
+\end{align*}
+}
+
+@aside{The gate @c{CCNOT} is sometimes known as the @emph{Toffoli
+gate}. It is a universal classical logic gate.}
+
+@p{Note that one has the following equivalences in Quil:
+
+@clist{
+CNOT  == CONTROLLED X
+CCNOT == CONTROLLED CONTROLLED X
+}
+}
+
+@subsubsection[:title "Swap Gates"]
+
+@dm{
+\begin{align*}
+\texttt{PSWAP}(\theta) &=
+\left(
+\begin{smallmatrix}
+1 & 0 & 0 & 0\\
+0 & 0 & e^{i\theta} & 0\\
+0 & e^{i\theta} & 0 & 0\\
+0 & 0 & 0 & 1
+\end{smallmatrix}
+\right)\\
+\texttt{SWAP} &= \texttt{PSWAP}(0)\\
+\texttt{ISWAP} &= \texttt{PSWAP}(\pi/2)\\
+\texttt{PISWAP}(\theta) &=
+\left(
+\begin{smallmatrix}
+1 & 0 & 0 & 0\\
+0 & \cos(\theta/2) & i\sin(\theta/2) & 0\\
+0 & i\sin(\theta/2) & \cos(\theta/2) & 0\\
+0 & 0 & 0 & 1
+\end{smallmatrix}
+\right)\\
+\texttt{CSWAP} &=
+\left(
+\begin{smallmatrix}
+    1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+    0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{smallmatrix}
+\right)
+\end{align*}
+}
+
+@aside{The gate @c{CSWAP} is sometimes known as the @emph{Fredkin
+gate}. It is a universal classical logic gate.}
+
+@p{Note that one has the following equivalence in Quil:
+
+@clist{
+CSWAP == CONTROLLED SWAP
+}
+}
+
+
+@subsubsection[:title "Other Gates"]
+
+@dm{
+\begin{align*}
+\texttt{XY}(\theta) &= \exp\left( -i\theta(\texttt{X}^{\otimes 2} + \texttt{Y}^{\otimes 2}) \right)
+                     = \texttt{PISWAP}(\theta)\\
+\texttt{CAN}(\alpha, \beta, \gamma) &=
+\exp\left( -i (  \alpha\texttt{X}^{\otimes 2}
+               + \beta\texttt{Y}^{\otimes 2}
+               + \gamma\texttt{Z}^{\otimes 2}
+    \right)
+\end{align*}
+}
+
+@aside{Every two-qubit gate can be written in terms of @c{CAN},
+possibly with up to two preceding and two proceeding arbitrary
+one-qubit gates.}
+
+@p{The definition of @c{CAN} can be written as the following Quil
+matrix definition:
+
+@clist{
+DEFGATE CAN(%alpha, %beta, %gamma):
+    (cis((%alpha+%beta-%gamma)/2)+cis((%alpha-%beta+%gamma)/2))/2, 0, 0, (cis((%alpha-%beta+%gamma)/2)-cis((%alpha+%beta-%gamma)/2))/2
+    0, (cis((%alpha+%beta+%gamma)/(-2))+cis((%beta+%gamma-%alpha)/2))/2, (cis((%alpha+%beta+%gamma)/(-2))-cis((%beta+%gamma-%alpha)/2))/2, 0
+    0, (cis((%alpha+%beta+%gamma)/(-2))-cis((%beta+%gamma-%alpha)/2))/2, (cis((%alpha+%beta+%gamma)/(-2))+cis((%beta+%gamma-%alpha)/2))/2, 0
+    (cis((%alpha-%beta+%gamma)/2)-cis((%alpha+%beta-%gamma)/2))/2, 0, 0, (cis((%alpha+%beta-%gamma)/2)+cis((%alpha-%beta+%gamma)/2))/2
+}
+
+It also has a straightforward definition as a @c{PAULI-SUM}.
+}
+
+
+
+
+
 @subsection[:title "Quantum Gate Applications"]
 
 @p{A gate is applied via the following syntax.}
@@ -1014,6 +1232,8 @@ declaration, and aliased declaration with offset.}
 
 @subsubsection[:title "Declaring Memory"]
 
+@p{The simplest kind of memory declaration is a plain one.}
+
 @syntax[:name "Plain Memory Declaration"]{
     DECLARE @ms{Identifier} @ms{Type}
 }
@@ -1103,6 +1323,10 @@ could result in any value for @c{b}, depending on the implementation.
 @p{An implementation shall describe the bit-level description of the
 types, the available declarable memories, the limits on the declared
 memory, alignment requirements, and limits on sharing and offsets.}
+
+@subsubsection[:title "Duplicate Declaration Identifiers"]
+
+@p{It is an error to declare the same name more than once.}
 
 @subsubsection[:title "Examples"]
 
@@ -1372,7 +1596,7 @@ NEG      a              # a := -a
          <int>
          <real>
 
-ADD      a b            # a := a + b 
+ADD      a b            # a := a + b
 SUB      a b            # a := a - b
 MUL      a b            # a := a * b
 DIV      a b            # a := a / b
@@ -1476,6 +1700,15 @@ target's label) is the @m{p}th instruction (zero-indexed). If no
 instruction follows the label, then it is said to be a @emph{halting
 label at position @m{\vert P\vert}}.}
 
+@p{Each @c{LABEL} jump target name must be unique. It is an error to
+have a duplicate jump target name in a program.}
+
+@aside{Jump target names may be duplicated across (but not within)
+@c{DEFCIRCUIT} bodies if and only if those names don't appear globally
+within the program in which the @c{DEFCIRCUIT} is expanded. Names may
+be duplicated because they are made unique when the circuit is
+expanded.}
+
 @p{One may transfer control to the @m{p}th position of a program by
 using a @c{JUMP} instruction targeting a label at position @m{p}.}
 
@@ -1549,9 +1782,14 @@ can be filled in with parameters and arguments. Circuit applications
 within a program are expanded according to the circuit's definition in
 full before a Quil program is executed.}
 
-@aside{Circuits in Quil are more like C preprocessor macros than they
-are like functions. The QAM has no notion of a circuit as a part of
-its semantics; circuits are simply notational conveniences.}
+@aside{Circuits are intended to be used more as macros than as
+specifications for general quantum circuits. Indeed, @c{DEFCIRCUIT} is
+very limited in its expressiveness, only performing argument and
+parameter substitution. It is included mainly to help with the
+debugging and human readability of Quil code. Circuits in Quil are
+more like C preprocessor macros than they are like functions. The QAM
+has no notion of a circuit as a part of its semantics; circuits are
+simply notational conveniences.}
 
 @p{A circuit is defined with the @c{DEFGATE} directive.}
 
@@ -1587,7 +1825,64 @@ instruction parameters or arguments.}
 
 @subsection[:title "Circuit Expansion"]
 
-@p{TODO: main points: (1) circuit expansion order, (2) infinite recursion, (3) presence of @c{LABEL}, (4) LABEL scope}
+@p{Circuits are expanded recursively, outside in. Circuits may not be
+self-recursive or mutually recursive. These circuits are invalid
+because they exhibit different kinds of non-terminating recursion.}
+
+@clist{
+DEFCIRCUIT FOO:
+    BAR
+
+DEFCIRCUIT BAR:
+    FOO
+
+DEFCIRCUIT BAZ:
+    BAZ
+}
+
+@p{Labels that are declared within the body of a @c{DEFCIRCUIT} are
+unique to each of that circuit's expansions. While it is possible to
+jump out of a @c{DEFCIRCUIT} to a globally declared label, it is not
+possible to jump inside of one.}
+
+@p{Consider the following two @c{DEFCIRCUIT} declarations and their
+instantiations. Note the comments on correct and incorrect usages of
+@c{JUMP}.
+
+@clist{
+DEFCIRCUIT FOO:
+    LABEL @@FOO_A
+    JUMP @@GLOBAL   # (A) valid, global label
+    JUMP @@FOO_A    # (B) valid, local to FOO
+    JUMP @@BAR_A    # (C) invalid
+
+DEFCIRCUIT BAR:
+    LABEL @@BAR_A
+    JUMP @@FOO_A    # (D) invalid
+
+LABEL @@GLOBAL
+FOO
+BAR
+JUMP @@FOO_A        # (E) invalid
+JUMP @@BAR_A        # (F) invalid
+}
+
+Line (A) is valid because it is a jump from a circuit to a global
+label called @c{@@GLOBAL}.
+
+Line (B) is valid because it is a jump to a label within the same
+circuit body.
+
+Line (C) is invalid because it is erroneously attempting to jump to a
+different circuit body.
+
+Line (D) is invalid for the same reason as line (C); it is an
+erroneous attempt to jump from one local circuit body to another.
+
+Lines (E) and (F) are both invalid because they are attempts to jump
+into a local circuit definition.
+}
+
 
 
 @section[:title "Test Area"]
