@@ -59,6 +59,11 @@
 (setf (gethash 'display-math *commands*) 'display-math)
 (setf (gethash 'dm *commands*) 'display-math)
 
+(defclass hyperlink (body-mixin)
+  ((target :initarg :target :reader hyperlink-target)))
+(setf (gethash 'hyperlink *commands*) 'hyperlink)
+(setf (gethash 'link *commands*) 'hyperlink)
+
 (defclass display-syntax (body-mixin)
   ((name :initarg :name :reader display-syntax-name)))
 (setf (gethash 'display-syntax *commands*) 'display-syntax)
@@ -235,7 +240,8 @@
                       (include (spec/ "sec-measurement.s"))
                       (include (spec/ "sec-control.s"))
                       (include (spec/ "sec-other.s"))
-                      (include (spec/ "sec-circuits.s"))))))
+                      (include (spec/ "sec-circuits.s"))
+                      (include (spec/ "sec-history.s"))))))
     (assign-heading-numbers doc)
     (push (generate-toc doc) (slot-value doc 'body))
     doc))
@@ -399,6 +405,11 @@
      (:summary "Side Note")
      (html-body s o))))
 
+(defmethod html (stream (o hyperlink))
+  (cl-who:with-html-output (s stream :indent t)
+    (:a :href (hyperlink-target o)
+        (html-body s o))))
+
 (defun syntax-alt-p (x)
   (typep x 'syntax-alt))
 
@@ -518,4 +529,5 @@
                      :if-exists ':supersede
                      :if-does-not-exist ':create)
     (html s document)
-    (format t "~&; Wrote ~A.~%" (site/ "spec.html"))))
+    (format t "~&; Wrote ~A.~%" (site/ "spec.html"))
+    nil))
