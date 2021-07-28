@@ -22,6 +22,11 @@ body {
     max-width: 800px;
 }
 
+code, pre, tt {
+    font-family: "Dejavu Sans Mono", "Consolas", "Courier New", monospace;
+    font-size: 100%;
+}
+
 pre.source-code {
     margin-left: 2em;
 }
@@ -40,6 +45,7 @@ div.syntax {
     line-height: 18px;
     overflow: hidden;
     padding-left: 12px;
+    font-size: 90%;
 }
 
 span.meta-syntax-identifier {
