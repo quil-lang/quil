@@ -703,7 +703,7 @@ version of @c{RX}, conditioned on qubit @c{1}. If qubit @c{1} is in
 the zero-state, this corresponds to @c{RX(pi/2) 0} and to @c{RX(pi/4)
 0} if qubit @c{1} is in the one-state.}
 
-@c{In general, when acting on a parametric gate @c{G} of @m{k}
+@p{In general, when acting on a parametric gate @c{G} of @m{k}
 parameters that can be represented as an @m{N \times N} matrix
 
 @dm{U(p_1,\ldots,p_k),}
