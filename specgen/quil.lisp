@@ -229,7 +229,7 @@
   (let ((doc (make-instance 'document
                :title "Quil Specification"
                :author "Robert S. Smith; Rigetti & Co. Inc.; and contributors"
-               :version "2021.1 (beta)"
+               :version "2021.1 (DRAFT)"
                :body (append
                       (include (spec/ "sec-intro.s"))
                       (include (spec/ "sec-opsem.s"))
@@ -281,12 +281,13 @@
      (cl-who:fmt "~&<!-- This document was automatically generated on ~A. -->"
                  (local-time:format-timestring nil (local-time:now)))
      (:head
-      (:title (cl-who:esc (title o)))
       (:link :rel "stylesheet"
-             :href "spec-style.css")
-      #-ig(:script :src "https://polyfill.io/v3/polyfill.min.js?features=es6")
-      #-ig(:script :id "MathJax-script"
-                   :src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"))
+             :type "text/css"
+             :href "style.css")
+      (:script :src "https://polyfill.io/v3/polyfill.min.js?features=es6")
+      (:script :id "MathJax-script"
+               :src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js")
+      (:title (cl-who:esc (title o))))
      (:body
       (:h1 (cl-who:esc (title o)))
       (:p (:b "Authors: ") (cl-who:esc (document-author o)))
