@@ -4,7 +4,7 @@
 
 @p{In 2016, at Rigetti Computing, Quil was defined in an @link[:target
 "https://arxiv.org/abs/1608.03355"]{arXiv paper} entitled "A Practical
-Quantum Instruction Set Architecture" by R. Smitqh, M. Curtis, and
+Quantum Instruction Set Architecture" by R. Smith, M. Curtis, and
 W. Zeng.}
 
 @p{In 2018, at Rigetti Computing, R. Smith began work to amend Quil to
