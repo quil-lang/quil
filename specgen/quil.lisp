@@ -525,7 +525,7 @@
 
 
 (defun write-quil-spec (&optional (document (make-quil-spec-document)))
-  (with-open-file (s (site/ "spec.html")
+  (with-open-file (s (site/ "index.html")
                      :direction ':output
                      :if-exists ':supersede
                      :if-does-not-exist ':create)
