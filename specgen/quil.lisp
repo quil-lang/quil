@@ -407,7 +407,7 @@
      (html-body s o))))
 
 (defmethod html (stream (o hyperlink))
-  (cl-who:with-html-output (s stream :indent t)
+  (cl-who:with-html-output (s stream :indent nil)
     (:a :href (hyperlink-target o)
         (html-body s o))))
 
