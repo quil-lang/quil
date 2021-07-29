@@ -1,6 +1,6 @@
 @aside{This document is in @emph{DRAFT STATUS} and is for review
 purposes only. It is being developed by the @link[:target
-"https://github.com/quil-lang/"]{Quil-Lang} group.}
+"https://github.com/quil-lang/"]{Quil-Lang group} on GitHub.}
 
 @section[:title "Introduction"]
 
