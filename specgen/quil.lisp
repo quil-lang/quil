@@ -300,22 +300,24 @@
 
 (defmethod html (stream (o table-of-contents))
   (cl-who:with-html-output (s stream :indent t)
-    (:h2 "Table of Contents")
-    (:ul
-     (dolist (heading (table-of-contents-headings o))
-       (cl-who:htm
-        (:li (:a :href (concatenate 'string "#" (heading-anchor heading))
-                 (cl-who:esc
-                  (format nil "~A. ~A"
-                          (heading-number heading)
-                          (title heading))))))))))
+    (:nav
+     :class "toc-wrapper"
+     (:h2 "Table of Contents")
+     (:ul
+      (dolist (heading (table-of-contents-headings o))
+        (cl-who:htm
+         (:li (:a :href (concatenate 'string "#" (heading-anchor heading))
+                  (cl-who:esc
+                   (format nil "~A. ~A"
+                           (heading-number heading)
+                           (title heading)))))))))))
 
 (defmethod html (stream (o string))
   (cl-who:with-html-output (s stream)
     (cl-who:esc o)))
 
 (defmethod html (stream (o paragraph))
-  (cl-who:with-html-output (s stream)
+  (cl-who:with-html-output (s stream :indent t)
     (:p
      (html-body s o))))
 
@@ -397,7 +399,7 @@
         (:li (html-body s item)))))))
 
 (defmethod html (stream (o aside))
-  (cl-who:with-html-output (s stream :indent t)
+  (cl-who:with-html-output (s stream)
     (:p :class "aside"
         (:b "Note: ")
         (html-body s o))
