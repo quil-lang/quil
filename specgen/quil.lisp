@@ -19,7 +19,7 @@
                    (asdf:system-relative-pathname ':quil-spec-gen "specgen/site/")))
 
 
-;;; Scrawl Commands
+;;; Scriptum Commands
 
 (defvar *commands* (make-hash-table :test 'eq))
 
@@ -211,14 +211,14 @@
        (apply 'make-instance class options))
       (t
        (warn "No object representation for ~S" operator)
-       (scrawl:default-form-handler operator :options options :body body)))))
+       (scriptum:default-form-handler operator :options options :body body)))))
 
 (defun include (filename)
   (with-open-file (s filename :direction ':input)
-    (let ((*readtable* (named-readtables:find-readtable 'scrawl:syntax))
-          (scrawl:*form-handler* 'clos-form-handler)
-          (scrawl:*debug-stream* t)
-          ;; Scrawl needs to intern symbols into this package (where
+    (let ((*readtable* (named-readtables:find-readtable 'scriptum:syntax))
+          (scriptum:*form-handler* 'clos-form-handler)
+          (scriptum:*debug-stream* t)
+          ;; Scriptum needs to intern symbols into this package (where
           ;; all the commands are at).
           (*package* (find-package "QUIL-SPEC-GEN")))
       (loop :for r := (read s nil nil)
