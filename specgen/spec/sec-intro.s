@@ -2,7 +2,9 @@
 purposes only. It is being developed by the @link[:target
 "https://github.com/quil-lang/"]{Quil-Lang group} on GitHub.}
 
-@section[:title "Introduction"]
+@section[:title "Preamble"]
+
+@subsection[:title "An Introduction to Quil"]
 
 @p{This is the language specification for Quil, a language for hybrid
 classical/quantum computations.}
@@ -31,3 +33,7 @@ depositing the resulting bit into a classic bit register named @c{ro}.
 
 @p{The remainder of this document serves as a reference for all Quil
 language syntax constructs and their associated semantics.}
+
+@subsection[:title "Annexes"]
+
+@p{The Quil language is described throughout the ordinarily named sections of this document. There are additional sections, called @emph{annexes}, which are optional extensions to the Quil language. These extensions may modify the syntax or semantics of the base specification in noted ways. }
