@@ -199,7 +199,7 @@ corresponding frame's sample rate is undefined.}
     SET-FREQUENCY @ms{Frame} @ms{Real}
 }
 
-@synrax[:name "Shift Frequency"]{
+@syntax[:name "Shift Frequency"]{
     SHIFT-FREQUENCY @ms{Frame} @ms{Real}
 }
 
