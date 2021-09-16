@@ -236,7 +236,7 @@ enough to warrant their own production.}
 instructions.}
 
 @syntax[:name "Program"]{
-@rep{@ms{Program Element}}
+    @rep{@ms{Program Element}}
 }
 
 @syntax[:name "Program Element"]{
