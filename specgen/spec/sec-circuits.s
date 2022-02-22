@@ -23,7 +23,7 @@ DEFCIRCUIT @ms{Identifier}
 @rep[:min 0 :max 1]{@group{(@ms{Parameters})}}
 @rep[:min 0 :max 1]{@ms{Arguments}}
 :
-@rep[:min 0]{@ms{Circuit Instruction}}
+@ms{Indent}@rep[:min 0]{@ms{Circuit Instruction}}
 }
 
 @p{Within the circuit body, we can write any Quil instruction,
@@ -31,7 +31,7 @@ allowing for the named parameters and arguments to show up as
 instruction parameters or arguments.}
 
 @syntax[:name "Circuit Instruction"]{
-    @ms{Indent} @ms{Instruction} @ms{Terminator}
+    @ms{Instruction} @ms{Terminator}
 }
 
 @p{A circuit may be used similarly to a gate:}
