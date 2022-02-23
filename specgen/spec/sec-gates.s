@@ -310,8 +310,40 @@ AS SEQUENCE:
 }
 @subsubsubsection[:title "Semantics"]
 
-@p{Each argument of a @ms{Sequence Element} must correspond to an @ms{Argument} contained in @ms{Arguments} found in the gate definition header (An @ms{Argument} is not a @ms{Qubit}). An @ms{Expression} in the @ms{Expression List} may reference a @ms{Parameter} from @ms{Parameters} found in the gate definition header, but this is not required (an explicitly defining some angle of rotation is also possible, for example).}
-@p{The unitary for a sequence gate should be the result of multiplying each unitary from that gate's sequence elements in the order they appear in the body. All the resulting unitary should cover the combined space of the arguments for that gate definition (even unused arguments).}
+@p{Each argument of a @ms{Sequence Element} must correspond to an @ms{Argument} contained in @ms{Arguments} found in the gate definition header (An @ms{Argument} is not a @ms{Qubit}). An @ms{Expression} in the @ms{Expression List} may reference a @ms{Parameter} from @ms{Parameters} found in the gate definition header, but this is not required (explicitly defining some angle of rotation is also possible, for example).}
+@p{The unitary for a sequence gate should be the result of multiplying each unitary from that gate's sequence elements in the order they appear in the body. The resulting unitary should cover the combined space of the arguments for that gate definition (including unused arguments).}
+@p{Sequence gate definitions may reference one another but not circularly as this would prevent them from being resolvable.}
+
+@subsubsubsection[:title "Example"]
+
+@clist{
+
+DEFGATE TT p q AS SEQUENCE:
+    T p
+    T q
+
+DEFGATE TOFFOLI p q r AS SEQUENCE:
+    H        r
+    CNOT     q r
+    DAGGER T r
+    CNOT     p r
+    T        r
+    CNOT     q r
+    DAGGER T r
+    CNOT     p r
+    TT       q r
+    CNOT     p q
+    H        r
+    T        p
+    DAGGER T q
+    CNOT     p q    
+    
+
+DEFGATE RYRZRY(%alpha, %beta, %gamma) p AS SEQUENCE:
+    RY(%alpha) p
+    RZ(%beta)  p 
+    RY(%gamma) p 
+}
 
 @subsection[:title "Standard Gate Definitions"]
 
