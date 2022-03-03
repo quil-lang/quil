@@ -312,7 +312,7 @@ AS SEQUENCE:
 
 @p{Each argument of a @ms{Sequence Element} must correspond to an @ms{Argument} contained in @ms{Arguments} found in the gate definition header (An @ms{Argument} is not a @ms{Qubit}). An @ms{Expression} in the @ms{Expression List} may reference a @ms{Parameter} from @ms{Parameters} found in the gate definition header, but this is not required (explicitly defining some angle of rotation is also possible, for example).}
 @p{The unitary for a sequence gate should be the result of multiplying each unitary from that gate's sequence elements in the order they appear in the body. The resulting unitary should cover the combined space of the arguments for that gate definition (including unused arguments).}
-@p{Sequence gate definitions may reference one another but not circularly as this would prevent them from being resolvable.}
+@p{Sequence gate definitions may reference one another but any circularity (e.g. X = AXB for some unitaries A,B) is undefined.}
 
 @subsubsubsection[:title "Example"]
 
