@@ -23,7 +23,7 @@ DEFCIRCUIT @ms{Identifier}
 @rep[:min 0 :max 1]{@group{(@ms{Parameters})}}
 @rep[:min 0 :max 1]{@ms{Arguments}}
 :
-@ms{Indent}@rep[:min 1]{@ms{Circuit Line}}@group{@ms{Newline} @alt @syntax-descriptive{End of File}}
+@rep[:min 1]{@ms{Circuit Line}}@group{@ms{Newline} @alt @syntax-descriptive{End of File}}
 }
 
 @p{Within the circuit body, we can write any Quil instruction,
