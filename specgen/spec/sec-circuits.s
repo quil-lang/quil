@@ -14,7 +14,9 @@ parameter substitution. It is included mainly to help with the
 debugging and human readability of Quil code. Circuits in Quil are
 more like C preprocessor macros than they are like functions. The QAM
 has no notion of a circuit as a part of its semantics; circuits are
-simply notational conveniences.}
+simply notational conveniences. If the definition of an actual gate
+in terms of other gates is desired, a @ms{Sequence Gate Definition} 
+accomplishes this.}
 
 @p{A circuit is defined with the @c{DEFGATE} directive.}
 
