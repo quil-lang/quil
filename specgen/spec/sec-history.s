@@ -50,4 +50,7 @@ languages, such as OpenQASM, Quipper, Q#, and QCL.}
     @itemize{
         @item{July 2021: Document created.}
     }
+    @itemize{
+        @item{March 2022: Sequence gate definition feature added. (Parker Williams, HRL Laboratories)}
+    }
 }
