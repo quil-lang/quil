@@ -189,7 +189,7 @@ semantics to that for @ms{Matrix Gate Definition}.
 
    @item{Scale each such matrix by the Pauli term's @ms{Expression}.}
 
-   @item{Sum the matrices, multiply by @m{i=\sqrt{-1}}, and form the
+   @item{Sum the matrices, multiply by @m{-i=-\sqrt{-1}}, and form the
    matrix exponential.}
 }
 }
@@ -202,16 +202,16 @@ semantics to that for @ms{Matrix Gate Definition}.
 
 @clist{
 DEFGATE RY(%theta) q AS PAULI-SUM:
-    Y(-%theta/2) q
+    Y(%theta/2) q
 }
 
 This also includes many standard multi-qubit operators:
 
 @clist{
 DEFGATE CPHASE(%theta) p q AS PAULI-SUM:
-    ZZ(-%theta/4) p q
-    Z(%theta/4) p
-    Z(%theta/4) q
+    ZZ(%theta/4) p q
+    Z(-%theta/4) p
+    Z(-%theta/4) q
 
 DEFGATE CAN(%alpha, %beta, %gamma) p q AS PAULI-SUM:
     XX(%alpha/4) p q
@@ -256,15 +256,15 @@ DEFGATE UCC-H2(%theta) p q r s AS PAULI-SUM:
     @item{After rescaling by the associated expressions, these matrices become
 
       @dm{
-        \left( \begin{smallmatrix}-\theta/4 \\ & \theta/4 \\ & & \theta/4 \\ & & & -\theta/4 \end{smallmatrix} \right)
+        \left( \begin{smallmatrix}\theta/4 \\ & -\theta/4 \\ & & -\theta/4 \\ & & & \theta/4 \end{smallmatrix} \right)
         \qquad
-        \left( \begin{smallmatrix}\theta/4 \\ & \theta/4 \\ & & -\theta/4 \\ & & & -\theta/4 \end{smallmatrix} \right)
+        \left( \begin{smallmatrix}-\theta/4 \\ & -\theta/4 \\ & & \theta/4 \\ & & & \theta/4 \end{smallmatrix} \right)
         \qquad
-        \left( \begin{smallmatrix}\theta/4 \\ & -\theta/4 \\ & & \theta/4 \\ & & & -\theta/4 \end{smallmatrix} \right).
+        \left( \begin{smallmatrix}-\theta/4 \\ & \theta/4 \\ & & -\theta/4 \\ & & & \theta/4 \end{smallmatrix} \right).
         }
     }
 
-    @item{Taking the sum and multiplying by @m{i} yields
+    @item{Taking the sum and multiplying by @m{-i} yields
 
       @dm{
         \left( \begin{smallmatrix}i\theta/4 \\ & i\theta/4 \\ & & i\theta/4 \\ & & & -3i\theta/4 \end{smallmatrix} \right),
