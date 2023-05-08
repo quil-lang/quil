@@ -27,7 +27,7 @@ of the qubits matters. In particular, the above frame may differ from @c{1 0 "cz
 }
 
 @syntax[:name "Frame Specification"]{
-    @ms{Indent} @ms{String} : @group{ @ms{Expression} @alt @ms{String} }
+    @ms{Indent} @ms{Identifier} : @group{ @ms{Expression} @alt @ms{String} }
 }
 
 @p{All frames used in a program must have a corresponding top-level definition.}
