@@ -20,7 +20,7 @@ of the qubits matters. In particular, the above frame may differ from @c{1 0 "cz
 
 @subsubsection[:title "DEFFRAME"]
 
-@p{Quil-T itself has no built-in frames. All frames referenced withiin a program must be defined using the @c{DEFFRAME} directive.}
+@p{Quil-T itself has no built-in frames. All frames referenced within a program must be defined using the @c{DEFFRAME} directive.}
 
 @syntax[:name "Frame Definition"]{
     DEFFRAME @ms{Frame} @rep[:min 0 :max 1]{@group{: @rep[:min 1]{@ms{Frame Specification}} }}
