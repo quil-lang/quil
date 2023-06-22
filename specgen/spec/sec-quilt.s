@@ -20,55 +20,31 @@ of the qubits matters. In particular, the above frame may differ from @c{1 0 "cz
 
 @subsubsection[:title "DEFFRAME"]
 
-@p{Quil-T itself has no built-in frames. Frames must be defined using the @c{DEFFRAME}
-directive.}
+@p{Quil-T itself has no built-in frames. All frames referenced within a program must be defined using the @c{DEFFRAME} directive.}
 
 @syntax[:name "Frame Definition"]{
     DEFFRAME @ms{Frame} @rep[:min 0 :max 1]{@group{: @rep[:min 1]{@ms{Frame Specification}} }}
 }
 
 @syntax[:name "Frame Specification"]{
-    @ms{Indent} @ms{Frame Attribute} : @group{ @ms{Expression} @alt @ms{String} }
-}
-
-@syntax[:name "Frame Attribute"]{
-    SAMPLE-RATE @alt INITIAL-FREQUENCY @alt DIRECTION @alt HARDWARE-OBJECT
+    @ms{Indent} @ms{Identifier} : @group{ @ms{Expression} @alt @ms{String} }
 }
 
 @p{All frames used in a program must have a corresponding top-level definition.}
 
 
-@p{Before execution, a Quil-T program is linked with a specific system of control
-hardware, and frames are mapped to suitable hardware objects (cf. the
-@c{HARDWARE-OBJECT} frame attribute below). Native or canonical frame definitions may be
-provided by a hardware vendor. Some examples of Rigetti's canonical frames are
-listed below, but this is subject to change.}
+@p{Before execution, a Quil-T program is compiled to target a specific hardware control system,
+and frames are mapped to suitable components of that control system. Native or canonical frame definitions may be
+provided by a hardware vendor.}
 
-@p{Examples (names only):
-
-@clist{
-"xy"  # eg. for the drive line
-"ff"  # eg. for a generic flux line
-"cz"  # eg. for a flux pulse for enacting CZ gate
-"iswap"
-"ro"  # eg. for the readout pulse
-"out" # eg. for the capture line
-}
-}
 
 @subsubsubsection[:title "Frame Attributes"]
 
-@p{Frame attributes represent quantities associated with a given frame which need not be specified by the programmer, but which are ultimately required to fully link and execute a Quil-T program on a physical device.}
+@p{Frame attributes describe a frame in a way that supports compilation on a particular hardware device. 
+These attributes take the form of a mapping with arbitrary string keys. The particular keys and their values
+are specific to the hardware vendor; consult their documentation for more information. Whether these may be
+modified by the program author or are simply provided for read-only reference depends on the vendor.}
 
-@itemize{
-    @item{@c{SAMPLE-RATE} is a floating point number indicating the rate (in Hz) of the digital-to-analog converter on the control hardware associated with this frame.}
-
-    @item{@c{INITIAL-FREQUENCY} is a floating point number indicating the initial frame frequency.}
-
-    @item{@c{DIRECTION} is one of @c{"tx"} or @c{"rx"}.}
-
-    @item{@c{HARDWARE-OBJECT} is a string indicating the (implementation-specific) hardware object that the frame is associated with.}
-}
 
 @subsection[:title "Waveforms"]
 
