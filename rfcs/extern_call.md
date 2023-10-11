@@ -19,55 +19,99 @@ This proposal intends to define an extension of this current instruction set to 
 
 ## Motivation
 
-The primary motivation for this work comes from a couple of promising error mitigation techniques that require the generation of random gate parameters. Below are a brief summary of these error mitigation techniques along with relevant references.
+The primary motivation for this work comes from a few promising error mitigation and tomography techniques that require the generation of random gate parameters. Generating these parameters on the control system rather than generating and sending them from the client make these techniques practically tractable. Below are a brief summary of these techniques along with relevant references.
 
-### Readout Randomization
+### Classical shadow tomography
 
-### Randomized Compiling
+Provides a means to construct an approximate classical description of a quantum state using "few" measurements of the quantum state. Useful for construction of quantum feature maps in QML as well as the estimation of local observables and fidelities in quantum engineering.
+
+* [Predicting Many Properties of a Quantum System from Very Few Measurements](https://arxiv.org/pdf/2002.08953.pdf)
+* [Efficient estimation of Pauli observables by derandomization](https://arxiv.org/pdf/2103.07510.pdf)
+* [Provably efficient machine learning for quantum many-body problems](https://arxiv.org/pdf/2106.12627.pdf)
+
+### Readout randomization
+
+This protocol is largely equivalent to that of classical shadow collection. In this case, randomized readout is used to effectively remove the problem of coherent readout errors, by transforming them into stochastic Pauli errors.
+
+* [Development and Demonstration of an Efficient Readout Error Mitigation Technique for use in NISQ Algorithms](https://arxiv.org/abs/2303.17741)
+
+### Randomized compiling
+
+A protocol for converting coherent errors into stochastic noise, which reduces the overall unpredictable errors in quantum algorithms and improves prediction of algorithmic performance.
+
+* [Randomized compiling for scalable quantum computing on a noisy superconducting quantum processor](https://arxiv.org/abs/2303.17741)
 
 ## Design
 
 We propose introducing two new instructions to the Quil specification that act _exclusively on classical memory_. These are:
 
-* `EXTERN` - Quil programs may include this instruction to declare they expect the target control system to support some arbitrary instruction on classical memory. Quil programs should invoke this prior to corresponding invocations of the `CALL` Quil instruction. The `EXTERN` instruction defines the type of classical memory of both externed instruction arguments and write destination.
-* `CALL` - Quil programs may invoke aribtrary instructions on classical memory that have been declared with the `EXTERN` instruction. Each invocation of `CALL` must conform to the relevant call signature defined in the `EXTERN` invocation.
+* `EXTERN` - Quil programs may include this instruction to declare they expect the target control system to support some arbitrary instruction on classical memory. Quil programs should invoke this prior to corresponding invocations of the `CALL` Quil instruction. The `EXTERN` instruction defines the type of classical memory of both externed instruction arguments and write destination. See [Appendix 1](#appendix1) for a discussion of the semantic precedence of `extern`.
+* `CALL` - Quil programs may invoke aribtrary instructions on classical memory that have been declared with the `EXTERN` instruction. Each invocation of `CALL` must conform to the relevant call signature defined in the `EXTERN` invocation. See [Appendix 2](#appendix2) for a discussion of the semantic precedence of `extern`. 
 
-The syntax of these instructions are defined under [Syntax](### Syntax).
+Please see [Appendix 3](#appendix3) for a discussion of alternatives considered. 
 
-### Syntax
+### Grammar & Syntax
 
-We propose the following syntax for `EXTERN` and `CALL` instructions.
+We propose the following grammar (defined in EBNF) for `EXTERN` and `CALL` instructions.
 
 ```
-EXTERN <Identifier>(<Type*>(, <Type*>)*) (<Type>(, <Type>)
+Extern = "EXTERN" , FunctionName , Parameters, ReturnTypes
+FunctionName = Identifier |
+    Identifier , { ":" , Identifier } # where ":" acts as a namespace delimiter
+Parameters = "(" , Parameter? , ")" |
+    "(" , Parameter , { "," , Parameter } , ")"
+Parameter = Identifier? ParameterType
+ParameterType = Type |
+    Type , "*" # where a value of "REAL*" indicates an array of arbitrary length
+ReturnTypes = BaseType |
+    "(" , BaseType? , ")" |
+    "(" , BaseType , { "," , BaseType } , ")"
 
-CALL (<typeXY>(, <typeXY>)) <Identifier>(<typeXY>(, <typeXY>)*)
+Call = "CALL" , CallDestinations , FunctionName , Arguments
+CallDestinations = CallDestination , { " " , CallDestination }
+CallDestination = "_" | MemoryReference # where "_" indicates that the return value must be dropped.
+Arguments = "(" , MemoryReference? , ")" |
+    "(" , MemoryReference , { "," , MemoryReference } , ")"
 ```
 
-* An `EXTERN` instruction _must_ precede any `CALL` to the corresponding `<Identifier>`.
+where `Type`, `BaseType`, `MemoryReference`, and `Identifier` are to be interpreted exactly as written in the existing Quil specification.
+
+A `Call` instruction is said to _correspond_ to an `Extern` instruction iff all of the following are true:
+
+* The `Identifier` in both instructions are equal (case sensitive).
+* The length of `Arguments` in `Call` equals the number `Parameters` in `Extern`.
+* The `Type` of each `MemoryReference` in the `Call` `Arguments` are equal to the declared `Type` of all `Parameters` in `Extern`.
+* The length of `CallDestinations` in `Call` equals the number `ReturnTypes` in `Extern`.
+* The `BaseType` of each `MemoryReference` in the `Call` `CallDestinations` are equal to the declared `BaseType` of all `ReturnTypes` in `Extern`.
 
 :white_check_mark:
 
-```quil
-DECLARE current_value REAL[1]
-EXTERN LSFR(REAL) REAL
-CALL current_value LSFR(current_value)
-```
+| Extern Instruction | Corresponding Call Instruction | Declarations |
+|--------------------|--------------------------------|--------------|
+| EXTERN my-function() | CALL my-function() |  |
+| EXTERN my-function() () | CALL my-function |  |
+| EXTERN my-function(REAL) (REAL) | CALL params[0] my-function(function-params[0]) | DECLARE function-params REAL[2]<br>DECLARE params REAL[2] |
+| _as above_ | CALL param my-function(function-param) | DECLARE function-param REAL[1] |
+| EXTERN my-function(REAL) REAL | CALL param my-function(function-param) | DECLARE function-param REAL<br>DECLARE param REAL |
+| _as above_ | CALL param my-function(function-params[0]) | DECLARE function-params REAL[2]<br>DECLARE params REAL[2]  |
+| EXTERN my-function(REAL) (REAL, REAL) | CALL params[0] params[1] my-function(function-param) | DECLARE function-param REAL<br>DECLARE params REAL[2] |
+| EXTERN my-function(REAL) (INTEGER) | CALL value my-function(function-param) | DECLARE function-param REAL<br>DECLARE value INTEGER |
+| _as above_ | CALL value my-function(function-params[0]) | DECLARE function-params REAL[2]<br>DECLARE value INTEGER |
+| EXTERN my-function(param1 REAL, param2 INTEGER) (REAL) | CALL param my-function(real-params[0], integer-params[0]) | DECLARE real-params REAL[10]<br>DECLARE integer-params INTEGER[10]<br>DECLARE param REAL |
+| EXTERN my-function(param1 REAL, param2 INTEGER) (output1 REAL) | CALL param my-function(real-params[0], integer-params[0]) | DECLARE real-params REAL[10]<br>DECLARE integer-params INTEGER[10]<br>DECLARE param REAL |
 
 :x:
 
-```quil
-DECLARE current_value REAL[1]
-CALL current_value LSFR(current_value)
-```
+| Extern Instruction | Non-corresponding Call Instruction | Declarations |
+|--------------------|------------------------------------|--------------|
+| EXTERN my-function() | CALL param my-function() |  |
+| _as above_ | CALL my-function(param) | DECLARE param REAL |
+| EXTERN my-function(REAL) (REAL) | CALL value my-function(param) | DECLARE value INTEGER<br>DECLARE param REAL |
+| EXTERN my-function(REAL, REAL) (REAL) | CALL value my-function(param) | DECLARE value REAL<br>DECLARE param REAL |
+| EXTERN my-function(REAL) (REAL, REAL) | CALL value my-function(param) | DECLARE value REAL<br>DECLARE param REAL |
+| EXTERN my-function(param1 REAL, param2 INTEGER) (REAL) | CALL value my-function(params[0], params[1]) | DECLARE params REAL[2]<br>DECLARE value REAL |
 
-:x:
-
-```quil
-DECLARE current_value REAL[1]
-CALL current_value LSFR(current_value)
-EXTERN LSFR(REAL) REAL
-```
+Note, the following:
 
 * The number and type of parameters declared in the `EXTERN` instruction _must_ strictly match the type and length of arguments in the corresponding `CALL` instructions.
 
@@ -118,18 +162,9 @@ EXTERN TOP_N(REAL*, INTEGER) REAL*
 CALL max_value TOP_N(params, n)
 ```
 
-* In the case an `EXTERN` declaration specifies multiple outputs, results cannot be written to the same memory address.
+* If the case an `EXTERN` declaration specifies multiple outputs, any of those results may be discarded.
 
-:x:
-
-```quil
-DECLARE params REAL[10]
-DECLARE top_values REAL[2]
-EXTERN MAX2(REAL*) (REAL, REAL)
-CALL top_values[0] top_values[0] MAX2(params)
-```
-
-* If the case an `EXTERN` declaration specifies multiple outputs, any of those results may be discarded
+:white_check_mark:
 
 ```quil
 DECLARE params REAL[10]
@@ -138,7 +173,56 @@ EXTERN MAX2(REAL*) (REAL, REAL)
 CALL _ top_values[0] MAX2(params)
 ```
 
-* Compilers _may_ support overloading multiple `EXTERN` instructions for `<Identifier>` with different call signatures. In such a case, any `CALL` instruction must match _exactly one_ of those defined call signatures.
+* Compilers _may_ support parameter names, so as to support more clear compiler errors.
+
+:white_check_mark:
+
+```quil
+DECLARE random_real REAL[1]
+EXTERN RAND(state REAL) (new_state REAL)
+CALL random_real RAND(random_real)
+```
+
+* Backends may namespace their function names using the ":" separator:
+
+:white_check_mark:
+
+```quil
+DECLARE random_real REAL[1]
+EXTERN CO:RAND:UNIFORM(state REAL) (new_state REAL)
+CALL random_real RAND(random_real)
+```
+
+#### Additional syntactic and semantic rules
+
+In addition to the grammar rules above, we specify the following syntactic and semantic rules:
+
+* A _corresponding_ `Extern` instruction _must_ precede any `Call` instruction.
+
+:white_check_mark:
+
+```quil
+DECLARE current_value REAL[1]
+EXTERN RAND(REAL) REAL
+CALL current_value RAND(current_value)
+```
+
+:x:
+
+```quil
+DECLARE current_value REAL[1]
+CALL current_value RAND(current_value)
+```
+
+:x:
+
+```quil
+DECLARE current_value REAL[1]
+CALL current_value RAND(current_value)
+EXTERN RAND(REAL) REAL
+```
+
+* Compilers _should_ support overloading multiple `EXTERN` instructions for `FunctionName` with different call signatures. In such a case, any `CALL` instruction must match _exactly one_ of those defined call signatures.
 
 :white_check_mark:
 
@@ -171,14 +255,15 @@ EXTERN RAND(REAL) REAL
 CALL random_integer RAND(random_integer)
 ```
 
-* Compilers _may_ support parameter names, so as to support more clear compiler errors.
+* In the case an `EXTERN` declaration specifies multiple outputs, results cannot be written to the same memory address.
 
-:white_check_mark:
+:x:
 
 ```quil
-DECLARE random_real REAL[1]
-EXTERN RAND(state REAL) (new_state REAL)
-CALL random_real RAND(random_real)
+DECLARE params REAL[10]
+DECLARE top_values REAL[2]
+EXTERN MAX2(REAL*) (REAL, REAL)
+CALL top_values[0] top_values[0] MAX2(params)
 ```
 
 #### Unspecified
@@ -189,7 +274,7 @@ This specification leaves the following behavior unspecified:
 * Whether to support parameter names in `EXTERN` instructions.
 * The behavior of compilers targeting hardware backends that do not support the `EXTERN`ed instructions.
 
-### Semantic Precedent for `EXTERN`
+## <a name="appendix1"></a>Appendix 1: Semantic Precedent for `EXTERN`
 
 `extern` is a common keyword in several well known classical computing contexts, as well as at least one other quantum computing IR, OpenQASM 3.0.
 
@@ -274,7 +359,7 @@ Open QASM 3.0 has introduced support for [extern function calls](https://openqas
 * `extern functions are invoked using the statement name(inputs)`
 * `The functions are not required to be idempotent.`
 
-### Semantic Precedent for `CALL` 
+## <a name="appendix2"></a>Appendix 2: Semantic Precedent for `CALL` 
 
 #### LLVM
 
@@ -300,9 +385,9 @@ define i32 @main() #5 {
 
 https://llvm.org/docs/LangRef.html#id1742
 
-### Alternatives
+## <a name="appendix3"></a>Appendix 3: Alternatives Considered
 
-#### `DECLARE` in place of `EXTERN`
+### `DECLARE` in place of `EXTERN`
 
 Because `EXTERN` _declares_ a function signature, we may consider overloading the existing `DECLARE` instruction:
 
@@ -314,7 +399,7 @@ CALL current_value lsfr(current_value)
 
 The main disadvante of this approach is that overloaded function declarations less clearly differentiate from program memory regions. We could disambiguate by introducing, instead, `DECLARE-INSTRUCTION`, `DECLARE-EXPRESSION`, or `DEFINSTRUCTION`, however, the `EXTERN` instruction more clearly insinuates a boundary between the Quil program and the classical control system that may, or may not, support the declaration. 
 
-#### `INVOKE` in place of `CALL`
+### `INVOKE` in place of `CALL`
 
 In addition to `call`, LLVM also has an [invoke](https://llvm.org/docs/LangRef.html#invoke-instruction) instruction.
 
@@ -322,7 +407,7 @@ In addition to `call`, LLVM also has an [invoke](https://llvm.org/docs/LangRef.h
 
 There is currently no notion of a runtime exception in Quil, much less exception handling. As such, we can draw a weaker analogy to the LLVM `invoke` instruction than `call`. This is only analogy, but the decision here is semantic and is perhaps the best we can do.
 
-#### Direct reference to instruction rather than `CALL`
+### Direct reference to instruction rather than `CALL`
 
 We could drop the `CALL` instruction entirely:
 
@@ -342,7 +427,4 @@ MOVE(params[0], params[1]) current_value
 ```
 
 The `CALL` instruction clearly disambiguates instruction extensions explicitly specified in the Quil spec, thereby providing a clean namespace into which functions may be declared within a program and providing a clearer means for compilers and backends to evaluate support for out-of-spec instructions.
-
-### Footnotes
-
 
