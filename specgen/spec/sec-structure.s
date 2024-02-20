@@ -252,6 +252,7 @@ object, like classical memory registers.}
      @ms{Gate Definition}
 @alt @ms{Circuit Definition}
 @alt @ms{Classical Memory Declaration}
+@alt @ms{Extern Function Declaration} @ms{Terminator}
 }
 
 @p{A @emph{directive} specifies information to software processing
@@ -270,6 +271,7 @@ Quil, such as the @quil{INCLUDE} directive for including files.}
 @alt @ms{Measurement Instruction}
 @alt @ms{Circuit Application}
 @alt @ms{Classical Memory Instruction}
+@alt @ms{Extern Call Instruction} 
 @alt @ms{Reset Instruction}
 @alt @ms{Wait Instruction}
 @alt @ms{Branch Instruction}
