@@ -1,5 +1,26 @@
 @section[:title "Classical Control"]
 
+@subsection[:title "Suspending Execution"]
+
+@p{For some quantum programs, execution must be suspended until some
+classical computations are performed and corresponding classical state
+is modified. This is accomplished using the @c{WAIT} instruction, a
+synchronization primitive which signals to the classical computer that
+computation will not continue until some condition is satisfied. WAIT
+takes no arguments.}
+
+@syntax[:name "Wait Instruction"]{
+    WAIT
+}
+
+@p{In the QAM model of Quil, @c{WAIT} delineates instructions that
+happen before the instruction, and those that happen after. The
+classical state of the QAM can change prior to and upon resumption of
+execution.}
+
+@p{The precise mechanism by which @c{WAIT} works is deliberately
+unspecified.}
+
 @subsection[:title "Halting the Program"]
 
 @p{The program is @emph{halted} if it is no longer executing. This may
