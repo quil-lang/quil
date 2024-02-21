@@ -293,6 +293,10 @@ memory, alignment requirements, and limits on sharing and offsets.}
 
 @p{It is an error to declare the same name more than once.}
 
+@subsubsection[:title "Initialization of Declared Memory"]
+
+@p{Memory that is declared is not assumed to be initialized in any way.}
+
 @subsubsection[:title "Examples"]
 
 @subsubsubsection[:title "Register Machine with a Condition Bit"]
@@ -391,6 +395,28 @@ RZ(theta) 16
 }
 
 @subsection[:title "Memory Access and Dereferencing"]
+
+@subsubsection[:title "Volatility of Classical Memory"]
+
+@p{Memory referenced in Quil is assumed to be shared with other
+processors. As such, the memory can be changed at any time outside of
+the semantics given by a particular Quil program. We refer to this
+property as @emph{volatility}.}
+
+@p{Programs processing Quil are not required to assume that memory is
+volatile, and as such are permitted to re-order reads and writes to a
+memory location (either directly or through sharing), so long as their
+in-program order is not changed. Implementations are encouraged to
+allow memory to be declared as @emph{non-volatile} by way of a pragma,
+such as:
+
+@clist{
+PRAGMA NON-VOLATILE @ms{Identifier}
+}
+
+though implementations are not required to support it.}
+
+@subsubsection[:title "Operations for Accessing Memory"]
 
 @p{Memory is dereferenced in a Quil program using common array
 access syntax. In particular, given a name @c{x} pointing to
