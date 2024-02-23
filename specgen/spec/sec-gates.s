@@ -729,6 +729,13 @@ then @m{C(U)} is
 }
 }
 
+@aside{The @c{CONTROLLED} modifier is sensitive to
+phase. Mathematically, for a gate @m{G} and a phase angle @m{\theta},
+@m{C(G)\neq C(e^{i\theta}G)}. Practically, this means that while the
+standard gates @c{Z} and @c{PHASE} are equivalent operators in
+@m{\mathscr{U}(2)} despite different matrix entries, their controlled
+variants (i.e., @c{CZ} and @c{CONTROLLED PHASE}) are @emph{not}
+equivalent.}
 
 @subsubsection[:title "FORKED Gate Modifier"]
 
