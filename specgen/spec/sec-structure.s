@@ -206,7 +206,7 @@ associativity directions.
 
 @syntax[:name "Term"]{
          - @ms{Expression}
-    @alt @ms{Identifier} ( @ms{Expression} )
+    @alt @ms{Function Expression}
     @alt ( @ms{Expression} )
     @alt @ms{Complex}
     @alt @ms{Parameter}
@@ -229,6 +229,28 @@ enough to warrant their own production.}
         }
     }
 }
+
+@p{This allows us to specify the @ms{Function Expression}.}
+
+@syntax[:name "Function Expression"]{
+        @ms{Function Name} ( @ms{Expression List} )
+}
+
+
+@subsubsection[:title "Functions in Arithmetic Expressions"]
+
+@p{The following functions are allowed to be used in function
+expressions.}
+
+@syntax[:name "Function Name"]{
+         @ms{Trigonometric Function Name}
+    @alt @ms{Inverse Trigonometric Function Name}
+    @alt @ms{Algebraic Function Name}
+    SIN | COS | TAN | ASIN | ACOS | ATAN | SQRT | ATAN2
+}
+
+@p{All functions listed take on their usual definitions over the
+complex numbers.}
 
 @subsection[:title "Main Program Elements"]
 
