@@ -9,6 +9,8 @@
 This repository contains the reference specification for the Quil language in
 addition to some useful extras outlined below.
 
+The current version of the spec can be browsed [here](https://quil-lang.github.io).
+
 Repository layout:
 - `/examples`: examples of Quil
 - `/grammars`: example grammars used by parser generators
