@@ -332,7 +332,7 @@ DEFGATE TT p q AS SEQUENCE:
     T p
     T q
 }
-@p{The standard gate `CSWAP` (Toffoli) could be defined with the following definition:}
+@p{The standard gate @c{CSWAP} (Toffoli) could be defined with the following definition:}
 @clist{
 DEFGATE TOFFOLI p q r AS SEQUENCE:
     H        r
@@ -343,7 +343,7 @@ DEFGATE TOFFOLI p q r AS SEQUENCE:
     CNOT     q r
     DAGGER T r
     CNOT     p r
-    #Note the use of TT here
+    # Note the use of TT here
     TT       q r
     CNOT     p q
     H        r
@@ -353,8 +353,7 @@ DEFGATE TOFFOLI p q r AS SEQUENCE:
 }
 @p{An arbitrary Euler rotation could be expressed as:}
 
-@clist{    
-
+@clist{
 DEFGATE EULER(%alpha, %beta, %gamma) p AS SEQUENCE:
     RY(%alpha) p
     RZ(%beta)  p 
