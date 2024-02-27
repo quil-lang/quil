@@ -584,6 +584,60 @@ This RFC leaves the following behavior unspecified:
 * The behavior of compilers targeting hardware backends that do not support the `EXTERN` instructions.
 * When invocation of single return value `EXTERN` functions is acceptable within expressions.
 
+## Resolution
+
+After discussion in [quil-lang/quil#69](https://github.com/quil-lang/quil/pull/69), we have agreed to pursue the following additions to the Quil grammar:
+
+```ebnf
+<Extern> := 'EXTERN'  <Identifier>
+
+<ExternParameter> := (<Identifier> s* ':' s*)? 'mut'? s+ <Base Type> ("[" , Integer? , "]")?
+<ExternParameters> := <ExternParameter> | <ExternParameter> s* ',' s* <ExternParameters>
+<TypeString> := '"'(s* <BaseType>)? s* <Identifier> s* '(' s* <ExternParameters>? s* ')' s*'"
+
+<ExternArgument> := <Identifier> | <Memory Reference> | <Complex>
+<Call> := 'CALL' <Identifier> <ExternArgument>*
+```
+
+### The Type String Pragma
+
+Currently, the specification does not require the program to specify a type string for all extern functions. A program _may_ declare extern type strings under the following circumstances by a designated pragma statement of the form:
+
+```
+PRAGMA EXTERN <TypeString>
+```
+
+### Return Types and Quil Expressions
+
+A `<TypeString>` may include a return `<BaseType>`, which a program may include in:
+
+1. `CALL` instructions, where the first argument must be a memory reference of length 1 and the same `<BaseType>`.
+2. Quil expressions.
+
+The specification supports such return types only in cases where:
+
+1. The extern function is read-only; it does not contain mutable parameters.
+2. There is an associated pragma type string declaration.
+
+### Overloading
+
+If a program overloads an extern function name (i.e. there are several type strings declared for one extern function name), consider the following relationships between parameter and return type sets:
+
+* $BaseType \subset BaseType[1] \subset BaseType[]$
+* $BaseType[Integer] \subset BaseType[]$
+
+If a `CALL` instruction matches two or more extern function type strings, the compiler must compile the extern function with the highest precedence according to the following rules:
+
+1. More specific types take precedence over less specific types (i.e. any type takes precedence over a type of which it is a subset).
+2. Any parameter takes precedence over a parameter to its right. Any parameter takes precedence over the return type `<BaseType>`.
+3. Declared signatures with equivalent type sets are strictly forbidden. This applies regardless of textual representation. Note, a parameter of type `mut <Base Type>` is considered equivalent to type `<Base Type>`.
+
+### Issues dropped from the RFC
+
+* Function namespacing and aliasing (G14 and G15). Those are definitel:w
+y nice-to-haves and what we have here is forward compatible with adding those in the future.
+* Because functions with a return type must exclusivey have read-only parameters, there is no sense in dropping a returned value. As such, dropping values via `_` is unsupported (G12).
+
 ## <a name="appendix1"></a>Appendix 1: Semantic Precedent for `EXTERN`
 
 `extern` is a common keyword in several well known classical computing contexts, as well as at least one other quantum computing IR, OpenQASM 3.0.
