@@ -111,32 +111,24 @@ modified by the program author or are simply provided for read-only reference de
 }
 @subsubsection[:title "Defining new waveforms"]
 
-@syntax[:name "Sample Rate"]{
-    @ms{Real}
-}
-
 @syntax[:name "Waveform Definition"]{
-    DEFWAVEFORM @ms{Identifier} ( @ms{Parameters} ) @ms{Sample Rate} : @ms{Matrix Entries}
+    DEFWAVEFORM @ms{Identifier} @rep[:max 1]{( @ms{Parameters} )} : @ms{Matrix Entries}
 }
 
-@p{New waveforms may be defined by specifying the sample rate (in
-Hertz) and listing out all the IQ values as complex numbers, separated
-by commas. Waveform definitions may also be parameterized, although
-note that Quil has no support for vector level operations.}
+@p{New waveforms may be defined by listing out all the IQ values as
+complex numbers, separated by commas. Waveform definitions may also be
+parameterized, although note that Quil has no support for vector level
+operations.}
 
 @p{Example:
 @clist{
-DEFWAVEFORM my_custom_waveform 6.0:
+DEFWAVEFORM my_custom_waveform:
     1+2i, 3+4i, 5+6i
 
-DEFWAVEFORM my_custom_parameterized_waveform(%a) 6.0:
+DEFWAVEFORM my_custom_parameterized_waveform(%a):
     (1+2i)*%a, (3+4i)*%a, (5+6i)*%a
 }
 }
-
-@p{The duration (in seconds) of a custom waveform may be computed by dividing the
-number of samples by the sample rate. In the above example, both waveforms have
-a duration of 0.5 seconds.}
 
 @subsection[:title "Pulses"]
 
