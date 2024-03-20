@@ -9,7 +9,7 @@
 }
 
 @syntax[:name "Frame"]{
-    @rep[:min 1]{@ms{Qubit}} @ms{Frame Identifier}
+    @rep[:min 0]{@ms{Qubit}} @ms{Frame Identifier}
 }
 
 @p{A frame encapsulates any rotating frame relative to which control/readout
