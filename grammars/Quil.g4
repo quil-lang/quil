@@ -29,6 +29,8 @@ instr               : gate
                     | include
                     | pragma
                     | memoryDescriptor
+                    | extern
+                    | call
                     ;
 
 // C. Static and Parametric Gates
@@ -118,6 +120,13 @@ include             : INCLUDE STRING ;
 pragma              : PRAGMA IDENTIFIER pragma_name* STRING? ;
 pragma_name         : IDENTIFIER | INT ;
 
+
+// N. Declaring and Calling External Functions
+
+extern              : EXTERN IDENTIFIER ;
+call                : CALL IDENTIFIER call_arg+ ;
+call_arg            : addr | number ;
+
 // Expressions (in order of precedence)
 
 expression          : LPAREN expression RPAREN                  #parenthesisExp
@@ -131,7 +140,7 @@ expression          : LPAREN expression RPAREN                  #parenthesisExp
                     | addr                                      #addrExp
                     ;
 
-function            : SIN | COS | SQRT | EXP | CIS ;
+function            : SIN | COS | SQRT | EXP | CIS | IDENTIFIER;
 sign                : PLUS | MINUS ;
 
 // Numbers
