@@ -30,7 +30,7 @@ be used later.}
 @p{The Quil language is represented as text. The text must be encoded
 as UTF-8. The standard language constructs of Quil are all expressible
 in the ASCII subset of UTF-8, but user programs may use codepoints
-outside of UTF-8.}
+outside of ASCII.}
 
 @p{Except when noted explicitly, whitespace has no significance and is
 ignored. Tokens can be separated by arbitrary amounts and kinds of
