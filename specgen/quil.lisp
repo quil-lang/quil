@@ -229,7 +229,7 @@
   (let ((doc (make-instance 'document
                :title "Quil Specification"
                :author "Robert S. Smith; Rigetti & Co. Inc.; and contributors"
-               :version "2024.1 (DRAFT)"
+               :version "2021.1 (DRAFT)"
                :body (append
                       (include (spec/ "sec-intro.s"))
                       (include (spec/ "sec-opsem.s"))

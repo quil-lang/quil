@@ -45,7 +45,7 @@ identifier can appear in call instructions.}
 
 @p{Under some circumstances it may be desirable to specify the
 function signature of an external function. Signature declarations are
-supplied by way of a special pragma.}
+supplied by way of a pragma.}
 
 @syntax[:name "Extern Signature Pragma"]{
     PRAGMA EXTERN @ms{Identifier} "@ms{Extern Signature}"
@@ -59,25 +59,26 @@ supplied by way of a special pragma.}
     @ms{Identifier} : @rep[:min 0 :max 1]{mut} @ms{Type}
 }
 
+@p{Type signatures to extern functions require every function parameter to be named.}
+        
 @subsubsection[:title "Call Instructions"]
 
-@p{Declared externs may be appear in call instructions.  The precise
-meaning of an extern call is left up to the implementor.  From the
-perspective of the abstract machine, a call to an external function
-increments the program counter and has some effect on classical
-memory.}
+@p{Declared externs may be appear in CALL instructions.  The precise
+effect of an extern function on classical memory is left up to the
+implementor. From the perspective of the abstract machine, the effect
+of processing a CALL instruction is to increment the program counter.}
 
 @syntax[:name "Extern Call Instruction"]{
     CALL @ms{Identifier} @rep[:min 1]{@group{@ms{Identifier} @alt @ms{Memory Reference} @alt @ms{Complex}}}
 }
 
-@p{When a supplied function type signature specifies a return type,
-then calls to the associated extern are assumed to write their return
-value to a memory reference passed in at the first argument position.
+@p{When a function type signature specifies a return type, then calls
+to the associated extern are assumed to write a return value to a
+memory reference that appears in the first argument position.
 E.g. the following are equivalent:}
 
 @clist{
-PRAMGA EXTERN rng "INTEGER (seed : INTEGER)"
+PRAGMA EXTERN rng "INTEGER (seed : INTEGER)"
 EXTERN rng;
 DECLARE num INTEGER
 ... snip ...
@@ -85,10 +86,10 @@ DECLARE num INTEGER
 CALL rng num 10
 }
 
-@p{is roughly the same as}
+@p{is equivalent to}
 
 @clist{
-PRAMGA EXTERN rng "(out : mut INTEGER, seed : INTEGER)"
+PRAGMA EXTERN rng "(out : mut INTEGER, seed : INTEGER)"
 EXTERN rng;
 DECLARE num INTEGER
 ... snip ...
@@ -100,14 +101,14 @@ CALL rng num 10
 @subsubsection[:title "Externs in Arithmetic Expressions"]
 
 @p{Extern calls may appear in arithmetic expressions with some
-restrictions: the extern MUST have a known function signature, which
+restrictions: the extern MUST have a declared function signature, which
 MUST include a return type, and which MUST NOT include any mutable
 parameters.}
 
 @p{For example, this is OK:}
 
 @clist{
-PRAMGA EXTERN prng "REAL (seed : REAL)"
+PRAGMA EXTERN prng "REAL (seed : REAL)"
 EXTERN prng;
 RX(prng(pi) / 4)
 }
