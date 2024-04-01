@@ -130,6 +130,12 @@ DEFWAVEFORM my_custom_parameterized_waveform(%a):
 }
 }
 
+
+@p{A waveform is just a list of samples. The duration of a waveform is
+determined by the number of samples divided by the sample rate of the
+frame on which the waveform is pulsed. Frames have fixed,
+hardware-specific sample rates.}
+
 @subsection[:title "Pulses"]
 
 @syntax[:name "Pulse"]{
