@@ -349,9 +349,11 @@
      (html-body s o))))
 
 (defmethod html :around (stream (o heading-mixin))
-  (cl-who:with-html-output (s stream)
-    (:a :name (heading-anchor o)
-        (call-next-method))))
+  (let ((target (heading-anchor o))) 
+   (cl-who:with-html-output (s stream)
+     (:a :name target
+         :href (concatenate 'string "#" target)
+         (call-next-method)))))
 
 (defmethod html (stream (o heading-section))
   (cl-who:with-html-output (s stream)
