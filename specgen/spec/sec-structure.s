@@ -125,7 +125,7 @@ i pi
 ADD AND AS CONTROLLED CONVERT DAGGER DECLARE DEFCIRCUIT DEFGATE DIV EQ
 EXCHANGE FORKED GE GT HALT INCLUDE IOR JUMP JUMP-UNLESS JUMP-WHEN
 LABEL LE LOAD LT MATRIX MEASURE MOVE MUL NEG NOP NOT OFFSET PAULI-SUM
-PERMUTATION PRAGMA RESET SHARING STORE SUB WAIT XOR
+PERMUTATION PRAGMA RESET SHARING STORE SUB WAIT XOR EXTERN CALL
 }
 }
 
@@ -252,6 +252,7 @@ object, like classical memory registers.}
      @ms{Gate Definition}
 @alt @ms{Circuit Definition}
 @alt @ms{Classical Memory Declaration}
+@alt @ms{Extern Function Declaration} @ms{Terminator}
 }
 
 @p{A @emph{directive} specifies information to software processing
@@ -270,6 +271,7 @@ Quil, such as the @quil{INCLUDE} directive for including files.}
 @alt @ms{Measurement Instruction}
 @alt @ms{Circuit Application}
 @alt @ms{Classical Memory Instruction}
+@alt @ms{Extern Call Instruction} 
 @alt @ms{Reset Instruction}
 @alt @ms{Wait Instruction}
 @alt @ms{Branch Instruction}
