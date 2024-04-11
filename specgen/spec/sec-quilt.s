@@ -386,9 +386,9 @@ implicitly applies to all qubits on the device.}
 
 @p{The non-blocking modifier allows for multiple concurrent pulses on
 the same qubit. An operation marked as @c{NONBLOCKING} is not excluded
-by pulse operations on intersecting frames.  Combining the
-non-blocking modifier with fence is usually preferred. See the example
-below.}
+by pulse operations on intersecting frames when those operations are
+also marked as non-blocking.  Combining the non-blocking modifier with
+fence is usually preferred. See the example below.}
         
 @p{Examples:
 
