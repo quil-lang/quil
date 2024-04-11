@@ -361,6 +361,12 @@ and neither match @c{DAGGER DAGGER T 0}.
     FENCE @rep[:min 0]{@ms{Qubit}}
 }
 
+@syntax[:name "Nonblocking"]{
+        NONBLOCKING @ms{Pulse}
+        @alt NONBLOCKING @ms{Capture}
+        @alt NONBLOCKING @ms{Raw Capture}        
+}        
+        
 @p{Delay allows for the insertion of a gap within a list of pulses or gates with
 a specified duration in seconds.}
 
@@ -378,6 +384,12 @@ fence statement happen after all operations involving the specified qubits that
 preceed the fence statement. If no qubits are specified, the @c{FENCE} operation
 implicitly applies to all qubits on the device.}
 
+@p{The non-blocking modifier allows for multiple concurrent pulses on
+the same qubit. An operation marked as @c{NONBLOCKING} is not excluded
+by pulse operations on intersecting frames.  Combining the
+non-blocking modifier with fence is usually preferred. See the example
+below.}
+        
 @p{Examples:
 
 @clist{
@@ -389,5 +401,17 @@ X 1 # This X gate will be applied to qubit 1 AFTER the X gate on qubit 0
 X 0
 DELAY 0 100e-6
 MEASURE 0 ro[0]
+
+# Nonblocking example
+FENCE 0 1
+NONBLOCKING PULSE 0 "xy" flat(duration: 1.0, iq: 1.0)
+NONBLOCKING PULSE 0 1 "ff" flat(duration: 1.0, iq: 1.0)
+FENCE 0 1
 }
 }
+
+@p{In the non-blocking example, the pulses on frame @c{0 "xy"} and on
+frame @c{0 1 "ff"} are free to act on qubit @c{0}
+simultaneously. Fencing the resources used by the mutually
+non-blocking operations isolates them in the schedule, ensuring that
+no undesired simultaneity is permitted.}
