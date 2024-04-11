@@ -276,11 +276,11 @@ does not match the corresponding frame's sample rate is undefined.}
 @subsection[:title "Defining Calibrations"]
 
 @syntax[:name "Calibration Definition"]{
-    DEFCAL @rep[:min 0]{@ms{Modifier}} @ms{Identifier} ( @ms{Parameters} ) @rep[:min 1]{@ms{Qubit}} : @rep[:min 1]{@ms{Instruction}}
+    DEFCAL @rep[:min 0]{@ms{Modifier}} @ms{Identifier} ( @ms{Parameters} ) @rep[:min 1]{@ms{Formal Qubit}} : @rep[:min 1]{@ms{Instruction}}
 }
 
 @syntax[:name "Measure Calibration"]{
-    DEFCAL @ms{Identifier} @rep[:min 0 :max 1]{@ms{Qubit}} @ms{Parameter} : @rep[:min 1]{@ms{Instruction}}
+    DEFCAL MEASURE @ms{Qubit} @rep[:min 0 :max 1]{@ms{Parameter}} : @rep[:min 1]{@ms{Instruction}}
 }
 
 @p{Calibrations for high-level gates can be defined by mapping a combination of
@@ -297,7 +297,7 @@ first match will be taken.}
 @p{For example, given the following list of calibration definitions in this order:
 
 @enumerate{
-    @item{@c{DEFCAL RX(%theta) %qubit:}}
+    @item{@c{DEFCAL RX(%theta) qubit:}}
 
     @item{@c{DEFCAL RX(%theta) 0:}}
 
@@ -323,8 +323,8 @@ DEFCAL RX(%theta) 0:
     PULSE 0 "xy" flat(duration: 1e-6, iq: 2+3i)*%theta/(2*pi)
 
 # Applying RZ to any qubit
-DEFCAL RZ(%theta) %qubit:
-    SHIFT-PHASE %qubit "xy" %theta
+DEFCAL RZ(%theta) qubit:
+    SHIFT-PHASE qubit "xy" %theta
 
 # Measurement and classification
 DEFCAL MEASURE 0 %dest:
