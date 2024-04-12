@@ -280,7 +280,7 @@ does not match the corresponding frame's sample rate is undefined.}
 }
 
 @syntax[:name "Measure Calibration"]{
-    DEFCAL MEASURE @ms{Qubit} @rep[:min 0 :max 1]{@ms{Parameter}} : @rep[:min 1]{@ms{Instruction}}
+    DEFCAL MEASURE @ms{Formal Qubit} @rep[:min 0 :max 1]{@ms{Parameter}} : @rep[:min 1]{@ms{Instruction}}
 }
 
 @p{Calibrations for high-level gates can be defined by mapping a combination of
