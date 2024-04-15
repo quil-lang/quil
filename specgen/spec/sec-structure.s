@@ -206,7 +206,7 @@ associativity directions.
 
 @syntax[:name "Term"]{
          - @ms{Expression}
-    @alt @ms{Identifier} ( @ms{Expression} )
+    @alt @ms{Identifier} ( @ms{Expression List} )
     @alt ( @ms{Expression} )
     @alt @ms{Complex}
     @alt @ms{Parameter}
