@@ -30,21 +30,25 @@ vocabulary of analytic and stochastic functions in the designs of
 their experiments and algorithms. Quantum control systems or quantum
 simulators that consume Quil code may support a variety of functions
 that operate on classical data. Quil addresses these cases by
-supporting the declaration of extern functions.}
+supporting the declaration of @c{EXTERN} functions.}
 
 @subsubsection[:title "Declaring Externs"]
 
 @p{Declaring an identifier to be an extern indicates that the
-identifier can appear in call instructions.}
+identifier can appear in @c{CALL} instructions.}
 
 @syntax[:name "Extern Function Declaration"]{
     EXTERN @ms{Identifier}
 }
 
+@p{Each @c{EXTERN} identifier must be unique within a program (case-sensitive).
+Additionally, @c{EXTERN} identifiers must not conflict with any reserved Quil
+keywords or standard gate definitions.}
+
 @subsubsection[:title "Extern Signature Pragmas"]
 
 @p{Under some circumstances it may be desirable to specify the
-function signature of an external function. Signature declarations are
+function signature of an @c{EXTERN} function. Signature declarations are
 supplied by way of a pragma.}
 
 @syntax[:name "Extern Signature Pragma"]{
@@ -56,24 +60,47 @@ supplied by way of a pragma.}
 }
 
 @syntax[:name "Extern Parameter"]{
-    @ms{Identifier} : @rep[:min 0 :max 1]{mut} @ms{Type}
+    @ms{Identifier} : @rep[:min 0 :max 1]{mut} @ms{Extern Type}
 }
 
-@p{Type signatures to extern functions require every function parameter to be named.}
+@syntax[:name "Extern Type"]{
+        @ms{Type}
+   @alt @ms{Base Type}[]
+}
+
+@p{The "[]" suffix indicates a variable-length array; that is, a parameter
+for which there is no length restriction.}
+
+@clist{
+DECLARE array1 INTEGER[5]
+DECLARE array2 INTEGER[10]
+EXTERN foo "(param : INTEGER[])"
+
+# both of these are valid
+CALL foo array1
+CALL foo array2
+}
+
+@p{Type signatures to extern functions require every function parameter to be named. Additionally, the signature must either specify a return type or at least one parameter. }
         
 @subsubsection[:title "Call Instructions"]
 
-@p{Declared externs may be appear in CALL instructions.  The precise
-effect of an extern function on classical memory is left up to the
+@p{Declared @c{EXTERN}s may appear in @c{CALL} instructions.  The precise
+effect of an @c{EXTERN} function on classical memory is left up to the
 implementor. From the perspective of the abstract machine, the effect
-of processing a CALL instruction is to increment the program counter.}
+of processing a @c{CALL} instruction is to increment the program counter.}
 
 @syntax[:name "Extern Call Instruction"]{
     CALL @ms{Identifier} @rep[:min 1]{@group{@ms{Identifier} @alt @ms{Memory Reference} @alt @ms{Complex}}}
 }
 
+@p{Note, for every @c{CALL} instruction, there must be a corresponding @c{EXTERN}
+declaration of the same identifier (case-sensitive). There is no restriction
+on the order of a @{CALL} instruction relative to its corresponding @c{EXTERN}
+declaration.}
+
 @p{When a function type signature specifies a return type, then calls
-to the associated extern are assumed to write a return value to a
+to the associated @c{EXTERN} are assumed to write a return value to a
 memory reference that appears in the first argument position.
 E.g. the following are equivalent:}
 
@@ -100,7 +127,7 @@ CALL rng num 10
 
 @subsubsection[:title "Externs in Arithmetic Expressions"]
 
-@p{Extern calls may appear in arithmetic expressions with some
+@p{Extern @c{CALL}s may appear in arithmetic expressions with some
 restrictions: the extern MUST have a declared function signature, which
 MUST include a return type, and which MUST NOT include any mutable
 parameters.}
