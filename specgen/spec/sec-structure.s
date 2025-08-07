@@ -62,35 +62,75 @@ a line. Indents in Quil programs can only happen following a newline.}
 @p{Note that since indents must follow a newline, we include the
 newline as a part of the syntax definition of an indent.}
 
-@p{Non-negative integers are written as usual. Leading zeros do not
-change the interpretation of these numeric literals.}
+@p{Non-negative integers can be written in decimal, hexadecimal,
+octal, or binary. Decimal integers are written as usual, hexadecimal
+integers start with '@c{0x}', octal integers start with '@c{0o}', and
+binary integers start with '@c{0b}' (all case-insensitive). These
+integers may contain interior or trailing underscores, which are
+ignored; in the case of non-decimal integers, the underscores must
+come after the identifying prefix.}
 
 @syntax[:name "Integer"]{
-    @rep[:min 1]{[0-9]}
+       @ms{Decimal Integer}
+  @alt @ms{Hexadecimal Integer}
+  @alt @ms{Octal Integer}
+  @alt @ms{Binary Integer}
 }
 
-@p{Real numbers are written in usual floating-point number syntax.}
+@syntax[:name "Decimal Integer"]{
+    [0-9]@rep{[0-9_]}
+}
+
+@syntax[:name "Hexadecimal Integer"]{
+    0[Xx]@rep{_}[0-9A-Fa-f]@rep{[0-9A-Fa-f_]}
+}
+
+@syntax[:name "Octal Integer"]{
+    0[Oo]@rep{_}[0-7]@rep{[0-7_]}
+}
+
+@syntax[:name "Binary Integer"]{
+    0[Bb]@rep{_}[01]@rep{[01_]}
+}
+
+@p{Non-integral real numbers are written in the usual decimal
+floating-point number syntax (including an optional base-10 exponent
+prefixed by case-insensitive '@c{e}'), or as the special literal
+'@c{pi}'.  As with integers, decimal floating-point numbers may
+contain internal or trailing underscores.}
 
 @syntax[:name "Real"]{
-  @rep[:min 0 :max 1]{@ms{Integer}}
-  @rep[:min 0 :max 1]{.}
-  @ms{Integer}
-  @rep[:min 0 :max 1]{
-    @group{
-      @group{e @alt E}
-      @rep[:min 0 :max 1]{@group{- @alt +}}
-      @ms{Integer}
-    }
-  }
+       @ms{Numeric Real}
+  @alt pi
 }
 
-@p{Complex numbers are an extension of this.}
+@syntax[:name "Numeric Real"]{
+       @group{
+              @ms{Decimal Integer}
+         @alt @ms{Real With Decimal Point}
+       }@rep[:max 1]{@group{
+         [Ee]@rep[:max 1]{@group{- @alt +}}@rep{_}@ms{Decimal Integer}
+       }}
+  @alt @ms{Hexadecimal Integer}
+  @alt @ms{Octal Integer}
+  @alt @ms{Binary Integer}
+}
+
+@syntax[:name "Real With Decimal Point"]{
+        @ms{Decimal Integer}.@rep[:min 0 :max 1]{@ms{Decimal Integer}}
+  @alt .@ms{Decimal Integer}
+}
+
+@p{An imaginary number literal is an optional numeric real number
+followed by the letter '@c{i}' (case-@emph{sensitive}). A complex
+number literal is either a real number literal or an imaginary number
+literal.  (Something that looks like a mixed real and imaginary
+complex number, such as '@c{1+2i}', is actually an arithmetic
+expression and not a single literal.)}
 
 @syntax[:name "Complex"]{
-       @ms{Integer}
-  @alt @ms{Real}
-  @alt @rep[:min 0 :max 1]{@ms{Real}} i
-  @alt pi
+       @ms{Real}
+  @alt @rep[:max 1]{@ms{Numeric Real}}i
 }
 
 @p{Strings are characters bounded by double-quotation mark characters
