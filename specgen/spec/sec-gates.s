@@ -544,6 +544,38 @@ CSWAP == CONTROLLED SWAP
 }
 }
 
+@subsubsection[:title "FSIM gates"]
+
+@p{The Fermionic Simulation gate describes the native interaction of transmon qubits
+\texttt{FSIM}(\theta,\phi) &=
+\left(
+\begin{smallmatrix}
+1 & 0 & 0 & 0\\
+0 & \cos(\theta/2) & i\sin(\theta/2) & 0\\
+0 & i\sin(\theta/2) & \cos(\theta/2) & 0\\
+0 & 0 & 0 & e^{i\phi}
+\end{smallmatrix}
+\right)\\
+\texttt{PHASEDFSIM}(\theta,\zeta,\chi,\gamma,\phi) &=
+\left(
+\begin{smallmatrix}
+1 & 0 & 0 & 0\\
+0 & e^{-i\gamma - i\zeta}\cos(\theta/2) & ie^{-i\gamma + i\chi}\sin(\theta/2) & 0\\
+0 & ie^{-i\gamma - i\chi}i\sin(\theta/2) & e^{-i\gamma + i\zeta}\cos(\theta/2) & 0\\
+0 & 0 & 0 & e^{i\phi}
+\end{smallmatrix}
+\right)\\
+}
+
+@subsubsection[:title "2-qubit Pauli rotation gates"]
+
+@dm{
+\begin{align*}
+\texttt{RXX}(\theta) &= \exp\left( -i\theta/2(\texttt{X}^{\otimes 2} \right)
+\texttt{RYY}(\theta) &= \exp\left( -i\theta/2(\texttt{Y}^{\otimes 2} \right)
+\texttt{RZZ}(\theta) &= \exp\left( -i\theta/2(\texttt{Z}^{\otimes 2} \right)
+\end{align*}
+}
 
 @subsubsection[:title "Other Gates"]
 
@@ -551,6 +583,7 @@ CSWAP == CONTROLLED SWAP
 \begin{align*}
 \texttt{XY}(\theta) &= \exp\left( -i\theta(\texttt{X}^{\otimes 2} + \texttt{Y}^{\otimes 2}) \right)
                      = \texttt{PISWAP}(\theta)\\
+\texttt{SQISWAP}(\theta) &= \texttt{XY}(\pi/2)
 \texttt{CAN}(\alpha, \beta, \gamma) &=
 \exp\left( -i (  \alpha\texttt{X}^{\otimes 2}
                + \beta\texttt{Y}^{\otimes 2}
