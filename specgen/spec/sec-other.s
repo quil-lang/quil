@@ -96,7 +96,7 @@ of processing a @c{CALL} instruction is to increment the program counter.}
 
 @p{Note, for every @c{CALL} instruction, there must be a corresponding @c{EXTERN}
 declaration of the same identifier (case-sensitive). There is no restriction
-on the order of a @{CALL} instruction relative to its corresponding @c{EXTERN}
+on the order of a @c{CALL} instruction relative to its corresponding @c{EXTERN}
 declaration.}
 
 @p{When a function type signature specifies a return type, then calls

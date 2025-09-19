@@ -327,10 +327,10 @@ DEFCAL RZ(%theta) qubit:
     SHIFT-PHASE qubit "xy" %theta
 
 # Measurement and classification
-DEFCAL MEASURE 0 %dest:
+DEFCAL MEASURE 0 dest:
     DECLARE iq REAL[2]
     CAPTURE 0 "out" flat(1e-6, 2+3i) iq
-    LT %dest iq[0] 0.5 # thresholding
+    LT dest iq[0] 0.5 # thresholding
 }
 }
 
