@@ -276,11 +276,21 @@ does not match the corresponding frame's sample rate is undefined.}
 @subsection[:title "Defining Calibrations"]
 
 @syntax[:name "Calibration Definition"]{
-    DEFCAL @rep[:min 0]{@ms{Modifier}} @ms{Identifier} ( @ms{Parameters} ) @rep[:min 1]{@ms{Formal Qubit}} : @rep[:min 1]{@ms{Instruction}}
+    DEFCAL
+        @rep[:min 0]{@ms{Modifier}}
+        @ms{Identifier}
+        @rep[:min 0 :max 1]{@group{( @ms{Expression List} )}}
+        @rep[:min 1]{@ms{Formal Qubit}}
+        :
+        @rep[:min 1]{@ms{Instruction}}
 }
 
 @syntax[:name "Measure Calibration"]{
-    DEFCAL MEASURE @ms{Formal Qubit} @rep[:min 0 :max 1]{@ms{Parameter}} : @rep[:min 1]{@ms{Instruction}}
+    DEFCAL MEASURE
+        @ms{Formal Qubit}
+        @rep[:min 0 :max 1]{@ms{Identifier}}
+        :
+        @rep[:min 1]{@ms{Instruction}}
 }
 
 @p{Calibrations for high-level gates can be defined by mapping a combination of
@@ -289,14 +299,46 @@ does not match the corresponding frame's sample rate is undefined.}
 @p{Calibrations with the same gate name as a built-in gate definition or custom
 gate definition are assumed to be the same.}
 
+@p{A gate application matches a calibration when:}
+
+@enumerate{
+    @item{The gate application has the same set of modifiers as the calibration.}
+
+    @item{The gate name is the same as the name defined by the calibration.}
+
+    @item{There are the same number of parameterizing arguments to the gate
+    application and the calibration, and gate argument @m{i} matches calibration
+    argument @m{i} for all indices @m{i}.  An argument matches if either:
+    @enumerate{
+        @item{@emph{(Abstract.)}  The calibration argument is a parameter, such
+        as @c{%theta}.}
+
+        @item{@emph{(Concrete.)}  The two expressions are identical.}
+    }}
+
+    @item{There are the same number of qubits in the gate application and the
+    calibration, and qubit @m{i} in the gate application matches qubit @m{i} in
+    the calibration for all indices @m{i}.  A qubit matches if either:
+    @enumerate{
+        @item{@emph{(Abstract.)}  The calibration qubit is a formal qubit, such
+        as @c{q}.}
+
+        @item{@emph{(Concrete.)}  The two qubits are identical fixed qubits.}
+    }}
+}
+
 @p{Multiple calibration definitions can be defined for different parameter and
-qubit values. When a gate is translated into control instructions the
-calibration definitions are enumerated in reverse order of definition and the
-first match will be taken.}
+qubit values. When a gate is translated into control instructions, the most
+precise match is taken; if there are multiple equally-precise matching
+calibrations, then the last such calibration that was defined in program order
+will be chosen.  A match is more precise than another if it has more concrete
+matches of arguments and qubits combined.}
 
 @p{For example, given the following list of calibration definitions in this order:
 
 @enumerate{
+    @item{@c{DEFCAL RX(pi/2) 1:}}
+
     @item{@c{DEFCAL RX(%theta) qubit:}}
 
     @item{@c{DEFCAL RX(%theta) 0:}}
@@ -304,12 +346,34 @@ first match will be taken.}
     @item{@c{DEFCAL RX(pi/2) 0:}}
 }
 
-The instruction @c{RX(pi/2) 0} would match (3), the instruction @c{RX(pi) 0} would
-match (2), and the instruction @c{RX(pi/2) 1} would match (1).}
+The instruction @c{RX(pi/2) 0} would match (4), the instruction @c{RX(pi) 0} would
+match (3), the instruction @c{RX(pi) 1} would match (2), and the instruction
+@c{RX(pi/2) 1} would match (1)}
 
-@p{The same system applies for @c{MEASURE}. Although @c{MEASURE} cannot be
-parameterized, it takes only a single qubit as input, and it has an additional
-(optional) parameter for the memory reference into which to store the result.}
+@p{Note the behavior of gate modifiers does not perform any reasoning or
+simplification.  Quil supports arbitrarily chained gate modifiers; as such,
+calibration definitions' gate modifiers, match a gate application only if the
+modifiers match exactly.  Thus, given
+
+@clist{
+DEFCAL T 0:
+    # ...
+
+DEFCAL DAGGER T 0:
+    # ...
+}
+
+the first calibration definition matches @c{T 0}, the second matches @c{DAGGER T 0},
+and neither matches @c{DAGGER DAGGER T 0}.  This is true even though at the QAM
+level, @c{DAGGER DAGGER T 0} is the same as @c{T 0}.
+}
+
+@p{The same calibration system applies for @c{MEASURE}, although simpler:
+@c{MEASURE} does not take modifiers, cannot be parameterized, and takes only a
+single qubit as an argument.  It also has an additional (optional) identifier
+used for the memory reference into which to store the result.  If that
+identifier is present, this calibration is for a measurement for record;
+otherwise, it is for a measurement for effect.}
 
 @p{Examples:
 
@@ -332,23 +396,6 @@ DEFCAL MEASURE 0 dest:
     CAPTURE 0 "out" flat(1e-6, 2+3i) iq
     LT dest iq[0] 0.5 # thresholding
 }
-}
-
-@p{Quil supports arbitrarily chained gate modifiers. As such, calibration
-definitions may also incorporate gate modifiers, with the convention that a
-calibration definition matches a gate application only if the modifiers match
-exactly. Thus in
-
-@clist{
-DEFCAL T 0:
-    # ...
-
-DEFCAL DAGGER T 0:
-    # ...
-}
-
-the first calibration definition matches @c{T 0}, the second matches @c{DAGGER T 0},
-and neither match @c{DAGGER DAGGER T 0}.
 }
 
 @subsection[:title "Timing and Synchronization"]
