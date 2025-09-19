@@ -655,9 +655,7 @@ a specified duration in seconds.}
 
 @p{If frame names are specified, then the delay instruction affects those frames on
 those qubits. If no frame names are specified, all frames on precisely those
-qubits are affected.}
-
-@aside{Note: this excludes frames which @emph{intersect} the
+qubits are affected.  Note that this excludes frames which @emph{intersect} the
 specified qubits but involve others. For example, @c{DELAY 0 1.0} delays one qubit
 frames on @c{0}, such as @c{0 "xy"}, but leaves other frames, such as @c{0 1 "cz"},
 unaffected.}
