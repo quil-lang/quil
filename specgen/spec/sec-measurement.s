@@ -10,7 +10,7 @@ classical memory.  Measurement comes in two flavors:
 }
 
 @aside{If @link[:target "#12Annex-T--Pulse-Level-Control"]{Annex T (§12)},
-the Quil-T extension to this specification, are in effect, then measurements are
+the Quil-T extension to this specification, is in effect, then measurements are
 extended to support @emph{measurement names}, such as @c{MEASURE!midcircuit},
 which affect the physical realization of measurement.  See
 @link[:target "#12-1Extensions-to-Quil"]{§12.1} for details.}
