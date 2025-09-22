@@ -5,7 +5,7 @@
 @emph{Quil-T}.}
 
 @p{Quil-T allows specifying the behavior of QAM programs at a physical,
-pulse-based level, as needed when programming supeconduncting qubit systems.  A
+pulse-based level, as needed when programming superconducting qubit systems.  A
 @emph{pulse} is a waveform that is played by the control system, and is the core
 primitive exposed by Quil-T.}
 
@@ -24,7 +24,7 @@ main text of the specification.}
 @emph{measurement names}, which are written with an @c{!} after the @c{MEASURE}
 keyword (as mentioned when defining @c{MEASURE} instructions in @link[:target
 "#7Measurement"]{§7}).  For instance, a midcircuit measurement of qubit @c{0}
-into memory locaiton @c{ro} can be written as @c{MEASURE!midcircuit 0 ro}, which
+into memory location @c{ro} can be written as @c{MEASURE!midcircuit 0 ro}, which
 is distinct from a plain (unnamed) measurement @c{MEASURE 0 ro}; the latter is
 still permitted, and simply unrelated to any named measurements.}
 
@@ -60,7 +60,7 @@ Cirq's @emph{calibration tags}}.}
 
 @p{A frame encapsulates any rotating frame relative to which control/readout
 waveforms may be defined. For the purposes of scheduling and execution on
-possibly heterogenous hardware, frames are specified with respect to a specific
+possibly heterogeneous hardware, frames are specified with respect to a specific
 list of qubits. Thus, @c{0 1 "cz"} is the "cz" frame on qubits 0 and 1. The order
 of the qubits matters. In particular, the above frame may differ from @c{1 0 "cz"}.}
 
@@ -662,7 +662,7 @@ unaffected.}
 
 @p{Fence ensures that all operations involving the specified qubits that follow the
 fence statement happen after all operations involving the specified qubits that
-preceed the fence statement. If no qubits are specified, the @c{FENCE} operation
+precede the fence statement. If no qubits are specified, the @c{FENCE} operation
 implicitly applies to all qubits on the device.}
 
 @p{Examples:
