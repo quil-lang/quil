@@ -238,7 +238,7 @@ IDENTIFIER          : ( ( [A-Za-z_] ) | ( [A-Za-z_] [A-Za-z0-9\-_]* [A-Za-z0-9_]
 INT                 : DEC_INT | HEX_INT | OCT_INT | BIN_INT ;
 FLOAT               : (DEC_INT | DEC_FLOAT) ([Ee] ('+' | '-')? '_'* DEC_INT)? ;
 
-fragment DEC_INT    : [0-9] [0-9_]+ ;
+fragment DEC_INT    : [0-9] [0-9_]* ;
 fragment HEX_INT    : '0' [Xx] '_'* [0-9A-Fa-f] [0-9A-Fa-f_]* ;
 fragment OCT_INT    : '0' [Oo] '_'* [0-7] [0-7_]* ;
 fragment BIN_INT    : '0' [Bb] '_'* [01] [01_]* ;
