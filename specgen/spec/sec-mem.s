@@ -475,6 +475,7 @@ the same syntax.}
 @syntax[:name "Classical Binary"]{
          MOVE @alt EXCHANGE @alt CONVERT
     @alt AND @alt IOR @alt XOR
+    @alt SHL @alt SHR @alt ASHR
     @alt ADD @alt SUB @alt MUL @alt DIV
 }
 
@@ -581,6 +582,30 @@ XOR      a b            # a := a ^ b
          <int> <!int>
          <bit> <bit>
          <bit> <!int>
+
+# Bitshifts
+#
+# - Shifting by a negative number of bits is forbidden.
+#
+# - Shifting by as many or more bits than are present in a word fills
+#   the entire word with the bit being shifted in.
+#
+# - SHL and SHR are "logical shifts", and fill in the shifted-out bits
+#   with zeros.
+#
+# - ASHR is an "arithmetic shift", and is the same as n := n * 2⁻ᵏ
+#   (rounding towards -∞); in a 2's-complement representation, this is
+#   the same as shifting right and filling in the shifted-out bits
+#   with the original value of the high bit.
+SHL      n b            # n := n << b; shift left (logical)
+SHR      n b            # n := n >> b; shift right (logical)
+ASHR     n b            # n := n * 2⁻ᵏ, or n := n >>> b; arithmetic shift right
+         <oct> <oct>
+         <oct> <int>
+         <oct> <!int>
+         <int> <oct>
+         <int> <int>
+         <int> <!int>
 
 # Arithmetic Operations
 NEG      a              # a := -a

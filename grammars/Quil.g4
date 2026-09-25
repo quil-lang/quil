@@ -98,7 +98,7 @@ offsetDescriptor    : OFFSET INT IDENTIFIER ;
 
 classicalUnary      : ( NEG | NOT | TRUE | FALSE ) addr ;
 classicalBinary     : logicalBinaryOp | arithmeticBinaryOp | move | exchange | convert ;
-logicalBinaryOp     : ( AND | OR | IOR | XOR ) addr ( addr | INT ) ;
+logicalBinaryOp     : ( AND | OR | IOR | XOR | SHL | SHR | ASHR ) addr ( addr | INT ) ;
 arithmeticBinaryOp  : ( ADD | SUB | MUL | DIV ) addr ( addr | number ) ;
 move                : MOVE addr ( addr | number );
 exchange            : EXCHANGE addr addr ;
@@ -184,6 +184,9 @@ FALSE               : 'FALSE' ; // Deprecated
 AND                 : 'AND' ;
 IOR                 : 'IOR' ;
 XOR                 : 'XOR' ;
+SHL                 : 'SHL' ;
+SHR                 : 'SHR' ;
+ASHR                : 'ASHR' ;
 OR                  : 'OR' ;   // Deprecated
 
 ADD                 : 'ADD' ;
